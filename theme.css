@@ -1,0 +1,27 @@
+/* Explain: Site-wide color palette and typography variables. */
+:root {
+    --primary-color: #0B0B0D;
+    --primary-hover: #C9A24B;
+    --secondary-color: #1A1A1F;
+    --accent-color: #D4AF37;
+    --logo-subtitle-color: #8F8778;
+    --button-color: #D4AF37;
+    --background-color: #0B0B0D;
+    --surface-color: #141418;
+    --footer-bg: #08080A;
+    --text-color: #F4EFE4;
+    --text-muted: #A49C8B;
+    --border-color: rgba(212, 175, 55, 0.14);
+    --glass-bg: rgba(20, 20, 24, 0.72);
+    --glass-border: rgba(212, 175, 55, 0.26);
+    --nav-bg: rgba(11, 11, 13, 0.82);
+    --field-bg: rgba(255, 255, 255, 0.045);
+    --sage-soft: rgba(212, 175, 55, 0.14);
+    --sage-dark: #D4AF37;
+    --terracotta-soft: rgba(212, 175, 55, 0.22);
+    --shadow-soft: 0 22px 70px rgba(0, 0, 0, 0.55);
+    --shadow-button: 0 16px 36px rgba(212, 175, 55, 0.26);
+    --font-heading: 'Tajawal', 'Noto Sans', 'Noto Sans SC', sans-serif;
+    --font-body: 'Cairo', 'Noto Sans', 'Noto Sans SC', sans-serif;
+    --font-logo: 'El Messiri', 'Tajawal', 'Noto Sans', sans-serif;
+}

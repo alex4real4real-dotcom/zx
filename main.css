@@ -1,0 +1,45 @@
+/* Explain: Base reset and global typography styles for the application. */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    background: var(--background-color);
+    color: var(--text-color);
+    scroll-padding-top: 96px;
+}
+
+body {
+    margin: 0;
+    overflow-x: hidden;
+    background:
+        radial-gradient(circle at 88% 8%, rgba(212, 175, 55, 0.10), transparent 26rem),
+        radial-gradient(circle at 6% 4%, rgba(212, 175, 55, 0.07), transparent 24rem),
+        var(--background-color);
+    color: var(--text-color);
+    font-family: var(--font-body);
+    text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    font-family: var(--font-heading);
+}
+
+button,
+a,
+select {
+    cursor: pointer;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+::selection {
+    background: var(--accent-color);
+    color: #0B0B0D;
+}

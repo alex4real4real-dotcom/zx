@@ -1,0 +1,18 @@
+.backend-shell{max-width:1100px;margin:auto;padding:145px 24px 80px;min-height:75vh}
+.backend-shell h1{font-size:clamp(1.8rem,4vw,2.8rem);margin:0 0 16px;color:var(--text-color)}
+.backend-shell h2{font-size:1.3rem;margin:0 0 20px}.backend-shell p{line-height:1.9}
+.backend-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:28px}
+.backend-panel{border:1px solid var(--glass-border);background:var(--surface-color);border-radius:24px;padding:28px;margin:20px 0}
+.backend-field{display:grid;gap:8px;margin:16px 0;font-size:.95rem}
+.backend-field input,.backend-field textarea{width:100%;border:1px solid var(--glass-border);border-radius:12px;padding:13px;background:var(--background-color);color:var(--text-color);font:inherit}
+.backend-field input:focus,.backend-field textarea:focus{outline:2px solid var(--accent-color);outline-offset:2px}
+.backend-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--button-color);color:#0b0b0d;border:1px solid var(--accent-color);border-radius:30px;min-height:44px;padding:10px 24px;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+.backend-button.secondary{background:transparent;color:var(--accent-color)}.backend-button:disabled{opacity:.55;cursor:wait}
+.backend-status{min-height:28px;white-space:pre-wrap;margin:16px 0;line-height:1.8;color:var(--text-muted)}
+.backend-status.error{color:#fca5a5}.backend-status.success{color:#86efac}.backend-muted{color:var(--text-muted)}
+.backend-actions{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:20px}
+.backend-hidden{display:none!important}.backend-item{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:20px 0;border-bottom:1px solid var(--glass-border)}
+.backend-item h3{font-size:1.1rem;margin:0 0 8px}.backend-item input[type=number]{width:84px;padding:10px;border:1px solid var(--glass-border);border-radius:10px;color:var(--text-color);background:var(--background-color)}
+.backend-order-id{direction:ltr;unicode-bidi:embed;overflow-wrap:anywhere;font-family:monospace}.backend-notice{padding:16px 20px;border-inline-start:3px solid var(--accent-color);background:var(--field-bg);border-radius:12px;line-height:1.9}
+.backend-card-image{width:100%;height:180px;object-fit:contain;border-radius:14px;margin-bottom:20px}.backend-shell a:not(.backend-button){color:var(--accent-color)}
+@media(max-width:650px){.backend-grid{grid-template-columns:1fr}.backend-panel{padding:22px}.backend-shell{padding:125px 18px 60px}}
