@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="dark"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><base href="."><link rel="preconnect" href="https://cdn.jsdelivr.net/"><link rel="preconnect" href="https://cdnjs.cloudflare.com/">
 <!-- Regular Meta Info -->
-<title>حسابي | Account</title>
+<title>تسجيل الدخول وإنشاء حساب | Account</title>
 <meta name="description" content="سوق Account الإلكتروني: اشترِ من بائعين موثّقين بالهوية الوطنية، أو وثّق حسابك واعرض منتجاتك في متجر خاص بك.">
 <meta name="keywords" content="سوق إلكتروني موثوق">
 <!-- Facebook Meta Info -->
@@ -1251,8 +1251,8 @@
 <link rel="stylesheet" href="./components.css">
 <link rel="stylesheet" href="./layout.css"><!-- /twig-include:global/head.html -->
 <style id="app-builder-recap-style">.grecaptcha-badge { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; transition: opacity 0.2s ease; }.grecaptcha-badge.app-builder-recap-show { visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; }</style><link rel="stylesheet" href="./backend-pages.css">
-</head>
-<body data-backend-page="account"><header class="site-header fixed inset-x-0 top-0 z-40 border-b border-[var(--border-color)]" data-twig-section="global/header.html">
+<link rel="stylesheet" href="./account-views.css"></head>
+<body data-backend-page="account-auth" class="account-body"><header class="site-header fixed inset-x-0 top-0 z-40 border-b border-[var(--border-color)]" data-twig-section="global/header.html">
     <nav class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-8" aria-label="التنقل الرئيسي" data-twig-section="global/header.html">
         <a href="./index.html" class="flex items-center gap-3 transition-opacity duration-300 hover:opacity-80 focus:outline-none" aria-label="Account - الصفحة الرئيسية" data-twig-section="global/header.html">
             <span class="brand-mark h-11 w-11" data-twig-section="global/header.html">
@@ -1441,23 +1441,49 @@
             </div>
         </div>
     </div>
-</header><main class="backend-shell"><h1>حسابي</h1>
-<div id="authForms" class="backend-grid">
-<section class="backend-panel"><h2>تسجيل الدخول</h2><form id="loginForm">
-<label class="backend-field">البريد الإلكتروني<input name="email" type="email" autocomplete="username" dir="ltr" required></label>
-<label class="backend-field">كلمة المرور<input name="password" type="password" autocomplete="current-password" required></label>
-<button class="backend-button" type="submit">دخول</button><p id="loginStatus" class="backend-status" role="status" aria-live="polite"></p></form></section>
-<section class="backend-panel"><h2>إنشاء حساب</h2><form id="signupForm">
-<label class="backend-field">الاسم<input name="fullname" autocomplete="name" maxlength="120" required></label>
-<label class="backend-field">البريد الإلكتروني<input name="email" type="email" autocomplete="email" dir="ltr" required></label>
-<label class="backend-field">كلمة المرور<input name="password" type="password" autocomplete="new-password" minlength="8" required></label>
-<button class="backend-button" type="submit">إنشاء الحساب</button><p id="signupStatus" class="backend-status" role="status" aria-live="polite"></p></form></section></div>
-<section id="profilePanel" class="backend-panel backend-hidden"><h2>بيانات حسابي</h2><form id="profileForm">
-<label class="backend-field">البريد الإلكتروني<input id="profileEmail" type="email" dir="ltr" readonly></label>
-<label class="backend-field">الاسم<input id="profileName" name="fullname" maxlength="120" autocomplete="name" required></label>
-<label class="backend-field">الجوال<input id="profilePhone" name="phone" type="tel" maxlength="40" autocomplete="tel"></label>
-<div class="backend-actions"><button class="backend-button" type="submit">حفظ البيانات</button><a class="backend-button secondary" href="orders.html">طلباتي</a><button id="backendLogout" class="backend-button secondary" type="button">تسجيل الخروج</button></div>
-<p id="profileStatus" class="backend-status" role="status" aria-live="polite"></p></form></section></main><footer class="bg-[var(--footer-bg)] px-5 pb-10 pt-14 text-[var(--text-color)] sm:px-8" data-twig-section="global/footer.html">
+</header><main class="account-ui account-auth-layout"><section class="account-intro" aria-labelledby="accountHeading">
+<span class="section-kicker">حسابك في ACCOUNT</span>
+<h1 id="accountHeading">سجّل الدخول أو أنشئ حسابك</h1>
+<p class="account-intro-copy">أنشئ حسابك ببريدك الإلكتروني ورقم جوالك وكلمة مرور، ثم أكّد بريدك برمز تحقق مكوّن من 6 أرقام. بعد ذلك سجّل الدخول في أي وقت بالبريد أو الجوال وكلمة المرور.</p>
+<ul class="account-benefits">
+<li>سجّل ببريدك الإلكتروني ورقم جوالك وكلمة مرور قوية، ثم فعّل حسابك برمز تحقق يصل إلى بريدك.</li>
+<li>لا يُسمح بإنشاء أكثر من حساب بالبريد الإلكتروني أو رقم الجوال نفسه.</li>
+<li>كلمة المرور لا تقل عن 8 خانات وتجمع بين الحروف والأرقام.</li>
+<li>جلسة دخول آمنة تبقيك مسجّلًا حتى 30 يومًا دون تسجيل متكرر.</li>
+</ul>
+<img class="account-brand-image" src="./800_6ad36bdac7565.png" alt="Account">
+</section>
+<section class="account-auth-card glass-panel" aria-label="حساب Account">
+<span class="verified-badge account-email-badge"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> تحقق بالبريد الإلكتروني</span>
+<div class="account-tabs" role="tablist" aria-label="الدخول أو إنشاء حساب">
+<button id="signupTab" class="account-tab" role="tab" type="button" aria-controls="signupView" aria-selected="false" data-auth-view="signup">إنشاء حساب</button>
+<button id="loginTab" class="account-tab is-active" role="tab" type="button" aria-controls="loginView" aria-selected="true" data-auth-view="login">تسجيل الدخول</button>
+</div>
+<section id="loginView" class="account-view" role="tabpanel" aria-labelledby="loginTab">
+<h2>تسجيل الدخول</h2><p class="account-form-copy">ادخل بريدك الإلكتروني أو رقم جوالك وكلمة المرور التي اخترتها.</p>
+<form id="loginForm"><label class="account-field">البريد الإلكتروني أو رقم الجوال *<input name="identifier" type="text" placeholder="you@example.com أو 05xxxxxxxx" required autocomplete="username" maxlength="254"></label><label class="account-field">كلمة المرور *<input name="password" type="password" placeholder="كلمة المرور" required autocomplete="current-password" maxlength="128"></label><button class="account-primary" type="submit"><i class="fa-solid fa-right-to-bracket" aria-hidden="true"></i> تسجيل الدخول</button><p id="loginStatus" class="account-status" role="status" aria-live="polite" hidden></p></form>
+<button class="account-forgot" type="button" data-auth-view="forgot"><i class="fa-solid fa-key" aria-hidden="true"></i> نسيت كلمة المرور؟</button>
+</section>
+<section id="signupView" class="account-view" role="tabpanel" aria-labelledby="signupTab" hidden>
+<h2>إنشاء حساب جديد</h2><p class="account-form-copy">املأ بياناتك، وسنرسل رمز تحقق مكوّنًا من 6 أرقام إلى بريدك لتفعيل الحساب.</p>
+<form id="signupForm"><label class="account-field">اسم المستخدم *<input name="fullname" type="text" placeholder="مثال: bsxr966" required minlength="2" maxlength="120" autocomplete="nickname"></label><label class="account-field">صورة الحساب</label><div class="account-avatar-upload"><img id="signupAvatarPreview" src="./800_6ad36bdac7565.png" alt="معاينة صورة الحساب"><div><input id="signupAvatar" name="avatar" type="file" accept="image/jpeg,image/png,image/webp" aria-label="صورة الحساب"><small>اختر صورة واضحة لحسابك (PNG أو JPG).</small></div></div><label class="account-field">البريد الإلكتروني *<input name="email" type="email" placeholder="you@example.com" required autocomplete="email" dir="ltr" maxlength="254"></label><label class="account-field">رقم الجوال *<input name="phone" type="tel" placeholder="05xxxxxxxx" required autocomplete="tel" dir="ltr" maxlength="24"></label><label class="account-field">كلمة المرور *<input name="password" type="password" placeholder="8 خانات على الأقل من حروف وأرقام" required minlength="8" maxlength="128" autocomplete="new-password"></label><label class="account-field">تأكيد كلمة المرور *<input name="confirm" type="password" placeholder="أعد كتابة كلمة المرور" required minlength="8" maxlength="128" autocomplete="new-password"></label><button class="account-primary" type="submit"><i class="fa-solid fa-user-plus" aria-hidden="true"></i> إنشاء الحساب وإرسال الرمز</button><p id="signupStatus" class="account-status" role="status" aria-live="polite" hidden></p></form>
+</section>
+<section id="verifyView" class="account-view" hidden>
+<h2>تفعيل البريد الإلكتروني</h2><p class="account-form-copy">أدخل رمز التحقق المكوّن من 6 أرقام الذي يصلك على <bdi class="account-target-email"></bdi></p>
+<form id="verifyForm"><label class="account-field">رمز التحقق *<input name="token" type="text" placeholder="0 0 0 0 0 0" required inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" class="account-otp" dir="ltr"></label><button class="account-primary" type="submit"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> تفعيل الحساب</button><p id="verifyStatus" class="account-status" role="status" aria-live="polite" hidden></p></form>
+<div class="account-code-actions"><button class="account-secondary" type="button" data-resend="signup"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> إعادة إرسال الرمز</button><button class="account-secondary" type="button" data-auth-view="signup"><i class="fa-solid fa-pen" aria-hidden="true"></i> تعديل البريد</button></div>
+</section>
+<section id="forgotView" class="account-view" hidden>
+<h2>استعادة كلمة المرور</h2><p class="account-form-copy">أدخل بريد حسابك لإرسال رمز التحقق وتعيين كلمة مرور جديدة.</p>
+<form id="forgotForm"><label class="account-field">البريد الإلكتروني *<input name="email" type="email" placeholder="you@example.com" required autocomplete="email" dir="ltr" maxlength="254"></label><button class="account-primary" type="submit"><i class="fa-solid fa-envelope" aria-hidden="true"></i> إرسال رمز التحقق</button><p id="forgotStatus" class="account-status" role="status" aria-live="polite" hidden></p></form>
+<button class="account-forgot" type="button" data-auth-view="login">العودة إلى تسجيل الدخول</button>
+</section>
+<section id="recoveryView" class="account-view" hidden>
+<h2>تعيين كلمة مرور جديدة</h2><p class="account-form-copy">أدخل الرمز المكوّن من 6 أرقام الذي يصلك على <bdi class="account-target-email"></bdi></p>
+<form id="recoveryForm"><label class="account-field">رمز التحقق *<input name="token" type="text" placeholder="0 0 0 0 0 0" required inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" class="account-otp" dir="ltr"></label><label class="account-field">كلمة المرور الجديدة *<input name="password" type="password" placeholder="8 خانات على الأقل من حروف وأرقام" required minlength="8" maxlength="128" autocomplete="new-password"></label><label class="account-field">تأكيد كلمة المرور الجديدة *<input name="confirm" type="password" placeholder="أعد كتابة كلمة المرور" required minlength="8" maxlength="128" autocomplete="new-password"></label><button class="account-primary" type="submit"><i class="fa-solid fa-circle-check" aria-hidden="true"></i> حفظ كلمة المرور الجديدة</button><p id="recoveryStatus" class="account-status" role="status" aria-live="polite" hidden></p></form>
+<div class="account-code-actions"><button class="account-secondary" type="button" data-resend="recovery"><i class="fa-solid fa-rotate-right" aria-hidden="true"></i> إعادة إرسال الرمز</button><button class="account-secondary" type="button" data-auth-view="forgot"><i class="fa-solid fa-pen" aria-hidden="true"></i> تعديل البريد</button></div>
+</section>
+</section></main><footer class="bg-[var(--footer-bg)] px-5 pb-10 pt-14 text-[var(--text-color)] sm:px-8" data-twig-section="global/footer.html">
     <div class="mx-auto max-w-7xl" data-twig-section="global/footer.html">
         <div class="grid gap-10 border-t border-[var(--glass-border)] pt-10 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-12" data-twig-section="global/footer.html">
             <div data-twig-section="global/footer.html">
@@ -1533,4 +1559,4 @@
 <script src="./supabase-config.js"></script>
 <script src="./supabase-backend.js"></script>
 <script src="./app.js"></script>
-<script src="./backend-pages.js"></script></body></html>
+<script src="./backend-pages.js"></script><script src="./account-views.js"></script></body></html>

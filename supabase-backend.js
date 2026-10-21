@@ -1,18 +1,25 @@
 (function () {
   'use strict';
   var config = window.ACCOUNT_CONFIG || {};
-  var state = { client: null, session: null, user: null, profile: null, error: null };
+  var state = { client: null, session: null, user: null, profile: null, error: null, recovery: false };
   var backend = window.accountBackend = {};
 
   function message(error) {
     var text = String(error && (error.message || error.error_description || error) || '');
     if (/AUTH_REQUIRED/.test(text)) return 'سجّل الدخول أولًا.';
     if (/ACCOUNT_BANNED/.test(text)) return 'هذا الحساب موقوف.';
+    if (/PHONE_IN_USE|account_profiles_confirmed_phone|duplicate key.*phone/i.test(text)) return 'رقم الجوال مستخدم في حساب آخر.';
+    if (/INVALID_PHONE/.test(text)) return 'أدخل رقم جوال صحيحًا مثل 05xxxxxxxx أو رقمًا دوليًا يبدأ بعلامة +.';
+    if (/INVALID_NAME/.test(text)) return 'اسم المستخدم يجب أن يكون بين حرفين و120 حرفًا.';
+    if (/PHONE_LOGIN_NOT_READY/.test(text)) return 'الدخول بالجوال غير متاح حاليًا. يمكنك الدخول بالبريد الإلكتروني.';
+    if (/otp_expired|Token has expired|invalid.*token/i.test(text)) return 'رمز التحقق غير صحيح أو انتهت صلاحيته. اطلب رمزًا جديدًا.';
+    if (/Database error saving new user/i.test(text)) return 'تعذّر إنشاء الحساب. تحقق من رقم الجوال، فقد يكون مستخدمًا بحساب آخر.';
+    if (/same_password|different from the old password/i.test(text)) return 'اختر كلمة مرور مختلفة عن السابقة.';
     if (/CART_EMPTY/.test(text)) return 'السلة فارغة.';
     if (/INVALID_QUANTITY/.test(text)) return 'الكمية المسموحة من 1 إلى 99.';
     if (/PRODUCT_UNAVAILABLE/.test(text)) return 'أحد المنتجات غير متاح حاليًا.';
     if (/PLEASE_WAIT/.test(text)) return 'انتظر دقيقتين قبل إرسال رسالة أخرى.';
-    if (/Invalid login credentials/i.test(text)) return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
+    if (/Invalid login credentials/i.test(text)) return 'بيانات الدخول غير صحيحة.';
     if (/Email not confirmed/i.test(text)) return 'فعّل حسابك من رسالة التأكيد في بريدك الإلكتروني.';
     if (/Email address not authorized|email_address_not_authorized/i.test(text)) return 'إرسال تأكيد البريد لهذا العنوان يحتاج إعداد SMTP في Supabase. راجع ملف اقرأني.';
     if (/rate limit/i.test(text)) return 'بلغت حد المحاولات مؤقتًا؛ حاول لاحقًا.';
@@ -31,10 +38,11 @@
         localStorage.setItem('app_user_email', user.email || '');
         localStorage.setItem('app_account', JSON.stringify({
           id: user.id, email: user.email || '',
-          name: state.profile && state.profile.display_name || user.user_metadata && user.user_metadata.name || ''
+          name: state.profile && state.profile.display_name || user.user_metadata && user.user_metadata.name || '',
+          phone: state.profile && state.profile.phone || '', avatar: backend.avatarUrl(state.profile)
         }));
       } else {
-        ['app_session_token', 'app_user_email', 'app_account'].forEach(function (key) { localStorage.removeItem(key); });
+        ['app_session_token', 'app_user_email', 'app_account', 'account.auth.started'].forEach(function (key) { localStorage.removeItem(key); });
       }
     } catch (error) { /* Supabase keeps its own session; legacy UI storage is optional. */ }
   }
@@ -54,6 +62,7 @@
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
       });
       state.client.auth.onAuthStateChange(function (event, session) {
+        if (event === 'PASSWORD_RECOVERY') state.recovery = true;
         if (event === 'SIGNED_OUT') {
           state.profile = null;
           storeSession(null, null);
@@ -64,11 +73,17 @@
       var current = await state.client.auth.getSession();
       if (current.error) throw current.error;
       if (!current.data.session) { storeSession(null, null); return backend; }
+      var started = Number(localStorage.getItem('account.auth.started'));
+      if (started && Date.now() - started > 30 * 24 * 60 * 60 * 1000) {
+        await state.client.auth.signOut({ scope: 'local' }); storeSession(null, null); return backend;
+      }
+      if (!started) localStorage.setItem('account.auth.started', String(Date.now()));
       // Cached user metadata is never used as authorization. Verify with Auth.
       var verified = await state.client.auth.getUser();
       if (verified.error) throw verified.error;
       state.user = verified.data.user;
       try { await loadProfile(); } catch (error) { state.error = message(error); }
+      if (state.profile && state.profile.banned) { await state.client.auth.signOut(); state.profile = null; throw new Error('ACCOUNT_BANNED'); }
       storeSession(current.data.session, state.user);
     } catch (error) {
       state.error = message(error);
@@ -89,41 +104,86 @@
   }
   function check(response) { if (response.error) throw response.error; return response.data; }
   backend.currentUser = function () { return state.user; };
+  backend.recoverySession = function () { return state.recovery && !!state.user; };
+  backend.avatarUrl = function (profile) {
+    var path = profile && profile.avatar_path;
+    return path && /^[a-f0-9-]{36}\/avatar\.(png|jpg|webp)$/.test(path) ? config.url + '/storage/v1/object/public/account-avatars/' + path + '?v=' + Date.now() : '';
+  };
+  backend.normalizePhone = function (value) {
+    var phone = String(value || '').trim().replace(/[٠-٩]/g, function (c) { return String(c.charCodeAt(0) - 1632); }).replace(/[۰-۹]/g, function (c) { return String(c.charCodeAt(0) - 1776); }).replace(/[\s()\-]/g, '');
+    if (phone.slice(0, 2) === '00') phone = '+' + phone.slice(2);
+    if (/^05\d{8}$/.test(phone)) phone = '+966' + phone.slice(1);
+    if (/^5\d{8}$/.test(phone)) phone = '+966' + phone;
+    if (/^9665\d{8}$/.test(phone)) phone = '+' + phone;
+    if (!/^\+[1-9]\d{7,14}$/.test(phone)) throw new Error('INVALID_PHONE');
+    return phone;
+  };
   backend.profile = async function () { await client(true); return loadProfile(); };
   backend.health = async function () { return check(await (await client()).rpc('account_health')); };
 
-  backend.signIn = async function (email, password) {
-    var c = await client();
-    var data = check(await c.auth.signInWithPassword({ email: email, password: password }));
+  async function acceptAuth(data) {
     state.user = data.user;
     await loadProfile();
+    if (!state.profile) throw new Error('PROFILE_NOT_READY');
+    if (state.profile.banned) { await state.client.auth.signOut(); state.profile = null; storeSession(null, null); throw new Error('ACCOUNT_BANNED'); }
+    localStorage.setItem('account.auth.started', String(Date.now()));
     storeSession(data.session, data.user);
     return data;
+  }
+  backend.signIn = async function (identifier, password) {
+    var c = await client();
+    if (identifier.indexOf('@') !== -1) return acceptAuth(check(await c.auth.signInWithPassword({ email: identifier, password: password })));
+    var response = await fetch(config.url + '/functions/v1/account-phone-login', { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: config.publishableKey }, body: JSON.stringify({ phone: backend.normalizePhone(identifier), password: password }) });
+    var result; try { result = await response.json(); } catch (error) { throw new Error('PHONE_LOGIN_NOT_READY'); }
+    if (response.status === 404 || response.status === 503) throw new Error('PHONE_LOGIN_NOT_READY');
+    if (!response.ok) throw new Error(result.error || 'Invalid login credentials');
+    return acceptAuth(check(await c.auth.setSession({ access_token: result.session.access_token, refresh_token: result.session.refresh_token })));
   };
-  backend.signUp = async function (email, password, name) {
+  backend.signUp = async function (email, password, name, phone) {
     var c = await client();
     var data = check(await c.auth.signUp({ email: email, password: password, options: {
-      data: { name: name }, emailRedirectTo: new URL('account.html', location.href).href
+      data: { name: name, phone: backend.normalizePhone(phone) }, emailRedirectTo: new URL('account.html', location.href).href
     } }));
+    if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+      throw new Error('هذا البريد مسجّل بالفعل. سجّل الدخول أو استخدم استعادة كلمة المرور.');
+    }
     if (data.session) {
-      state.user = data.user;
-      await loadProfile();
-      storeSession(data.session, data.user);
+      await acceptAuth(data);
     }
     return data;
   };
   backend.signOut = async function () {
     check(await (await client()).auth.signOut());
-    state.profile = null;
+    state.profile = null; state.recovery = false;
     storeSession(null, null);
   };
-  backend.updateProfile = async function (name, phone) {
+  backend.verifySignup = async function (email, token) { return acceptAuth(check(await (await client()).auth.verifyOtp({ email: email, token: token, type: 'email' }))); };
+  backend.resendSignup = async function (email) { return check(await (await client()).auth.resend({ type: 'signup', email: email, options: { emailRedirectTo: new URL('account.html', location.href).href } })); };
+  backend.requestRecovery = async function (email) { return check(await (await client()).auth.resetPasswordForEmail(email, { redirectTo: new URL('account.html?recovery=1', location.href).href })); };
+  backend.resetPassword = async function (email, token, password) {
+    var c = await client();
+    if (!backend.recoverySession()) { await acceptAuth(check(await c.auth.verifyOtp({ email: email, token: token, type: 'recovery' }))); state.recovery = true; }
+    check(await c.auth.updateUser({ password: password }));
+    await backend.signOut();
+  };
+  backend.uploadAvatar = async function (dataUrl) {
     var c = await client(true);
-    check(await c.from('account_profiles').update({ display_name: name, phone: phone }).eq('id', state.user.id));
+    var match = /^data:image\/(png|jpeg|webp);base64,([A-Za-z0-9+/=]+)$/.exec(dataUrl || '');
+    if (!match) throw new Error('اختر صورة PNG أو JPG أو WebP.');
+    var raw = atob(match[2]); if (raw.length > 2 * 1024 * 1024) throw new Error('حجم الصورة الأقصى 2 ميجابايت.');
+    var bytes = new Uint8Array(raw.length); for (var i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    var path = state.user.id + '/avatar.' + (match[1] === 'jpeg' ? 'jpg' : match[1]);
+    check(await c.storage.from('account-avatars').upload(path, new Blob([bytes], { type: 'image/' + match[1] }), { upsert: true, cacheControl: '0', contentType: 'image/' + match[1] }));
+    return path;
+  };
+  backend.updateProfile = async function (name, phone, avatarPath) {
+    var c = await client(true);
+    check(await c.rpc('account_update_profile', { p_name: name, p_phone: backend.normalizePhone(phone), p_avatar_path: avatarPath === undefined ? null : avatarPath }));
     await loadProfile();
     storeSession(state.session, state.user);
     return state.profile;
   };
+  backend.profileSummary = async function () { return check(await (await client(true)).rpc('account_profile_summary')); };
   backend.products = async function () {
     return check(await (await client()).from('account_products').select('*').eq('active', true).order('created_at', { ascending: false }));
   };
@@ -180,7 +240,7 @@
           profile = await backend.profile();
           if (profile && (namespace === 'accounts' || namespace === 'admins' && profile.role === 'admin' && !profile.banned || namespace === 'sellers' && profile.role === 'seller')) {
             records = [{ id: profile.id, email: profile.email, name: profile.display_name,
-              store_name: profile.display_name, banned: profile.banned, ban_reason: profile.ban_reason, active: !profile.banned }];
+              store_name: profile.display_name, phone: profile.phone, avatar: backend.avatarUrl(profile), verified: profile.is_verified === true, banned: profile.banned, ban_reason: profile.ban_reason, active: !profile.banned }];
           }
         }
       } else if (namespace !== 'withdrawals') {
@@ -194,7 +254,7 @@
   } };
   // Test orders never create money, withdrawable balances, or real sales.
   window.ServerFunction = { call: function (name) {
-    return Promise.resolve(name === 'seller_sales' ? { success: true, totalSales: 0, is_test: true } : { success: false, error: 'هذه الوظيفة غير مهيأة.' });
+    return result(async function () { if (name !== 'seller_sales') throw new Error('هذه الوظيفة غير مهيأة.'); var summary = await backend.profileSummary(); return { success: true, totalSales: Number(summary.totalSales), is_test: true }; });
   } };
   window.PluginsSystem = { sendRequest: function () {
     return Promise.resolve({ success: false, error: 'رفع الملفات يحتاج إعداد تخزين مستقل؛ لم يُفعّل في هذه الحزمة.' });
