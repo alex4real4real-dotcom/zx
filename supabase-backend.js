@@ -227,7 +227,8 @@
     });
   } };
   window.CurrencySystem = { format: function (amount) {
-    return new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(Number(amount) || 0);
+    var lang = document.documentElement.lang || 'ar';
+    return new Intl.NumberFormat(lang === 'ar' ? 'ar-SA' : lang, { style: 'currency', currency: 'SAR' }).format(Number(amount) || 0);
   } };
   window.DataSystem = { list: function (namespace, options) {
     return result(async function () {

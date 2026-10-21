@@ -171,6 +171,41 @@
         }
     };
 
+    Object.assign(DICT.ar, {
+        nav_admin: 'لوحة الإدارة', nav_logout: 'تسجيل الخروج',
+        how_kicker: 'كيف تبدأ البيع؟', how_title: 'ثلاث خطوات لفتح متجرك الموثّق',
+        how_desc: 'نحافظ على ثقة المتسوقين عبر التحقق من هوية كل بائع قبل نشر منتجاته على المنصة.',
+        how_signup_title: 'أنشئ حسابك', how_signup_desc: 'سجّل بالبريد الإلكتروني وأكّد الدخول برمز التحقق في ثوانٍ.',
+        how_verify_title: 'وثّق هويتك', how_verify_desc: 'أكّد بريدك وجوالك، ارفع صورة الهوية الوطنية، ثم بانتظار موافقة الإدارة.',
+        how_list_title: 'اعرض منتجاتك', how_list_desc: 'بعد التوثيق أضف منتجاتك بصور وأسعار، وستظهر في متجرك وفي كتالوج السوق.',
+        how_start: 'ابدأ الآن مجانًا', featured_kicker: 'الأكثر طلبًا', featured_title: 'حسابات وعروض رقمية مختارة', featured_all: 'عرض كل العروض',
+        sellers_kicker: 'بائعون موثّقون', sellers_title: 'تسوّق من متاجر تم التحقق من أصحابها', sellers_all: 'كل البائعين',
+        sellers_account: 'زيارة الحساب', sellers_account_desc: 'انتقل إلى حسابك لمتابعة طلباتك ومبيعاتك ورصيدك وإدارة بياناتك الشخصية.',
+        cat_social_count: '+150 حسابًا', cat_services_count: '+80 خدمة', cat_games_count: '+120 منتجًا',
+        newsletter_kicker: 'عروض حصرية', newsletter_title: 'اشترك ليصلك كل جديد من بائعي السوق',
+        newsletter_desc: 'سجّل بريدك الإلكتروني لتصلك أحدث المنتجات والخصومات من المتاجر الموثّقة قبل الجميع، دون أي رسائل مزعجة.',
+        newsletter_email: 'البريد الإلكتروني', newsletter_subscribe: 'اشترك الآن',
+        logo_alt: 'شعار Account', avatar_alt: 'صورة الحساب', hero_image_alt: 'واجهات تطبيقات رقمية على هاتف ذكي',
+        product_cart_aria: 'أضف 1191 إلى السلة', product_contact_aria: 'تواصل بخصوص 1191'
+    });
+    Object.assign(DICT.en, {
+        nav_admin: 'Admin Dashboard', nav_logout: 'Sign Out',
+        how_kicker: 'How to start selling', how_title: 'Three steps to open your verified store',
+        how_desc: 'We protect shoppers’ trust by verifying every seller’s identity before they list products on the platform.',
+        how_signup_title: 'Create your account', how_signup_desc: 'Register with your email and confirm your sign-in with a verification code in seconds.',
+        how_verify_title: 'Verify your identity', how_verify_desc: 'Confirm your email and phone number, upload your national ID, then wait for approval from the team.',
+        how_list_title: 'List your products', how_list_desc: 'After verification, add your products with photos and prices. They will appear in your store and the marketplace catalog.',
+        how_start: 'Get started for free', featured_kicker: 'Most popular', featured_title: 'Selected accounts and digital offers', featured_all: 'View all offers',
+        sellers_kicker: 'Verified sellers', sellers_title: 'Shop from stores with verified owners', sellers_all: 'All sellers',
+        sellers_account: 'Visit your account', sellers_account_desc: 'Go to your account to track your orders, sales and balance, and manage your personal details.',
+        cat_social_count: '150+ accounts', cat_services_count: '80+ services', cat_games_count: '120+ products',
+        newsletter_kicker: 'Exclusive offers', newsletter_title: 'Get the latest updates from marketplace sellers',
+        newsletter_desc: 'Enter your email to receive the latest products and discounts from verified stores before everyone else, without spam.',
+        newsletter_email: 'Email address', newsletter_subscribe: 'Subscribe now',
+        logo_alt: 'Account logo', avatar_alt: 'Account photo', hero_image_alt: 'Digital app interfaces on a smartphone',
+        product_cart_aria: 'Add 1191 to cart', product_contact_aria: 'Contact us about 1191'
+    });
+
     var menuEl = null;
     var buttonEl = null;
 
@@ -218,6 +253,24 @@
                 el.setAttribute('aria-label', dict[key]);
             }
         });
+        document.querySelectorAll('[data-i18n-text]').forEach(function (el) {
+            var text = dict[el.getAttribute('data-i18n-text')];
+            if (!text) return;
+            Array.prototype.some.call(el.childNodes, function (node) {
+                if (node.nodeType !== 3 || !node.nodeValue.trim()) return false;
+                node.nodeValue = node.nodeValue.replace(node.nodeValue.trim(), text);
+                return true;
+            });
+        });
+        document.querySelectorAll('[data-i18n-alt]').forEach(function (el) {
+            var text = dict[el.getAttribute('data-i18n-alt')];
+            if (text) el.setAttribute('alt', text);
+        });
+        if (window.CurrencySystem && typeof window.CurrencySystem.format === 'function') {
+            document.querySelectorAll('[data-currency-amount]').forEach(function (el) {
+                el.textContent = window.CurrencySystem.format(el.getAttribute('data-currency-amount'));
+            });
+        }
 
         var current = document.getElementById('langCurrent');
         if (current) {

@@ -444,6 +444,7 @@
 
         var balanceEl = document.getElementById('accountWidgetBalance');
         if (balanceEl) {
+            balanceEl.setAttribute('data-currency-amount', '0');
             if (window.CurrencySystem && typeof window.CurrencySystem.format === 'function') {
                 balanceEl.textContent = window.CurrencySystem.format(0);
             } else {
@@ -451,6 +452,7 @@
             }
             if (typeof window.getUserBalance === 'function') {
                 window.getUserBalance(email).then(function (balance) {
+                    balanceEl.setAttribute('data-currency-amount', String(Number(balance) || 0));
                     if (window.CurrencySystem && typeof window.CurrencySystem.format === 'function') {
                         balanceEl.textContent = window.CurrencySystem.format(balance);
                     } else {
