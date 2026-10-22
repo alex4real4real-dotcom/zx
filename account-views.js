@@ -21,7 +21,9 @@
     location.assign(next || './profile.html');
   }
   function node(id) { return document.getElementById(id); }
-  function notify(id, text, error) { var p = node(id); if (!p) return; p.hidden = !text; p.textContent = text || ''; p.classList.toggle('is-error', !!error); }
+  function t(text) { return window.AppI18N ? window.AppI18N.text(text) : text; }
+  function bindText(node, text) { if (window.AppI18N) window.AppI18N.bindText(node, text); else node.textContent = text; }
+  function notify(id, text, error) { var p = node(id); if (!p) return; p.hidden = !text; bindText(p, text || ''); p.classList.toggle('is-error', !!error); }
   function userError(error) {
     var text = backend.errorMessage(error);
     if (/SQL Editor|SMTP|تهيئة|schema|Storage|Bucket|row-level|policy/i.test(text)) return 'الخدمة غير جاهزة حاليًا؛ تواصل مع الدعم.';
@@ -123,10 +125,11 @@
       notify('loginStatus', 'حُفظت كلمة المرور الجديدة. يمكنك تسجيل الدخول الآن.', false);
     }));
     document.querySelectorAll('[data-resend]').forEach(function (button) {
-      var baseText = button.textContent, inFlight = false, label = document.createElement('span'), icon = button.querySelector('i');
+      var baseText = button.textContent.trim(), inFlight = false, label = document.createElement('span'), icon = button.querySelector('i');
       label.textContent = baseText; if (icon) button.replaceChildren(icon, label); else button.replaceChildren(label);
-      function update() { var remaining = Math.ceil((cooldowns[button.dataset.resend] - Date.now()) / 1000); button.disabled = inFlight || remaining > 0; label.textContent = remaining > 0 ? baseText + ' (' + remaining + ')' : baseText; }
-      setInterval(update, 1000);
+      function update() { var remaining = Math.ceil((cooldowns[button.dataset.resend] - Date.now()) / 1000); button.disabled = inFlight || remaining > 0; var caption = t('إعادة إرسال الرمز'); label.textContent = remaining > 0 ? caption + ' (' + remaining + ')' : caption; }
+      window.addEventListener('account:languagechange', update);
+      update(); setInterval(update, 1000);
       button.addEventListener('click', function () {
         var kind = button.dataset.resend, statusId = kind === 'signup' ? 'verifyStatus' : 'recoveryStatus', target = kind === 'signup' ? pending : recovery;
         inFlight = true;
@@ -152,11 +155,11 @@
       node('profileHeadingName').textContent = profile.display_name;
       node('profileDisplayName').textContent = profile.display_name;
       node('profileAvatar').src = backend.avatarUrl(profile) || './800_6ad36bdac7565.png';
-      var badge = node('profileVerified'); badge.textContent = profile.is_verified === true ? '✓ موثّق' : 'غير موثّق';
+      var badge = node('profileVerified'); bindText(badge, profile.is_verified === true ? '✓ موثّق' : 'غير موثّق');
       badge.className = 'verified-badge ' + (profile.is_verified === true ? 'is-approved' : 'is-unverified');
       node('profileCard').hidden = false;
       syncHeader(profile);
-      try { var summary = await backend.profileSummary(); node('profileSales').textContent = Number(summary.totalSales).toFixed(2) + 'ريال'; }
+      try { var summary = await backend.profileSummary(); node('profileSales').dataset.currencyAmount = summary.totalSales; node('profileSales').textContent = window.CurrencySystem.format(summary.totalSales); }
       catch (error) { node('profileSales').textContent = '—'; notify('profileStatus', userError(error), true); }
     }
     node('editProfile').addEventListener('click', function () {

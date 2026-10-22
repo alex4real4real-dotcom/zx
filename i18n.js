@@ -92,6 +92,183 @@
         product_cart_aria: 'Add 1191 to cart', product_contact_aria: 'Contact us about 1191'
     });
 
+    // Interface text in the older account and catalog templates. User content is not scanned.
+    var originalPageTitle = document.title;
+    var UI_TEXT = {
+        "المتجر": "Shop",
+        "تغيير اللغة": "Change language",
+        "التنقل الرئيسي": "Main navigation",
+        "قائمة الجوال": "Mobile menu",
+        "حساب Account": "Account",
+        "الدخول أو إنشاء حساب": "Sign in or create account",
+        "شعار Account": "Account logo",
+        "Account - الصفحة الرئيسية": "Account - Home",
+        "البائعون الموثّقون": "Verified sellers",
+        "تسجيل الدخول وإنشاء حساب": "Sign in and create account",
+        "لم ينجح اختبار إعداد قاعدة البيانات.": "The database connection test failed.",
+        "نجح الاتصال بقاعدة البيانات. يمكنك الآن إنشاء حساب وتجربة السلة والطلبات التجريبية.": "Connected to the database. You can now create an account and try the cart and test orders.",
+        "جارٍ تحميل المنتجات…": "Loading products…",
+        "سلع البائعين الموثّقين": "Verified sellers’ listings",
+        "تظهر هنا سلع البائعين الموثّقين فقط.": "Only listings from verified sellers appear here.",
+        "سلة التسوق": "Shopping cart",
+        "الدفع تجريبي فقط. لا تُطلب بيانات بطاقة ولا تُسحب أموال.": "Test checkout only. No card details are requested and no money is charged.",
+        "الإجمالي:": "Total:",
+        "إتمام طلب تجريبي": "Place test order",
+        "متابعة التسوق": "Continue shopping",
+        "طلباتي": "My orders",
+        "هذه الطلبات تجريبية ولا تمثل مدفوعات أو أرصدة حقيقية.": "These are test orders and do not represent real payments or balances.",
+        "اختبار الاتصال": "Test connection",
+        "رابط المشروع:": "Project URL:",
+        "يفحص هذا الزر اتصال الموقع بقاعدة البيانات بعد تشغيل ملف الإعداد.": "Test the website’s database connection after setup.",
+        "تسجيل حساب": "Create account",
+        "حسابك في ACCOUNT": "YOUR ACCOUNT",
+        "سجّل الدخول أو أنشئ حسابك": "Sign in or create an account",
+        "أنشئ حسابك ببريدك الإلكتروني ورقم جوالك وكلمة مرور، ثم أكّد بريدك برمز تحقق مكوّن من 6 أرقام. بعد ذلك سجّل الدخول في أي وقت بالبريد أو الجوال وكلمة المرور.": "Create an account with your email, phone number and password, then confirm your email with a 6-digit verification code. You can then sign in with your email or phone number and password.",
+        "سجّل ببريدك الإلكتروني ورقم جوالك وكلمة مرور قوية، ثم فعّل حسابك برمز تحقق يصل إلى بريدك.": "Register with your email, phone number and a strong password, then activate your account using the code sent to your email.",
+        "لا يُسمح بإنشاء أكثر من حساب بالبريد الإلكتروني أو رقم الجوال نفسه.": "Each email address and phone number can only be used for one account.",
+        "كلمة المرور لا تقل عن 8 خانات وتجمع بين الحروف والأرقام.": "Your password must contain at least 8 characters, including letters and numbers.",
+        "جلسة دخول آمنة تبقيك مسجّلًا حتى 30 يومًا دون تسجيل متكرر.": "Stay securely signed in for up to 30 days.",
+        "تحقق بالبريد الإلكتروني": "Email verification",
+        "إنشاء حساب": "Create account",
+        "تسجيل الدخول": "Sign in",
+        "ادخل بريدك الإلكتروني أو رقم جوالك وكلمة المرور التي اخترتها.": "Enter your email address or phone number and your password.",
+        "البريد الإلكتروني أو رقم الجوال *": "Email or phone number *",
+        "كلمة المرور *": "Password *",
+        "نسيت كلمة المرور؟": "Forgot password?",
+        "إنشاء حساب جديد": "Create a new account",
+        "املأ بياناتك، وسنرسل رمز تحقق مكوّنًا من 6 أرقام إلى بريدك لتفعيل الحساب.": "Enter your details. We will email you a 6-digit verification code to activate your account.",
+        "اسم المستخدم *": "Username *",
+        "صورة الحساب": "Profile photo",
+        "اختر صورة واضحة لحسابك (PNG أو JPG).": "Choose a clear profile photo (PNG or JPG).",
+        "البريد الإلكتروني *": "Email address *",
+        "رقم الجوال *": "Phone number *",
+        "تأكيد كلمة المرور *": "Confirm password *",
+        "إنشاء الحساب وإرسال الرمز": "Create account and send code",
+        "تفعيل البريد الإلكتروني": "Verify your email",
+        "أدخل رمز التحقق المكوّن من 6 أرقام الذي يصلك على": "Enter the 6-digit verification code sent to",
+        "رمز التحقق *": "Verification code *",
+        "تفعيل الحساب": "Activate account",
+        "إعادة إرسال الرمز": "Resend code",
+        "تعديل البريد": "Change email",
+        "استعادة كلمة المرور": "Reset password",
+        "أدخل بريد حسابك لإرسال رمز التحقق وتعيين كلمة مرور جديدة.": "Enter your account email to request a verification code and reset your password.",
+        "إرسال رمز التحقق": "Send verification code",
+        "العودة إلى تسجيل الدخول": "Back to sign in",
+        "تعيين كلمة مرور جديدة": "Set a new password",
+        "أدخل الرمز المكوّن من 6 أرقام الذي يصلك على": "Enter the 6-digit code sent to",
+        "كلمة المرور الجديدة *": "New password *",
+        "تأكيد كلمة المرور الجديدة *": "Confirm new password *",
+        "حفظ كلمة المرور الجديدة": "Save new password",
+        "الملف الشخصي": "Profile",
+        "بروفايل": "Profile",
+        "صورة أوضح لهويتك في السوق، مع متابعة مباشرة لمجمل مبيعاتك.": "Manage your marketplace profile and keep track of your total sales.",
+        "تعديل الملف": "Edit profile",
+        "مجمل المبيعات": "Total sales",
+        "تسجيل الخروج": "Sign out",
+        "تعديل الملف الشخصي": "Edit your profile",
+        "البريد الإلكتروني": "Email address",
+        "حفظ التعديلات": "Save changes",
+        "إلغاء": "Cancel",
+        "سجّل الدخول لعرض حسابك وتعديل بياناتك.": "Sign in to view and edit your profile.",
+        "جارٍ التنفيذ…": "Working…",
+        "سجّل الدخول لعرض هذه الصفحة.": "Sign in to view this page.",
+        "لا توجد سلع متاحة من بائعين موثّقين حاليًا.": "No listings from verified sellers are available right now.",
+        "لا توجد منتجات متاحة حاليًا.": "No products are available right now.",
+        "أضف إلى السلة": "Add to cart",
+        "هذا المنتج غير متاح حاليًا.": "This product is currently unavailable.",
+        "حُدّثت السلة.": "Cart updated.",
+        "حذف": "Remove",
+        "حُذف المنتج من السلة.": "Product removed from cart.",
+        "السلة فارغة.": "Your cart is empty.",
+        "لا توجد طلبات بعد.": "You have no orders yet.",
+        "طلب تجريبي": "Test order",
+        "محاكاة فقط؛ لا يُمثّل هذا الطلب دفعة حقيقية.": "Simulation only. This order does not represent a real payment.",
+        "المنتج غير متاح حاليًا": "Product currently unavailable",
+        "حسابات التواصل الاجتماعي": "Social Media Accounts",
+        "الخدمات الرقمية": "Digital Services",
+        "الألعاب والاشتراكات": "Games & Subscriptions",
+        "الخدمة غير جاهزة حاليًا؛ تواصل مع الدعم.": "This service is currently unavailable. Please contact support.",
+        "كلمة المرور يجب أن تكون 8 خانات على الأقل وتجمع بين الحروف والأرقام.": "Your password must contain at least 8 characters, including letters and numbers.",
+        "كلمتا المرور غير متطابقتين.": "The passwords do not match.",
+        "اختر صورة PNG أو JPG أو WebP.": "Choose a PNG, JPG or WebP image.",
+        "حجم الصورة الأقصى 2 ميجابايت.": "The maximum image size is 2 MB.",
+        "تعذّرت قراءة الصورة.": "Could not read the image.",
+        "أدخل رمز التحقق الذي يصلك على بريدك الإلكتروني.": "Enter the verification code sent to your email.",
+        "أدخل بيانات الحساب أولًا.": "Enter your account details first.",
+        "تم تفعيل الحساب، لكن تعذّر حفظ الصورة. يمكنك رفعها من تعديل الملف.": "Your account is active, but the photo could not be saved. You can upload it from Edit profile.",
+        "إذا كان البريد مسجّلًا، ستصلك رسالة برمز التحقق.": "If the email is registered, you will receive a verification code.",
+        "أدخل بريد الحساب أولًا.": "Enter your account email first.",
+        "حُفظت كلمة المرور الجديدة. يمكنك تسجيل الدخول الآن.": "Your new password has been saved. You can now sign in.",
+        "أدخل البريد الإلكتروني أولًا.": "Enter your email address first.",
+        "طُلب إرسال رمز جديد. راجع بريدك الإلكتروني.": "A new code has been requested. Check your email.",
+        "✓ موثّق": "✓ Verified",
+        "غير موثّق": "Not verified",
+        "حُفظت بيانات الملف الشخصي.": "Profile saved.",
+        "سجّل الدخول أولًا.": "Please sign in first.",
+        "هذا الحساب موقوف.": "This account is suspended.",
+        "رقم الجوال مستخدم في حساب آخر.": "This phone number is already used by another account.",
+        "أدخل رقم جوال صحيحًا مثل 05xxxxxxxx أو رقمًا دوليًا يبدأ بعلامة +.": "Enter a valid phone number, such as 05xxxxxxxx, or an international number beginning with +.",
+        "اسم المستخدم يجب أن يكون بين حرفين و120 حرفًا.": "Your username must contain between 2 and 120 characters.",
+        "الدخول بالجوال غير متاح حاليًا. يمكنك الدخول بالبريد الإلكتروني.": "Phone sign-in is unavailable. Please sign in with your email.",
+        "رمز التحقق غير صحيح أو انتهت صلاحيته. اطلب رمزًا جديدًا.": "The verification code is incorrect or has expired. Request a new code.",
+        "تعذّر إنشاء الحساب. تحقق من رقم الجوال، فقد يكون مستخدمًا بحساب آخر.": "Could not create your account. The phone number may already be in use.",
+        "اختر كلمة مرور مختلفة عن السابقة.": "Choose a password different from your previous one.",
+        "الكمية المسموحة من 1 إلى 99.": "Quantity must be between 1 and 99.",
+        "أحد المنتجات غير متاح حاليًا.": "One of the products is currently unavailable.",
+        "انتظر دقيقتين قبل إرسال رسالة أخرى.": "Wait two minutes before sending another message.",
+        "بيانات الدخول غير صحيحة.": "The sign-in details are incorrect.",
+        "فعّل حسابك من رسالة التأكيد في بريدك الإلكتروني.": "Activate your account using the confirmation email.",
+        "بلغت حد المحاولات مؤقتًا؛ حاول لاحقًا.": "Too many attempts. Please try again later.",
+        "تعذّر الاتصال بالخادم؛ تحقق من الإنترنت.": "Could not connect to the server. Check your internet connection.",
+        "تعذّر تنفيذ الطلب.": "Could not complete your request.",
+        "تعذّر تأكيد الطلب التجريبي.": "Could not confirm the test order.",
+        "حُفظت بياناتك.": "Your details have been saved.",
+        "كمية": "Quantity",
+        "حُفظ الطلب التجريبي:": "Test order saved:",
+        "لم تُسحب أي أموال.": "No money was charged."
+};
+    Object.keys(UI_TEXT).forEach(function (source) { DICT.ar[source] = source; DICT.en[source] = UI_TEXT[source]; });
+    function text(source) { return getLang() === 'en' && UI_TEXT[source] ? UI_TEXT[source] : source; }
+    function bindText(element, source) {
+        if (UI_TEXT[source]) element.setAttribute('data-i18n', source);
+        else element.removeAttribute('data-i18n');
+        element.textContent = text(source);
+        return element;
+    }
+    var templateText = [], templateAttributes = [], templateCaptured = false;
+    function captureTemplateText() {
+        if (templateCaptured || !document.createTreeWalker) return;
+        templateCaptured = true;
+        document.querySelectorAll('[aria-label], [placeholder], [alt], [title]').forEach(function (element) {
+            ['aria-label', 'placeholder', 'alt', 'title'].forEach(function (attribute) {
+                var source = element.getAttribute(attribute);
+                if (UI_TEXT[source]) templateAttributes.push({ element: element, attribute: attribute, source: source, last: source });
+            });
+        });
+        document.querySelectorAll('main.backend-shell, main.account-ui').forEach(function (root) {
+            var walker = document.createTreeWalker(root, 4), node;
+            while ((node = walker.nextNode())) {
+                var source = node.nodeValue.trim();
+                if (!UI_TEXT[source] || node.parentElement.closest('[data-i18n], script, style, textarea, #productList, #cartList, #orderList')) continue;
+                templateText.push({ node: node, source: source, whitespace: node.nodeValue, last: node.nodeValue });
+            }
+        });
+    }
+    function translateTemplateText(lang) {
+        templateAttributes.forEach(function (item) {
+            if (!item.element.isConnected || item.element.getAttribute(item.attribute) !== item.last) return;
+            item.last = lang === 'en' ? UI_TEXT[item.source] : item.source;
+            item.element.setAttribute(item.attribute, item.last);
+        });
+        var titleLabel = originalPageTitle.replace(/ \| Account$/, '');
+        if (UI_TEXT[titleLabel]) document.title = (lang === 'en' ? UI_TEXT[titleLabel] : titleLabel) + ' | Account';
+        templateText.forEach(function (item) {
+            if (!item.node.isConnected || item.node.nodeValue !== item.last) return;
+            item.last = item.whitespace.replace(item.source, lang === 'en' ? UI_TEXT[item.source] : item.source);
+            item.node.nodeValue = item.last;
+        });
+    }
+
     var menuEl = null;
     var buttonEl = null;
 
@@ -115,6 +292,8 @@
         if (!DICT[lang]) {
             lang = 'ar';
         }
+        captureTemplateText();
+        translateTemplateText(lang);
         var dict = DICT[lang];
         var isRtl = RTL_LANGS.indexOf(lang) !== -1;
         var root = document.documentElement;
@@ -157,6 +336,10 @@
                 el.textContent = window.CurrencySystem.format(el.getAttribute('data-currency-amount'));
             });
         }
+
+        document.querySelectorAll('[data-locale-date]').forEach(function (el) {
+            el.textContent = new Date(el.getAttribute('data-locale-date')).toLocaleString(lang === 'en' ? 'en-GB' : 'ar-SA');
+        });
 
         var current = document.getElementById('langCurrent');
         if (current) {
@@ -258,6 +441,8 @@
         apply: apply,
         getLang: getLang,
         setLang: setLang,
+        text: text,
+        bindText: bindText,
         langs: LANGS
     };
 
