@@ -7,7 +7,7 @@
     payment:['حالة الدفع','Payment status'], payment_copy:['تُحجز قيمة السلعة 12 ساعة من الشراء، ثم تُخصّص للبائع إذا لم يُفتح نزاع. المحاكاة الحالية بلا أموال حقيقية.','The item amount is held for 12 hours after purchase, then allocated to the seller if no dispute is opened. The current simulation uses no real money.'],
     delivery:['تسليم الحسابات','Account delivery'], delivery_copy:['استعرض حالة التسليم ومعلومات طلبك من حسابك الشخصي.','View delivery status and order information from your own account.'],
     fair:['نزاع عادل','Fair disputes'], fair_copy:['إغلاق البائع يحسم للمشتري، وإغلاق المشتري لصالح البائع يحسم للبائع. يمكن للإدارة الفصل، والحسم نهائي.','Seller closure awards the buyer; buyer closure in the seller’s favor awards the seller. Support can decide too. Decisions are final.'],
-    email:['البريد الإلكتروني للحساب','Account email address'], refresh:['اعرض طلباتي','View my orders'],
+    refresh:['تحديث الطلبات','Refresh orders'],
     guest:['سجّل الدخول لعرض مشترياتك ومتابعة طلباتك.','Sign in to view your purchases and track your orders.'], login:['تسجيل الدخول','Sign in'],
     loading:['جارٍ تحميل الطلبات…','Loading orders…'], empty:['لا توجد طلبات حتى الآن.','You do not have any orders yet.'],
     test:['طلب تجريبي','Test order'], unknown:['حالة الدفع غير مؤكدة','Payment not confirmed'],
@@ -87,11 +87,11 @@
     });
     if(!count) host.append(make('p',t(disputesOnly?'cases_empty':'empty'),'orders-empty'));
   }
-  function guest() { if(window.OrderDisputes)window.OrderDisputes.reset();revision++;ready=false;orders=[];disputes=[];products=[];settlements=[];node('orderList').replaceChildren();node('ordersEmail').value='';node('ordersMember').hidden=true;node('ordersGuest').hidden=false;notice(''); }
+  function guest() { if(window.OrderDisputes)window.OrderDisputes.reset();revision++;ready=false;orders=[];disputes=[];products=[];settlements=[];node('orderList').replaceChildren();node('ordersMember').hidden=true;node('ordersGuest').hidden=false;notice(''); }
   async function allDisputes() { var rows=[],part;do{part=await backend.disputes(rows.length);rows=rows.concat(part);}while(part.length===50);return rows; }
   async function load() {
     if(!backend.currentUser()){guest();return;}
-    var token=++revision, user=backend.currentUser();node('ordersGuest').hidden=true;node('ordersMember').hidden=false;node('ordersEmail').value=user.email || '';node('ordersRefresh').disabled=true;notice(t('loading'));
+    var token=++revision, user=backend.currentUser();node('ordersGuest').hidden=true;node('ordersMember').hidden=false;node('ordersRefresh').disabled=true;notice(t('loading'));
     try {
       var result=await Promise.allSettled([backend.orders(),allDisputes(),backend.products(),backend.testSettlements(),backend.sellerOrders()]);
       if(token!==revision || !backend.currentUser() || backend.currentUser().id!==user.id)return;
@@ -106,7 +106,7 @@
     finally{if(token===revision)node('ordersRefresh').disabled=false;}
   }
   var domReady=document.readyState==='loading'?new Promise(function(resolve){document.addEventListener('DOMContentLoaded',resolve,{once:true});}):Promise.resolve();
-  domReady.then(function(){localize();node('ordersLookup').addEventListener('submit',function(event){event.preventDefault();load();});window.addEventListener('account:languagechange',localize);window.addEventListener('account:signed-out',guest);
+  domReady.then(function(){localize();node('ordersRefresh').addEventListener('click',load);window.addEventListener('account:languagechange',localize);window.addEventListener('account:signed-out',guest);
     var scope=make('p',t('policy_scope'),'order-policy');scope.dataset.ordersText='policy_scope';document.querySelector('.orders-features').after(scope);
     setInterval(function(){if(ready&&!document.hidden&&!node('ordersRefresh').disabled&&(settlements.some(function(s){return s.state==='held'||s.state==='disputed';})||disputes.some(function(d){return d.status==='open';})))load();},60000);});
   Promise.all([domReady,backend.ready]).then(load).catch(function(){notice(t('failed'),true);});
