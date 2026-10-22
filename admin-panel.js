@@ -253,7 +253,7 @@
     });
   }
   function renderPurchases() {
-    var select=node('disputeOrderItem');if(!select)return;var chosen=select.value;select.replaceChildren();
+    var select=node('disputeOrderItem');if(!select)return;var chosen=select.value || new URL(location.href).searchParams.get('item');select.replaceChildren();
     var claimed=new Set(customerRows.map(function(row){return row.order_item_id;})),items=[];
     purchases.forEach(function(order){(order.items||[]).forEach(function(item){if(!claimed.has(item.id))items.push({item:item,order:order});});});
     items.forEach(function(row){var option=make('option','',row.item.title+' · '+date(row.order.created_at));option.value=row.item.id;select.append(option);});
