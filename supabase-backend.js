@@ -188,6 +188,19 @@
   backend.products = async function () {
     return check(await (await client()).from('account_products').select('*').eq('active', true).order('created_at', { ascending: false }));
   };
+  backend.sellerProducts = async function (offset) {
+    var c = await client(true), start = offset || 0;
+    return check(await c.from('account_products').select('id,title,description,price,listing_type,active,created_at')
+      .eq('seller_id', state.user.id).order('created_at', { ascending: false }).order('id', { ascending: true }).range(start, start + 23));
+  };
+  backend.sellerProduct = async function (id) { return check(await (await client(true)).rpc('account_seller_read_product', { p_id: id })); };
+  backend.sellerSaveProduct = async function (product) {
+    return check(await (await client(true)).rpc('account_seller_save_product', {
+      p_id: product.id, p_title: product.title, p_price: product.price, p_listing_type: product.kind,
+      p_description: product.description, p_credentials: product.credentials, p_active: product.active
+    }));
+  };
+  backend.sellerSetVisibility = async function (id, active) { return check(await (await client(true)).rpc('account_seller_set_visibility', { p_id: id, p_active: active })); };
   backend.cart = async function () {
     await client();
     if (!state.user) return [];

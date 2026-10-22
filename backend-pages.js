@@ -68,6 +68,10 @@
       rows.forEach(function (row) {
         var card = el('article', undefined, 'backend-panel');
         if (row.image_url) { var image = el('img'); image.src = row.image_url; image.alt = row.title; image.className = 'backend-card-image'; card.append(image); }
+        else {
+          var icons = {x:'fa-brands fa-x-twitter',instagram:'fa-brands fa-instagram',snapchat:'fa-brands fa-snapchat',tiktok:'fa-brands fa-tiktok',facebook:'fa-brands fa-facebook',youtube:'fa-brands fa-youtube',game:'fa-solid fa-gamepad',service:'fa-solid fa-briefcase'};
+          var icon = el('div', undefined, 'backend-product-icon'), mark = el('i', undefined, icons[row.listing_type] || icons.service); mark.setAttribute('aria-hidden', 'true'); icon.append(mark); card.append(icon);
+        }
         card.append(el('h2', row.title), el('p', row.description, 'backend-muted'), el('p', money(row.price)));
         var button = el('button', 'أضف إلى السلة', 'backend-button js-add-to-cart'); button.type = 'button'; button.dataset.uid = row.id; card.append(button); container.append(card);
       });

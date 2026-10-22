@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="dark"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><base href="."><link rel="preconnect" href="https://cdn.jsdelivr.net/"><link rel="preconnect" href="https://cdnjs.cloudflare.com/">
 <!-- Regular Meta Info -->
-<title>توثيق حساب البائع | Account</title>
+<title>إضافة خدمة جديدة | Account</title>
 <meta name="description" content="سوق Account الإلكتروني: اشترِ من بائعين موثّقين بالهوية الوطنية، أو وثّق حسابك واعرض منتجاتك في متجر خاص بك.">
 <meta name="keywords" content="سوق إلكتروني موثوق">
 <!-- Facebook Meta Info -->
@@ -1250,9 +1250,9 @@
 <link rel="stylesheet" href="./main.css">
 <link rel="stylesheet" href="./components.css">
 <link rel="stylesheet" href="./layout.css"><!-- /twig-include:global/head.html -->
-<style id="app-builder-recap-style">.grecaptcha-badge { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; transition: opacity 0.2s ease; }.grecaptcha-badge.app-builder-recap-show { visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; }</style><link rel="stylesheet" href="./backend-pages.css">
-<link rel="stylesheet" href="./admin-panel.css?v=33218ac8cff3"></head>
-<body data-backend-page="management" data-management-page="sell"><header class="site-header fixed inset-x-0 top-0 z-40 border-b border-[var(--border-color)]" data-twig-section="global/header.html">
+<style id="app-builder-recap-style">.grecaptcha-badge { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; transition: opacity 0.2s ease; }.grecaptcha-badge.app-builder-recap-show { visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; }</style><link rel="stylesheet" href="./backend-pages.css?v=d040292b7495">
+<link rel="stylesheet" href="./seller-products.css?v=d71c010a72c5"></head>
+<body data-backend-page="seller"><header class="site-header fixed inset-x-0 top-0 z-40 border-b border-[var(--border-color)]" data-twig-section="global/header.html">
     <nav class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-8" aria-label="التنقل الرئيسي" data-twig-section="global/header.html">
         <a href="./index.html" class="flex items-center gap-3 transition-opacity duration-300 hover:opacity-80 focus:outline-none" aria-label="Account - الصفحة الرئيسية" data-twig-section="global/header.html">
             <span class="brand-mark h-11 w-11" data-twig-section="global/header.html">
@@ -1441,7 +1441,44 @@
             </div>
         </div>
     </div>
-</header><main class="management-ui" id="top"><div class="admin-shell"><div class="admin-header"><div><p class="admin-kicker"><span data-admin-i18n="platform_management">إدارة المنصة</span></p><h1><span data-admin-i18n="verification_page">توثيق حساب البائع</span></h1><p class="admin-copy"><span data-admin-i18n="verification_intro">أرسل بيانات متجرك ووثيقة هويتك لمراجعتها من إدارة المنصة.</span></p></div></div><section id="managementGuest" class="admin-card" hidden><h2 class="admin-title"><span data-admin-i18n="guest_heading">سجّل الدخول للمتابعة</span></h2><p class="admin-copy"><span data-admin-i18n="guest_copy">هذه البيانات خاصة بحسابك. سجّل الدخول أو أنشئ حسابًا للمتابعة.</span></p><a id="managementSignIn" href="./account.html" class="admin-button"><span data-admin-i18n="sign_in">تسجيل الدخول</span></a></section><p id="managementStatus" class="admin-status" role="status" aria-live="polite" hidden></p><div id="sellerMember" hidden><section class="admin-card"><form id="verificationForm" class="admin-form"><label class="admin-field"><span data-admin-i18n="store_name">اسم المتجر</span><input name="store" type="text" required minlength="2" maxlength="120"></label><label class="admin-field"><span data-admin-i18n="legal_name">الاسم الكامل كما في الهوية</span><input name="legal" type="text" required minlength="2" maxlength="120" autocomplete="name"></label><label class="admin-field"><span data-admin-i18n="phone">رقم الجوال</span><input name="phone" type="tel" required maxlength="40" autocomplete="tel"></label><label class="admin-field"><span data-admin-i18n="identity_file">وثيقة الهوية</span><input name="document" type="file" required accept="image/jpeg,image/png,image/webp,application/pdf"></label><p class="admin-privacy"><span data-admin-i18n="identity_hint">صورة واضحة أو ملف PDF، بحد أقصى 5 ميغابايت.</span> <span data-admin-i18n="private_document">الوثيقة خاصة بصاحبها والإدارة فقط. رابط العرض مؤقت.</span></p><button type="submit" class="admin-button" data-management-mutation><span data-admin-i18n="verification_submit">إرسال طلب التوثيق</span></button><p id="verificationStatus" class="admin-status" role="status" aria-live="polite" hidden></p></form></section><section class="admin-subsection"><h2 class="admin-title"><span data-admin-i18n="verification_history">طلبات التوثيق</span></h2><div id="verificationRows" class="admin-grid"></div></section></div></div></main><footer class="bg-[var(--footer-bg)] px-5 pb-10 pt-14 text-[var(--text-color)] sm:px-8" data-twig-section="global/footer.html">
+</header><main class="seller-ui" id="top">
+  <div class="seller-shell">
+    <section id="listingCard" class="seller-card" aria-labelledby="listingHeading">
+      <h1 id="listingHeading" class="seller-title" data-seller-text="title">إضافة خدمة جديدة</h1>
+      <p class="seller-copy" data-seller-text="intro">أضف بيانات السلعة لتظهر في متجرك وكتالوج السوق.</p>
+      <div id="sellerGuest" class="seller-notice" hidden><span data-seller-text="login">سجّل الدخول لإضافة سلعك وإدارتها.</span> <a href="./account.html?return=sell.html" data-seller-text="sign_in">تسجيل الدخول</a></div>
+      <div id="sellerVerification" class="seller-notice" hidden><span data-seller-text="verify_hint">يمكنك تجهيز سلعك كمسودات الآن. يتطلب نشرها في المتجر توثيق حساب البائع.</span> <a href="./verify.html" data-seller-text="verify">توثيق الحساب</a></div>
+      <form id="sellerProductForm" class="seller-form" autocomplete="off">
+        <fieldset id="listingFields" class="seller-fields" disabled>
+          <label class="seller-field" for="listingTitle"><span id="listingNameLabel">يوزر الحساب *</span><input id="listingTitle" name="title" type="text" required minlength="2" maxlength="200" placeholder="مثال: xx7a"></label>
+          <label class="seller-field" for="listingPrice"><span data-seller-text="price">السعر (ر.س) *</span><input id="listingPrice" name="price" type="number" required min="0.01" max="1000000" step="0.01" inputmode="decimal" placeholder="0.00"></label>
+          <label class="seller-field" for="listingKind"><span data-seller-text="kind">نوع العرض *</span><select id="listingKind" name="kind" required>
+            <option value="x" data-seller-type="x">منصة X</option><option value="instagram" data-seller-type="instagram">إنستغرام</option><option value="snapchat" data-seller-type="snapchat">سناب شات</option><option value="tiktok" data-seller-type="tiktok">تيك توك</option><option value="facebook" data-seller-type="facebook">فيسبوك</option><option value="youtube" data-seller-type="youtube">يوتيوب</option><option value="service" data-seller-type="service">خدمة رقمية</option><option value="game" data-seller-type="game">لعبة أو اشتراك</option>
+          </select><span class="seller-hint" data-seller-text="hint">كل منصة تواصل تظهر برمزها تلقائيًا، أما الخدمات والألعاب فتظهر بأيقونة دون صورة.</span></label>
+          <fieldset id="listingCredentials" class="seller-secrets">
+            <legend data-seller-text="private">بيانات الحساب المعروض للبيع</legend>
+            <div class="seller-secrets-grid">
+              <label class="seller-field"><span data-seller-text="email">البريد الإلكتروني للحساب *</span><input name="account_email" type="email" required maxlength="254" autocomplete="off" placeholder="account@example.com"></label>
+              <label class="seller-field"><span data-seller-text="email_password">باسورد البريد *</span><input name="email_password" type="password" required maxlength="512" autocomplete="new-password"></label>
+              <label class="seller-field"><span data-seller-text="username">يوزر الحساب *</span><input name="account_username" type="text" required maxlength="200" autocomplete="off"></label>
+              <label class="seller-field"><span data-seller-text="password">باسورد الحساب *</span><input name="account_password" type="password" required maxlength="512" autocomplete="new-password"></label>
+            </div>
+            <p class="seller-hint" data-seller-text="privacy">هذه البيانات خاصة بك ولا تظهر في صفحة المنتج العامة أو الطلبات التجريبية.</p>
+          </fieldset>
+          <label class="seller-field" for="listingDescription"><span data-seller-text="description">وصف مختصر للخدمة</span><textarea id="listingDescription" name="description" maxlength="5000" rows="4" placeholder="اكتب وصفًا مختصرًا للخدمة…"></textarea></label>
+          <button type="submit" class="seller-button seller-submit"><i class="fa-solid fa-plus" aria-hidden="true"></i><span id="listingSubmitText" data-seller-text="publish">نشر المنتج</span></button>
+        </fieldset>
+        <button id="cancelListing" type="button" class="seller-button secondary" data-seller-text="cancel" hidden>إلغاء التعديل</button>
+      </form>
+      <p id="sellerStatus" class="seller-status" role="status" aria-live="polite" hidden></p>
+      <noscript><p class="seller-notice">فعّل JavaScript لاستخدام صفحة البيع.</p></noscript>
+    </section>
+    <section id="sellerProducts" class="seller-products" aria-labelledby="myListingsHeading" hidden>
+      <div class="seller-toolbar"><h2 id="myListingsHeading" data-seller-text="mine">سلعي</h2><button id="sellerRefresh" type="button" class="seller-button secondary" data-seller-text="refresh">تحديث</button></div>
+      <div id="sellerRows" class="seller-rows"></div><button id="sellerMore" type="button" class="seller-button secondary seller-more" data-seller-text="more" hidden>عرض المزيد</button>
+    </section>
+  </div>
+</main><footer class="bg-[var(--footer-bg)] px-5 pb-10 pt-14 text-[var(--text-color)] sm:px-8" data-twig-section="global/footer.html">
     <div class="mx-auto max-w-7xl" data-twig-section="global/footer.html">
         <div class="grid gap-10 border-t border-[var(--glass-border)] pt-10 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-12" data-twig-section="global/footer.html">
             <div data-twig-section="global/footer.html">
@@ -1479,7 +1516,7 @@
                     <a href="./withdraw.html" class="transition-colors duration-300 hover:text-[var(--text-color)]" data-i18n="nav_withdraw" data-twig-section="global/footer.html">Withdraw</a>
                     <a href="./seller-disputes.html" class="transition-colors duration-300 hover:text-[var(--text-color)]" data-i18n="nav_seller_disputes" data-twig-section="global/footer.html">Store Disputes</a>
 
-                    <a href="./account.html" class="transition-colors duration-300 hover:text-[var(--text-color)]" data-i18n="footer_start_selling" data-twig-section="global/footer.html">Start Selling</a>
+                    <a href="./sell.html" class="transition-colors duration-300 hover:text-[var(--text-color)]" data-i18n="footer_start_selling" data-twig-section="global/footer.html">Start Selling</a>
                     <a href="./help.html" class="transition-colors duration-300 hover:text-[var(--text-color)]" data-i18n="nav_help" data-twig-section="global/footer.html">Help Center</a>
                 </div>
             </div>
@@ -1515,6 +1552,6 @@
 </footer><script src="./i18n.js?v=f70a301679f5"></script>
 <script src="./supabase-sdk.js"></script>
 <script src="./supabase-config.js"></script>
-<script src="./supabase-backend.js?v=bc96264ee9b8"></script>
+<script src="./supabase-backend.js?v=2853a3260fd4"></script>
 <script src="./app.js?v=4208bf2e869a"></script>
-<script src="./backend-pages.js"></script><script src="./management-text.js?v=ee88c82fa20c"></script><script src="./admin-panel.js?v=fb7d2b95a2c3"></script></body></html>
+<script src="./backend-pages.js?v=ffbf5cea39e1"></script><script src="./seller-products.js?v=2e5fc551dbe5"></script></body></html>
