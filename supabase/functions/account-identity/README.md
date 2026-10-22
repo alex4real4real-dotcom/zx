@@ -1,6 +1,6 @@
 # Automatic identity verification
 
-Status: database setup applied and tested, with automatic verification disabled. Edge Function and frontend are prepared for review and have not been published. Provider configuration and live validation are still required. No real identity documents have been used to test this code.
+Status: database setup applied and tested, with automatic verification disabled. The Edge Function is deployed; publishing the page does not activate matching. Provider configuration and live validation are still required. No real identity documents have been used to test this code.
 
 The hosted Didit journey collects the identity document first, then a live selfie. Document authenticity, liveness and face matching must all pass. An authoritative declined face verdict rejects the request immediately; uncertain captures request another attempt. No site-admin approval is used for these requests.
 
@@ -46,3 +46,6 @@ Official references (checked October 22, 2026):
 - https://docs.didit.me/integration/webhooks
 - https://didit.me/ar/terms/verification-privacy-notice/
 - https://supabase.com/docs/guides/functions/auth-headers
+
+
+The automatic flow requests only the ID and live selfie, plus explicit consent. No separate full name, phone number or store name is requested. No name or phone extracted from the provider report is stored. Existing manual verification records remain unchanged.

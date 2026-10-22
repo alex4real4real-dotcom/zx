@@ -9,7 +9,7 @@ declare uid uuid:=current_setting('account_identity_test.buyer')::uuid; row_id u
   workflow text:=gen_random_uuid()::text; result jsonb; fields jsonb;
 begin
   if uid is null then raise exception 'UNVERIFIED_FIXTURE_REQUIRED'; end if;
-  fields:=jsonb_build_object('store','Fictional QA store','legal','Fictional QA name','phone','+966500000000','consent_version','identity-v1');
+  fields:=jsonb_build_object('consent_version','identity-v1');
   update account_identity_private.settings set enabled=false where singleton;
   begin
     perform public.account_identity_service('prepare',uid,null,gen_random_uuid(),fields);
@@ -19,6 +19,7 @@ begin
   result:=public.account_identity_service('prepare',uid,null,gen_random_uuid(),fields);
   if result->>'create_allowed'<>'true' then raise exception 'SESSION_CREATION_FAILED'; end if;
   row_id:=(result->'record'->>'id')::uuid;
+  if exists(select 1 from public.account_verifications where id=row_id and (legal_name is not null or phone is not null)) then raise exception 'UNREQUESTED_CONTACT_DATA_STORED'; end if;
   perform public.account_identity_service('attach',uid,row_id,null,jsonb_build_object('session_id',provider_id,'url','https://verify.didit.me/ar/session/fictional','workflow_id',workflow));
   perform set_config('account_identity_test.row',row_id::text,true);
   fields:=jsonb_build_object('session_id',provider_id,'workflow_id',workflow,'vendor_data',row_id,'state','approved','id_status','approved','liveness_status','approved');
@@ -38,7 +39,7 @@ begin
   if result->'record'->>'state'<>'rejected' then raise exception 'TERMINAL_REJECTION_CHANGED'; end if;
   if (select is_verified from public.account_profiles where id=uid) then raise exception 'REJECTED_USER_VERIFIED'; end if;
   -- A fresh request can succeed; no site-admin approval is involved.
-  fields:=jsonb_build_object('store','Fictional QA store','legal','Fictional QA name','phone','+966500000000','consent_version','identity-v1');
+  fields:=jsonb_build_object('consent_version','identity-v1');
   result:=public.account_identity_service('prepare',uid,null,gen_random_uuid(),fields);row_id:=(result->'record'->>'id')::uuid;provider_id:=gen_random_uuid();
   perform public.account_identity_service('attach',uid,row_id,null,jsonb_build_object('session_id',provider_id,'url','https://verify.didit.me/ar/session/fictional2','workflow_id',workflow));
   fields:=jsonb_build_object('session_id',provider_id,'workflow_id',workflow,'vendor_data',row_id,'state','approved','id_status','approved','liveness_status','approved','face_status','approved');

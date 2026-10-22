@@ -11,6 +11,10 @@ insert into account_identity_private.settings(singleton) values(true) on conflic
 alter table account_identity_private.settings enable row level security;
 revoke all on account_identity_private.settings from public,anon,authenticated;
 alter table public.account_verifications add column if not exists verification_method text not null default 'manual';
+alter table public.account_verifications alter column legal_name drop not null;
+alter table public.account_verifications alter column phone drop not null;
+alter table public.account_verifications drop constraint if exists account_verification_manual_contact_required;
+alter table public.account_verifications add constraint account_verification_manual_contact_required check(verification_method<>'manual' or (legal_name is not null and phone is not null));
 create table if not exists account_identity_private.sessions (
   verification_id uuid primary key references public.account_verifications(id) on delete cascade,
   user_id uuid not null references public.account_profiles(id),
@@ -64,10 +68,7 @@ begin
   if p_action='prepare' then
     if not coalesce(enabled,false) then raise exception 'IDENTITY_NOT_CONFIGURED'; end if;
     if profile.is_verified then raise exception 'ALREADY_VERIFIED'; end if;
-    if p_request_id is null or p_fields->>'consent_version' is distinct from 'identity-v1'
-      or char_length(btrim(coalesce(p_fields->>'store',''))) not between 2 and 120
-      or char_length(btrim(coalesce(p_fields->>'legal',''))) not between 2 and 120
-      or coalesce(p_fields->>'phone','')!~'^\+?[0-9]{8,15}$' then raise exception 'INVALID_REQUEST'; end if;
+    if p_request_id is null or p_fields->>'consent_version' is distinct from 'identity-v1' then raise exception 'INVALID_REQUEST'; end if;
     -- Finish timed-out creation attempts without fabricating a verification decision.
     update public.account_verifications a set status='cancelled'
       where a.user_id=p_user_id and a.status='uploading' and a.verification_method='didit'
@@ -82,7 +83,7 @@ begin
         if (select count(*) from account_identity_private.sessions where user_id=p_user_id and created_at>now()-interval '1 day')>=3 then raise exception 'REQUEST_LIMIT'; end if;
         ident:=gen_random_uuid();
         insert into public.account_verifications(id,user_id,request_id,store_name,legal_name,phone,document_path,verification_method)
-          values(ident,p_user_id,p_request_id,btrim(p_fields->>'store'),btrim(p_fields->>'legal'),p_fields->>'phone',p_user_id::text||'/'||ident::text||'.didit','didit') returning * into v;
+          values(ident,p_user_id,p_request_id,'توثيق الهوية',null,null,p_user_id::text||'/'||ident::text||'.didit','didit') returning * into v;
         insert into account_identity_private.sessions(verification_id,user_id,consent_version) values(ident,p_user_id,'identity-v1');
         fresh:=true;
       end if;

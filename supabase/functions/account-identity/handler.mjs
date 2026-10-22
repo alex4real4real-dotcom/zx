@@ -42,7 +42,7 @@ export function createHandler({env,fetch:send=fetch,now=Date.now}) {
       if(!ready)return reply({error:'IDENTITY_NOT_CONFIGURED'},503);
       if(body.action==='start') {
         if(!UUID.test(body.request_id||'')||body.consent!==true)return reply({error:'CONSENT_REQUIRED'},400);
-        const result=await rpc('prepare',user.id,null,body.request_id,{store:String(body.store||'').trim(),legal:String(body.legal||'').trim(),phone:String(body.phone||'').replace(/[^+0-9]/g,''),consent_version:'identity-v1'});
+        const result=await rpc('prepare',user.id,null,body.request_id,{consent_version:'identity-v1'});
         if(!result.create_allowed)return reply(result);
         try {
           const callback=new URL(env('IDENTITY_RETURN_URL'));if(callback.protocol!=='https:'||callback.search||callback.hash||callback.username||callback.password)throw new Error('IDENTITY_NOT_CONFIGURED');

@@ -40,7 +40,7 @@ test('start uses the authenticated user, requires consent, and binds the new ses
     if(url.endsWith('/auth/v1/user'))return Response.json({id:uid});
     if(url.includes('/rpc/')){const args=JSON.parse(options.body);actions.push(args);assert.equal(args.p_user_id,uid);
       if(args.p_action==='config')return Response.json({enabled:true,verified:false});
-      if(args.p_action==='prepare')return Response.json({create_allowed:true,record:{id,state:'creating'}});
+      if(args.p_action==='prepare'){assert.deepEqual(args.p_fields,{consent_version:'identity-v1'});return Response.json({create_allowed:true,record:{id,state:'creating'}});}
       if(args.p_action==='attach')return Response.json({verified:false,record:{id,state:'not_started',url:args.p_fields.url}});
       throw Error('unexpected RPC');
     }
@@ -48,7 +48,7 @@ test('start uses the authenticated user, requires consent, and binds the new ses
     return Response.json({session_id:sid,workflow_id:wid,url:'https://verify.didit.me/ar/session/token'});
   }});
   assert.equal((await handle(request({action:'start',request_id:id,consent:false}))).status,400);
-  const response=await handle(request({action:'start',request_id:id,user_id:'forged-user',consent:true,store:'Test',legal:'Test User',phone:'+966500000000'}));
+  const response=await handle(request({action:'start',request_id:id,user_id:'forged-user',consent:true}));
   assert.equal(response.status,200);assert.equal((await response.json()).verified,false);assert.ok(actions.some(item=>item.p_action==='attach'));
 });
 test('client-supplied approval fields and callback parameters cannot grant verification',async()=>{

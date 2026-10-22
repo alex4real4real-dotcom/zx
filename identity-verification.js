@@ -5,7 +5,6 @@
     title:['توثيق الهوية الآلي','Automatic identity verification'],intro:['وثّق هويتك وسيلفي مباشر لتفعيل حساب البائع، دون انتظار موافقة الإدارة.','Verify your ID and a live selfie to activate your seller account automatically.'],
     step_id:['١. تصوير الهوية','1. Capture your ID'],step_face:['٢. سيلفي مباشر','2. Take a live selfie'],step_result:['٣. نتيجة آلية','3. Automatic result'],
     detail:['ابدأ بوثيقة الهوية، ثم اتبع تعليمات الكاميرا لالتقاط سيلفي مباشر. تُفحص الهوية وحيوية الوجه ومطابقة الصورة.','Start with your ID, then follow the camera instructions for a live selfie. Your document, liveness and face match are checked.'],
-    store:['اسم المتجر','Store name'],legal:['الاسم الكامل كما في الهوية','Full name on your ID'],phone:['رقم الجوال','Phone number'],
     consent:['أوافق على معالجة هويتي والسيلفي وبيانات مطابقة الوجه لدى Didit للتحقق من ملكيتي للهوية.','I consent to Didit processing my ID, live selfie and face matching data to verify that the ID belongs to me.'],
     privacy:['تُلتقط الصور مباشرة لدى مزود التحقق. يحفظ هذا المسار في الموقع بيانات الطلب ونتيجته، ولا يحفظ صور الهوية أو السيلفي.','Images are captured directly by the verification provider. This flow stores request information and the outcome on this site, without ID or selfie images.'],
     privacy_link:['خصوصية التحقق لدى Didit','Didit verification privacy notice'],notice_link:['تفاصيل معالجة بيانات التوثيق','Verification data notice'],
@@ -14,6 +13,7 @@
     loading:['جارٍ تحميل حالة التوثيق…','Loading verification status…'],working:['جارٍ الاتصال بخدمة التحقق…','Connecting to verification…'],
     creating:['جارٍ إنشاء جلسة التحقق. أعد تحديث الحالة بعد قليل.','Creating your verification session. Refresh shortly.'],not_started:['جلسة التحقق جاهزة. ابدأ بالهوية ثم السيلفي.','Your session is ready. Start with your ID, then take a live selfie.'],
     in_progress:['أكمل تصوير الهوية والسيلفي في جلسة التحقق.','Complete ID and selfie capture in the verification session.'],processing:['جارٍ فحص الهوية والسيلفي آليًا.','Your ID and selfie are being checked automatically.'],
+    already_verified:['حسابك موثّق مسبقًا. يمكنك عرض سلعك.','Your account is already verified. You can list your items.'],
     approved:['تم توثيق هويتك آليًا. يمكنك الآن عرض سلعك.','Your identity is verified. You can now list your items.'],rejected:['لم ينجح التوثيق الآلي. يمكنك تقديم طلب جديد.','Automatic verification failed. You can start a new request.'],
     face_mismatch:['رُفض الطلب آليًا: لم تتطابق صورة السيلفي مع صورة الهوية.','Automatically declined: the selfie did not match the ID portrait.'],
     retry:['تعذّر إكمال المطابقة. أعد التقاط الهوية والسيلفي بوضوح؛ حسابك غير موثّق بعد.','The check could not be completed. Retake clear ID and selfie captures; your account is not verified yet.'],cancelled:['انتهت جلسة التحقق. يمكنك بدء طلب جديد.','The session ended. You can start a new request.'],
@@ -36,7 +36,7 @@
     node('identitySync').hidden=!ready||!active||!record.session_id;
     node('identitySync').disabled=busy;
     node('identitySell').hidden=!verified;
-    if(verified)notice('approved');else if(!ready)notice('unavailable',true);else if(record)notice(record.reason==='face_mismatch'?'face_mismatch':record.state,['rejected','retry'].includes(record.state));else node('identityStatus').hidden=true;
+    if(verified)notice(record&&record.state==='approved'?'approved':'already_verified');else if(!ready)notice('unavailable',true);else if(record)notice(record.reason==='face_mismatch'?'face_mismatch':record.state,['rejected','retry'].includes(record.state));else node('identityStatus').hidden=true;
   }
   function localize(){document.querySelectorAll('[data-identity-text]').forEach(function(el){el.textContent=t(el.dataset.identityText);});document.title=t('title')+' | Account';if(latest)render();}
   function showError(error){var value=String(error&&error.message||error||''),key=/NOT_CONFIGURED|FunctionNotFound|PGRST202/.test(value)?'unavailable':/REQUEST_LIMIT/.test(value)?'limit':/CHECK_RATE_LIMIT/.test(value)?'cooldown':/VERIFICATION_PENDING/.test(value)?'pending':/ACCOUNT_BANNED/.test(value)?'blocked':/EMAIL_NOT_CONFIRMED/.test(value)?'confirm_email':'failed';notice(key,true);}
@@ -48,7 +48,7 @@
     if(!backend.currentUser()){node('managementGuest').hidden=false;node('managementSignIn').href='./account.html?return=verify.html';return;}
     node('identityMember').hidden=false;notice('loading');
     node('identityForm').addEventListener('submit',function(event){event.preventDefault();var form=event.currentTarget;if(!form.reportValidity()||!ready)return;
-      perform(async function(){if(!requestId)requestId=crypto.randomUUID();var result=await backend.identityVerification('start',{request_id:requestId,store:form.elements.store.value.trim(),legal:form.elements.legal.value.trim(),phone:backend.normalizePhone(form.elements.phone.value),consent:form.elements.consent.checked,language:language()});latest=result;render();var url=result.record&&validUrl(result.record.url);if(url)location.assign(url);});
+      perform(async function(){if(!requestId)requestId=crypto.randomUUID();var result=await backend.identityVerification('start',{request_id:requestId,consent:form.elements.consent.checked,language:language()});latest=result;render();var url=result.record&&validUrl(result.record.url);if(url)location.assign(url);});
     });
     node('identitySync').addEventListener('click',function(){perform(function(){return load(true);});});
     try{await load(false);if(ready&&latest.record&&!['approved','rejected','cancelled'].includes(latest.record.state))await load(true);}catch(error){showError(error);}

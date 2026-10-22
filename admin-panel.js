@@ -144,7 +144,7 @@
     });
   }
   function verificationCard(row, forAdmin) {
-    var box=card(row.store_name,row.status);box.append(make('p','',row.legal_name));if(row.email)box.append(make('p','admin-email',row.email));box.append(make('p','',row.phone+' · '+date(row.created_at)));if(row.review_note)box.append(make('p','',row.review_note));
+    var box=card(row.store_name,row.status);if(row.legal_name)box.append(make('p','',row.legal_name));if(row.email)box.append(make('p','admin-email',row.email));box.append(make('p','',(row.phone?row.phone+' · ':'')+date(row.created_at)));if(row.review_note)box.append(make('p','',row.review_note));
     if(forAdmin){if(row.verification_method==='didit'){box.append(make('p','admin-copy',lang()==='ar'?'نتيجة التحقق الآلي — لا تحتاج موافقة الإدارة.':'Automatic verification — no admin approval required.'));}else{var actions=make('div','admin-actions');actions.append(button('review',function(){reviewVerification(row);},true));box.append(actions);}}return box;
   }
   function reviewVerification(row) {
