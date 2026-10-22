@@ -145,7 +145,7 @@
   }
   function verificationCard(row, forAdmin) {
     var box=card(row.store_name,row.status);box.append(make('p','',row.legal_name));if(row.email)box.append(make('p','admin-email',row.email));box.append(make('p','',row.phone+' · '+date(row.created_at)));if(row.review_note)box.append(make('p','',row.review_note));
-    if(forAdmin){var actions=make('div','admin-actions');actions.append(button('review',function(){reviewVerification(row);},true));box.append(actions);}return box;
+    if(forAdmin){if(row.verification_method==='didit'){box.append(make('p','admin-copy',lang()==='ar'?'نتيجة التحقق الآلي — لا تحتاج موافقة الإدارة.':'Automatic verification — no admin approval required.'));}else{var actions=make('div','admin-actions');actions.append(button('review',function(){reviewVerification(row);},true));box.append(actions);}}return box;
   }
   function reviewVerification(row) {
     var ui=dialog('review');ui.el.append(make('h3','admin-title',row.store_name),make('p','admin-copy',row.legal_name+' · '+row.email+' · '+row.phone),badge(row.status));

@@ -263,6 +263,14 @@
   backend.adminVerify = async function (id, approve, note) { return check(await (await client(true)).rpc('account_admin_verify', { p_id: id, p_approve: !!approve, p_note: note || '' })); };
   backend.adminDispute = async function (id, status, note, requestId) { return check(await (await client(true)).rpc('account_admin_dispute', { p_id: id, p_status: status, p_note: note, p_request_id: requestId })); };
   backend.adminTopup = async function (id, approve, note) { return check(await (await client(true)).rpc('account_admin_topup', { p_id: id, p_approve: !!approve, p_note: note || '' })); };
+  backend.identityVerification = async function (action, values) {
+    var response = await (await client(true)).functions.invoke('account-identity', { body: Object.assign({}, values || {}, { action: action }) });
+    if (response.error) {
+      var detail = {}; try { if (response.error.context && response.error.context.json) detail = await response.error.context.json(); } catch (ignored) {}
+      throw new Error(detail.error || 'IDENTITY_SERVICE_UNAVAILABLE');
+    }
+    return response.data;
+  };
   backend.verificationPrepare = async function (data, requestId) { return check(await (await client(true)).rpc('account_verification_prepare', { p_request_id: requestId, p_store_name: data.store, p_legal_name: data.legal, p_phone: backend.normalizePhone(data.phone), p_file_type: data.type })); };
   backend.verificationSubmit = async function (id) { return check(await (await client(true)).rpc('account_verification_submit', { p_id: id })); };
   backend.verificationUpload = async function (record, file) {
