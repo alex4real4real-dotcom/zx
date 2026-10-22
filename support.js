@@ -502,7 +502,7 @@
     node('ticketMeta').textContent = t('category_' + currentTicket.category) + ' · ' + t('priority_' + currentTicket.priority) + ' · ' + when(currentTicket.created_at);
     node('ticketStatus').replaceChildren(badge(currentTicket.status));
     node('ticketCustomer').textContent = staff ? currentTicket.customer_name : '';
-    var back = node('ticketBack'); back.href = staff ? './admin.html' : './tickets.html'; back.querySelector('span').textContent = t(staff ? 'back_inbox' : 'back_tickets');
+    var back = node('ticketBack'); back.href = staff ? './admin.html#tickets' : './tickets.html'; back.querySelector('span').textContent = t(staff ? 'back_inbox' : 'back_tickets');
     updateControls();
   }
   function renderMessages(force) {

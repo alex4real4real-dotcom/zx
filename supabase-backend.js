@@ -244,6 +244,41 @@
   backend.supportStatus = async function (id, status) { return check(await (await client(true)).rpc('account_support_status', { p_ticket_id: id, p_status: status })); };
   backend.supportRead = async function (id, staff) { return check(await (await client(true)).rpc('account_support_read', { p_ticket_id: id, p_as_staff: !!staff })); };
 
+  backend.adminData = async function (section, offset, filter) { return check(await (await client(true)).rpc('account_admin_data', { p_section: section, p_offset: offset || 0, p_filter: filter || '' })); };
+  backend.adminMembership = async function (email, name, remove) { return check(await (await client(true)).rpc('account_admin_membership', { p_email: email, p_name: name || '', p_remove: !!remove })); };
+  backend.adminBan = async function (id, banned, reason) { return check(await (await client(true)).rpc('account_admin_ban', { p_user_id: id, p_banned: !!banned, p_reason: reason || '' })); };
+  backend.adminVerify = async function (id, approve, note) { return check(await (await client(true)).rpc('account_admin_verify', { p_id: id, p_approve: !!approve, p_note: note || '' })); };
+  backend.adminDispute = async function (id, status, note, requestId) { return check(await (await client(true)).rpc('account_admin_dispute', { p_id: id, p_status: status, p_note: note, p_request_id: requestId })); };
+  backend.adminTopup = async function (id, approve, note) { return check(await (await client(true)).rpc('account_admin_topup', { p_id: id, p_approve: !!approve, p_note: note || '' })); };
+  backend.verificationPrepare = async function (data, requestId) { return check(await (await client(true)).rpc('account_verification_prepare', { p_request_id: requestId, p_store_name: data.store, p_legal_name: data.legal, p_phone: backend.normalizePhone(data.phone), p_file_type: data.type })); };
+  backend.verificationSubmit = async function (id) { return check(await (await client(true)).rpc('account_verification_submit', { p_id: id })); };
+  backend.verificationUpload = async function (record, file) {
+    var c = await client(true), response = await c.storage.from('account-verification').upload(record.document_path, file, { upsert: false, contentType: file.type, cacheControl: '0' });
+    if (response.error && !/already exists|duplicate/i.test(response.error.message || '')) throw response.error;
+    return backend.verificationSubmit(record.id);
+  };
+  backend.verificationDocument = async function (path) {
+    if (!/^[a-f0-9-]{36}\/[a-f0-9-]{36}\.(jpg|png|webp|pdf)$/.test(path || '')) throw new Error('INVALID_DOCUMENT');
+    var data = check(await (await client(true)).storage.from('account-verification').createSignedUrl(path, 60));
+    var url = new URL(data.signedUrl), allowed = new URL(config.url);
+    if (url.origin !== allowed.origin || !url.pathname.startsWith('/storage/v1/object/sign/account-verification/')) throw new Error('INVALID_DOCUMENT');
+    return url.href;
+  };
+  backend.verifications = async function () {
+    var c = await client(true), rows = [], part;
+    do { part = check(await c.from('account_verifications').select('*').eq('user_id', state.user.id).order('created_at', { ascending: false }).order('id', { ascending: false }).range(rows.length, rows.length + 199)); rows = rows.concat(part); } while (part.length === 200);
+    return rows;
+  };
+  backend.disputes = async function (offset) { var c = await client(true); return check(await c.from('account_disputes').select('*').or('buyer_id.eq.' + state.user.id + ',seller_id.eq.' + state.user.id).order('updated_at', { ascending: false }).order('id', { ascending: false }).range(offset || 0, (offset || 0) + 49)); };
+  backend.dispute = async function (id) { return check(await (await client(true)).from('account_disputes').select('*').eq('id', id).maybeSingle()); };
+  backend.disputeMessages = async function (id) {
+    var c = await client(true), rows = [], part;
+    do { part = check(await c.from('account_dispute_replies').select('*').eq('dispute_id', id).order('created_at', { ascending: true }).order('id', { ascending: true }).range(rows.length, rows.length + 199)); rows = rows.concat(part); } while (part.length === 200);
+    return rows;
+  };
+  backend.disputeOpen = async function (item, reason, requestId) { return check(await (await client(true)).rpc('account_dispute_open', { p_item_id: item, p_request_id: requestId, p_reason: reason })); };
+  backend.disputeReply = async function (id, body, requestId) { return check(await (await client(true)).rpc('account_dispute_reply', { p_id: id, p_request_id: requestId, p_body: body })); };
+
   // Compatibility with the APIs already called by the supplied application.
   window.OrderSystem = {
     getCart: function () { return result(async function () { return { success: true, cart: await backend.cart() }; }); },

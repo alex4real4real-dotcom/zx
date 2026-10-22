@@ -7,7 +7,7 @@
     try {
       var target = new URL(value, location.href);
       if (target.origin !== location.origin) return null;
-      var allowed = ['help.html', 'tickets.html', 'ticket.html', 'admin.html'].map(function (page) { return new URL(page, location.href).pathname; });
+      var allowed = ['help.html', 'tickets.html', 'ticket.html', 'admin.html', 'sell.html', 'seller-disputes.html'].map(function (page) { return new URL(page, location.href).pathname; });
       return allowed.includes(target.pathname) ? target.pathname + target.search + target.hash : null;
     } catch (error) { return null; }
   }
