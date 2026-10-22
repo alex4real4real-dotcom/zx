@@ -1,0 +1,14 @@
+# Deploy only the password recovery email template to the existing main project.
+project_id = "accountx"
+
+[remotes.main]
+project_id = "zsbhldxeaihrjcvygdcx"
+
+[remotes.main.db.migrations]
+enabled = false
+
+[remotes.main.db.seed]
+enabled = false
+
+[remotes.main.auth.email.template.recovery]
+content_path = "./supabase/templates/recovery.html"
