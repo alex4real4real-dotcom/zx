@@ -2,6 +2,24 @@
   'use strict';
   var backend = window.accountBackend;
   var pendingKey = 'account.pending-signup', recoveryKey = 'account.pending-recovery';
+  var returnKey = 'account.return-after-auth';
+  function safeReturn(value) {
+    try {
+      var target = new URL(value, location.href);
+      if (target.origin !== location.origin) return null;
+      var allowed = ['help.html', 'tickets.html', 'ticket.html', 'admin.html'].map(function (page) { return new URL(page, location.href).pathname; });
+      return allowed.includes(target.pathname) ? target.pathname + target.search + target.hash : null;
+    } catch (error) { return null; }
+  }
+  try {
+    var requestedReturn = new URL(location.href).searchParams.get('return');
+    if (requestedReturn) { var safe = safeReturn(requestedReturn); if (safe) sessionStorage.setItem(returnKey, safe); else sessionStorage.removeItem(returnKey); }
+  } catch (error) { /* Returning to support is optional. */ }
+  function goAfterAuth() {
+    var next = null;
+    try { next = safeReturn(sessionStorage.getItem(returnKey)); sessionStorage.removeItem(returnKey); } catch (error) { /* Optional storage. */ }
+    location.assign(next || './profile.html');
+  }
   function node(id) { return document.getElementById(id); }
   function notify(id, text, error) { var p = node(id); if (!p) return; p.hidden = !text; p.textContent = text || ''; p.classList.toggle('is-error', !!error); }
   function userError(error) {
@@ -46,7 +64,7 @@
       await backend.updateProfile(pending.name, pending.phone, path);
     }
     writeStored(pendingKey, null);
-    location.assign('./profile.html');
+    goAfterAuth();
   }
   function bindForm(id, statusId, operation) {
     var form = node(id);
@@ -69,7 +87,7 @@
     document.querySelectorAll('.account-otp').forEach(function (input) { input.addEventListener('input', function () { input.value = input.value.replace(/[٠-٩]/g, function (c) { return String(c.charCodeAt(0) - 1632); }).replace(/[۰-۹]/g, function (c) { return String(c.charCodeAt(0) - 1776); }).replace(/\D/g, '').slice(0, 6); }); });
     node('signupAvatar').addEventListener('change', function () { readAvatar(this, node('signupAvatarPreview')).catch(function (e) { this.value = ''; notify('signupStatus', userError(e), true); }.bind(this)); });
     function exclusive(op) { return async function (form) { busy = true; try { await op(form); } finally { busy = false; } }; }
-    bindForm('loginForm', 'loginStatus', exclusive(async function (form) { await backend.signIn(form.elements.identifier.value.trim(), form.elements.password.value); form.elements.password.value = ''; location.assign('./profile.html'); }));
+    bindForm('loginForm', 'loginStatus', exclusive(async function (form) { await backend.signIn(form.elements.identifier.value.trim(), form.elements.password.value); form.elements.password.value = ''; goAfterAuth(); }));
     bindForm('signupForm', 'signupStatus', exclusive(async function (form) {
       var password = checkedPassword(form), name = form.elements.fullname.value.trim(), phone = backend.normalizePhone(form.elements.phone.value);
       if (name.length < 2 || name.length > 120) throw new Error('INVALID_NAME');

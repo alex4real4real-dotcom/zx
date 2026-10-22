@@ -66,6 +66,7 @@
         if (event === 'SIGNED_OUT') {
           state.profile = null;
           storeSession(null, null);
+          window.dispatchEvent(new Event('account:signed-out'));
         } else if (event === 'TOKEN_REFRESHED' && state.user && session && session.user.id === state.user.id) {
           storeSession(session, state.user);
         }
@@ -213,6 +214,35 @@
   backend.submitMessage = async function (email, kind, fields) {
     return check(await (await client()).rpc('account_submit_message', { p_email: email, p_kind: kind, p_fields: fields }));
   };
+
+  backend.supportHealth = async function () { return check(await (await client()).rpc('account_support_health')); };
+  backend.supportTickets = async function (staff, offset, status) {
+    var c = await client(true), query;
+    if (staff && (await loadProfile()).role !== 'admin') throw new Error('SUPPORT_FORBIDDEN');
+    query = c.from('account_support_tickets').select('*');
+    if (!staff) query = query.eq('user_id', state.user.id);
+    if (['open', 'in_progress', 'closed'].includes(status)) query = query.eq('status', status);
+    return check(await query.order('updated_at', { ascending: false }).order('id', { ascending: false }).range(offset || 0, (offset || 0) + 49));
+  };
+  backend.supportTicket = async function (id) { return check(await (await client(true)).from('account_support_tickets').select('*').eq('id', id).maybeSingle()); };
+  backend.supportMessages = async function (id) {
+    var c = await client(true), all = [], page;
+    do {
+      page = check(await c.from('account_support_replies').select('*').eq('ticket_id', id)
+        .order('created_at', { ascending: true }).order('id', { ascending: true }).range(all.length, all.length + 199));
+      all = all.concat(page);
+    } while (page.length === 200);
+    return all;
+  };
+  backend.supportCreate = async function (data, requestId) {
+    return check(await (await client(true)).rpc('account_support_create', { p_request_id: requestId, p_subject: data.subject,
+      p_category: data.category, p_priority: data.priority, p_body: data.message }));
+  };
+  backend.supportReply = async function (id, body, requestId) {
+    return check(await (await client(true)).rpc('account_support_reply', { p_ticket_id: id, p_request_id: requestId, p_body: body }));
+  };
+  backend.supportStatus = async function (id, status) { return check(await (await client(true)).rpc('account_support_status', { p_ticket_id: id, p_status: status })); };
+  backend.supportRead = async function (id, staff) { return check(await (await client(true)).rpc('account_support_read', { p_ticket_id: id, p_as_staff: !!staff })); };
 
   // Compatibility with the APIs already called by the supplied application.
   window.OrderSystem = {

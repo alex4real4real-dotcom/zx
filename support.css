@@ -1,0 +1,61 @@
+.support-ui [hidden] { display: none !important; }
+.support-ui { overflow-wrap: anywhere; }
+.support-ui .support-heading { padding: 132px 24px 52px; }
+.support-ui .support-heading h1 { margin: 16px 0; font: 700 clamp(1.8rem, 3vw, 2.5rem)/1.4 var(--font-heading); }
+.support-ui .support-heading p:not(.section-kicker) { max-width: 650px; color: var(--text-muted); line-height: 1.9; }
+.support-container { width: 100%; max-width: 1120px; margin-inline: auto; }
+.support-content { width: 100%; max-width: 944px; margin-inline: auto; padding: 72px 24px 100px; }
+.support-panel { padding: 32px; border: 1px solid var(--glass-border); border-radius: 32px; background: var(--glass-bg); box-shadow: var(--shadow-soft); }
+.support-panel h2, .support-section-title { font: 700 1.45rem/1.5 var(--font-heading); margin: 12px 0; }
+.support-copy { color: var(--text-muted); font-size: .9rem; line-height: 1.9; }
+.support-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: var(--button-color); color: var(--background-color); font-size: .72rem; font-weight: 700; }
+.support-form { display: grid; gap: 16px; margin-top: 24px; }
+.support-field { display: flex; flex-direction: column; gap: 8px; min-width: 0; font-size: .82rem; font-weight: 700; }
+.support-field input, .support-field select, .support-field textarea, .support-filter select { width: 100%; min-height: 44px; border: 1px solid var(--glass-border); border-radius: 999px; background: var(--field-bg); color: var(--text-color); padding: 10px 15px; font: inherit; outline: none; }
+.support-field textarea { min-height: 112px; border-radius: 17px; resize: vertical; font-weight: 400; }
+.support-field input::placeholder, .support-field textarea::placeholder { color: var(--text-muted); font-weight: 400; opacity: 1; }
+.support-field input:focus, .support-field select:focus, .support-field textarea:focus, .support-filter select:focus { border-color: var(--accent-color); box-shadow: 0 0 0 3px var(--sage-soft); }
+.support-field select option, .support-filter select option { color: var(--text-color); background: var(--surface-color); }
+.support-form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.support-button { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 44px; padding: 10px 23px; border: 1px solid transparent; border-radius: 999px; font-size: .86rem; font-weight: 700; cursor: pointer; background: var(--button-color); color: var(--background-color); box-shadow: var(--shadow-button); text-decoration: none; }
+.support-button:hover { background: var(--primary-hover); }
+.support-button.is-secondary { color: var(--text-color); background: var(--glass-bg); border-color: var(--glass-border); box-shadow: none; }
+.support-button:disabled { opacity: .55; cursor: wait; }
+.support-status { margin: 12px 0 0; font-size: .85rem; line-height: 1.8; color: var(--accent-color); }
+.support-status.is-error { color: #f39b9b; }
+.support-section-title { margin-top: 44px; margin-bottom: 20px; }
+.support-ticket-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.support-ticket-card { display: flex; flex-direction: column; gap: 13px; padding: 23px; min-width: 0; border: 1px solid var(--glass-border); border-radius: 26px; background: var(--glass-bg); color: var(--text-color); text-decoration: none; transition: border-color .2s; }
+.support-ticket-card:hover { border-color: var(--accent-color); }
+.support-ticket-card h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+.support-ticket-top, .support-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; }
+.support-ticket-meta { font-size: .72rem; color: var(--text-muted); line-height: 1.8; }
+.support-preview { color: var(--text-muted); font-size: .85rem; line-height: 1.8; white-space: pre-wrap; }
+.support-ticket-cta { display: inline-flex; align-items: center; gap: 8px; margin-top: auto; color: var(--accent-color); font-size: .78rem; font-weight: 700; }
+.support-badge { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; border-radius: 999px; padding: 4px 9px; font-size: .68rem; background: rgba(212,175,55,.15); color: var(--accent-color); }
+.support-badge.is-closed { background: rgba(100,170,140,.15); color: #9fceb6; }
+.support-badge.is-progress { background: rgba(100,150,220,.15); color: #a9c8f3; }
+.support-unread { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-color); }
+.support-empty { border: 1px solid var(--glass-border); border-radius: 22px; padding: 28px; color: var(--text-muted); font-size: .9rem; line-height: 1.9; }
+.support-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.support-filter { display: flex; align-items: center; gap: 10px; color: var(--text-muted); font-size: .8rem; }
+.support-filter select { width: auto; min-width: 150px; }
+.support-thread { display: flex; flex-direction: column; gap: 15px; min-height: 140px; max-height: 520px; overflow-y: auto; padding: 24px 0; }
+.support-message { width: fit-content; max-width: 85%; align-self: flex-start; border: 1px solid var(--glass-border); border-radius: 20px; background: var(--field-bg); padding: 14px 17px; }
+.support-message.is-mine { align-self: flex-end; background: var(--sage-soft); }
+.support-message-body { white-space: pre-wrap; line-height: 1.9; font-size: .9rem; }
+.support-message-meta { display: block; color: var(--text-muted); font-size: .68rem; margin-top: 8px; line-height: 1.8; }
+.support-thread-heading { margin-top: 22px; border-bottom: 1px solid var(--glass-border); padding-bottom: 18px; }
+.support-detail-grid { display: flex; gap: 10px 24px; flex-wrap: wrap; color: var(--text-muted); font-size: .8rem; line-height: 1.8; }
+.support-more { margin-top: 20px; }
+.support-ui .support-admin-link { margin-top: 16px; }
+.support-ui .support-feedback { margin-top: 18px; }
+@media (max-width: 640px) {
+  .support-ui .support-heading { padding: 116px 20px 35px; }
+  .support-content { padding: 40px 18px 64px; }
+  .support-panel { padding: 22px 18px; border-radius: 25px; }
+  .support-form-grid, .support-ticket-grid { grid-template-columns: 1fr; }
+  .support-message { max-width: 95%; }
+  .support-ticket-top { align-items: flex-start; }
+  .support-toolbar { align-items: stretch; }
+}

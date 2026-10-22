@@ -291,6 +291,7 @@
                 btn.removeAttribute('aria-current');
             }
         });
+        window.dispatchEvent(new CustomEvent('account:languagechange', { detail: { lang: lang } }));
     }
 
     function buildMenu() {
