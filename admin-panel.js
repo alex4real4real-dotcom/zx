@@ -81,8 +81,8 @@
     } else if (tab === 'disputes') {
       var wrap = make('label', 'admin-switch'), check = make('input'); check.type = 'checkbox'; check.checked = filter === 'open'; wrap.append(check, label('only_open')); host.append(wrap);
       check.addEventListener('change', function () { filter = check.checked ? 'open' : ''; target = 50; loadAdminRows(); });
-    } else if (tab === 'tickets' || tab === 'verifications') {
-      var opts = tab === 'tickets' ? [['','all'],['open','open'],['in_progress','in_progress'],['closed','closed']] : [['','all'],['pending','pending'],['approved','approved'],['rejected','rejected'],['cancelled','cancelled']];
+    } else if (tab === 'tickets' || tab === 'verifications' || tab === 'withdrawals') {
+      var opts = tab === 'tickets' ? [['','all'],['open','open'],['in_progress','in_progress'],['closed','closed']] : [['','all'],['pending','pending'],['approved','approved'],['rejected','rejected']].concat(tab==='verifications'?[['cancelled','cancelled']]:[]);
       var control = selectField('status', opts, filter); if (tab === 'tickets') control.select.id = 'ticketFilter'; host.append(control.wrap);
       control.select.addEventListener('change', function () { filter = control.select.value; target = 50; loadAdminRows(); });
     }
@@ -97,8 +97,8 @@
     }); node('sectionForm').append(form);
   }
   function chooseTab(tab, nextFilter) {
-    if (!['verifications','disputes','accounts','orders','tickets','members'].includes(tab)) tab = 'verifications';
-    activeTab = tab; filter = nextFilter !== undefined ? nextFilter : tab === 'verifications' ? 'pending' : tab === 'disputes' ? 'open' : ''; target = 50; topupTarget = 50; adminRows = []; topups = [];
+    if (!['verifications','disputes','accounts','orders','tickets','members','withdrawals'].includes(tab)) tab = 'verifications';
+    activeTab = tab; filter = nextFilter !== undefined ? nextFilter : (tab === 'verifications'||tab === 'withdrawals') ? 'pending' : tab === 'disputes' ? 'open' : ''; target = 50; topupTarget = 50; adminRows = []; topups = [];
     document.querySelectorAll('[data-admin-tab]').forEach(function (el) { var selected = el.dataset.adminTab === tab; el.setAttribute('aria-selected',String(selected)); el.tabIndex = selected ? 0 : -1; });
     node('adminSection').setAttribute('aria-labelledby','tab-' + tab); node('sectionTitle').textContent = t(tab); node('sectionCopy').textContent = t(tab + '_copy'); node('sectionForm').replaceChildren();
     node('topupSection').hidden = tab !== 'orders'; node('adminMore').hidden = true; filtersFor(tab); if (tab === 'members') membershipForm();
@@ -188,12 +188,20 @@
     var credits=node('topupRows');credits.replaceChildren();topups.forEach(function(row){var box=card(row.email,row.status);box.append(make('p','',money(row.amount)),make('p','',t('test_topup')),make('p','',row.note));
       if(row.status==='pending'){var actions=make('div','admin-actions');[['approve_test',true],['reject',false]].forEach(function(pair){actions.append(mutationButton(pair[0],function(){run(function(){return backend.adminTopup(row.id,pair[1],'');},refreshAdmin,node('sectionStatus'));},!pair[1]));});box.append(actions);}credits.append(box);});if(!topups.length)empty(credits);node('topupMore').hidden=!topupMore;
   }
+  function withdrawalReview(row,approved){
+    var ui=dialog(approved?'withdrawal_approve':'withdrawal_reject'),form=make('form','admin-form'),note=field('review_note','note','textarea',!approved,1000),submit=mutationButton('save_decision');submit.type='submit';if(!approved)note.querySelector('textarea').minLength=3;
+    ui.el.append(make('p','admin-copy',row.email+' · '+money(row.amount)),make('p','admin-copy',t('withdrawal_test')));form.append(note,submit,ui.status);ui.el.append(form);var key=uuid();
+    form.addEventListener('submit',function(event){event.preventDefault();if(!form.reportValidity())return;run(function(){return backend.adminWithdrawalReview(row.id,approved,form.elements.note.value.trim(),key);},async function(){closeDialog();await refreshAdmin();},ui.status);});
+  }
+  function renderWithdrawals(host){
+    adminRows.forEach(function(row){var box=card(row.email),top=make('div','admin-card-top');top.append(make('strong','',money(row.amount)),make('span','admin-badge',t('withdrawal_'+row.status)));box.append(top,make('p','admin-copy',row.bank_name+' · '+row.holder_name),make('p','admin-copy',row.iban_masked),make('p','admin-copy',date(row.created_at)),make('p','admin-copy',t('withdrawal_test')));if(row.note)box.append(make('p','',row.note));if(row.review_note)box.append(make('p','',row.review_note));if(row.status==='pending'){var actions=make('div','admin-actions');actions.append(mutationButton('withdrawal_approve',function(){withdrawalReview(row,true);}),mutationButton('withdrawal_reject',function(){withdrawalReview(row,false);},true));box.append(actions);}host.append(box);});
+  }
   function renderAdminRows() {
     if(!activeTab||!node('myTicketsList')||!user)return;var host=node('myTicketsList');host.replaceChildren();host.className=['orders','disputes'].includes(activeTab)?'':'admin-grid';
     if(!adminRows.length)empty(host);
     else if(activeTab==='members')renderMembers(host);else if(activeTab==='accounts')renderAccounts(host);else if(activeTab==='tickets')renderTickets(host);
     else if(activeTab==='verifications')adminRows.forEach(function(row){host.append(verificationCard(row,true));});else if(activeTab==='disputes')renderDisputeTable(host);
-    if(activeTab==='orders')renderOrders(host);node('adminMore').hidden=!listMore;
+    if(activeTab==='orders')renderOrders(host);if(activeTab==='withdrawals')renderWithdrawals(host);node('adminMore').hidden=!listMore;
   }
   function decisionDialog(row,status) {
     var ui=dialog('decision');ui.el.append(make('p','admin-copy','#'+row.case_number+' · '+row.product_title));var form=make('form','admin-form');var choices=[['resolved_buyer','resolve_buyer']];if(row.seller_id||!settlementFor(row.order_item_id))choices.push(['resolved_seller','resolve_seller']);var control=selectField('decision',choices,status),note=field('decision_note','note','textarea',true,1000);note.querySelector('textarea').minLength=3;var submit=mutationButton('save_decision');submit.type='submit';form.append(control.wrap,note,submit,ui.status);ui.el.append(form);var key=uuid();

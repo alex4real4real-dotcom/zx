@@ -10,3 +10,10 @@ The settlement table and audit history are not a wallet, a provider payment conf
 
 
 `supabase/inline-order-disputes.sql` adds participant concessions and permanently final decisions for every case, including legacy disputes. Seller closure derives `resolved_buyer`; buyer closure derives `resolved_seller` on the server. Request IDs make retries safe. Buyers and sellers review the private thread inside the item card on orders/disputes pages; only the buyer can create a case. The creation dialog fixes the item and offers reason choices. `account_seller_orders` exposes only a seller’s purchased-item snapshots, never buyer emails, other sellers’ items or listing secrets. Existing test/real-payment limits remain unchanged. Verify with `tests/inline-order-disputes.sql` (rollback fixtures).
+
+
+## Test withdrawals
+
+Apply `supabase/test-withdrawals.sql` after the settlement scripts. `withdraw.html` shows the signed-in account’s test balance, masked bank-account entries and paginated withdrawal history. Only released test settlements credit this separate simulation balance; held/disputed/refunded amounts do not. Pending and approved test requests are subtracted from available credit. Request submission and admin review serialize on the account’s profile row, preventing concurrent reservations from overspending. Retried request IDs return the same record. Rejection releases the reservation once; approval is final and remains a simulation, with no bank transfer. Admins review requests in the Withdrawals tab. Real profile sales and real withdrawable balances are not credited.
+
+Bank accounts and immutable request bank snapshots are held in an unexposed private schema with RLS and no client table grants. RPCs return masked IBANs only. IBAN validation checks Saudi structure/checksum, not account ownership or bank existence. The test suite `tests/test-withdrawals.sql` verifies balance restrictions, reservations, rejection/approval, idempotency, invalid amounts, cross-user isolation and API privileges with rollback fixtures.

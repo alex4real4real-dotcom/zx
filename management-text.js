@@ -1,4 +1,13 @@
 window.AccountManagementText = {
+  "withdrawals":["طلبات السحب", "Withdrawals"],
+  "withdrawals_copy":["راجع طلبات السحب التجريبية. المبلغ محجوز أثناء المراجعة؛ الرفض يعيده للرصيد المتاح.", "Review test withdrawal requests. Amounts are reserved during review; rejection restores the available balance."],
+  "withdrawal_approve":["اعتماد السحب التجريبي", "Approve test withdrawal"],
+  "withdrawal_reject":["رفض طلب السحب", "Reject withdrawal"],
+  "withdrawal_test":["هذه مراجعة تجريبية فقط؛ الاعتماد لا ينفّذ حوالة بنكية أو يصرف أموالًا حقيقية.", "This is a test review only. Approval does not send a bank transfer or pay real money."],
+  "withdrawal_pending":["قيد المراجعة — تجريبي", "Pending review — test"],
+  "withdrawal_approved":["معتمد — تجريبي", "Approved — test"],
+  "withdrawal_rejected":["مرفوض", "Rejected"],
+
   "window_expired":["انتهت مهلة 12 ساعة لفتح نزاع لهذه السلعة.","The 12-hour dispute window for this item has ended."],
   "winner_required":["حدد حسم النزاع للمشتري أو للبائع قبل إنهائه؛ يبقى المبلغ معلّقًا دون قرار.","Resolve for the buyer or seller before closing; the amount remains held without a decision."],
   "settlement_final":["تمت التسوية؛ لا يمكن إعادة فتح النزاع أو تغيير الطرف المستحق.","Settlement is final. The dispute cannot be reopened or the recipient changed."],
