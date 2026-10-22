@@ -1,4 +1,15 @@
 // Explain: Handles navigation, cart, user authentication, and admin link visibility.
+(function () {
+    document.querySelectorAll('footer a').forEach(function (link) {
+        var icon = link.querySelector('.fa-instagram, .fa-facebook-f, .fa-whatsapp, .fa-tiktok');
+        if (!icon) return;
+        if (!icon.classList.contains('fa-tiktok')) { link.remove(); return; }
+        link.href = 'https://www.tiktok.com/@t0ex';
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.setAttribute('aria-label', 'TikTok @t0ex');
+    });
+})();
 (function (initialize) {
     var domReady = document.readyState === 'loading' ? new Promise(function (resolve) {
         document.addEventListener('DOMContentLoaded', resolve, { once: true });
