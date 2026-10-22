@@ -1251,8 +1251,8 @@
 <link rel="stylesheet" href="./components.css">
 <link rel="stylesheet" href="./layout.css"><!-- /twig-include:global/head.html -->
 <style id="app-builder-recap-style">.grecaptcha-badge { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; transition: opacity 0.2s ease; }.grecaptcha-badge.app-builder-recap-show { visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; }</style><link rel="stylesheet" href="./backend-pages.css?v=d040292b7495">
-<link rel="stylesheet" href="./admin-panel.css?v=33218ac8cff3"></head>
-<body data-backend-page="management" data-management-page="disputes"><header class="site-header fixed inset-x-0 top-0 z-40 border-b border-[var(--border-color)]" data-twig-section="global/header.html">
+<link rel="stylesheet" href="./admin-panel.css?v=33218ac8cff3"><link rel="stylesheet" href="./orders-view.css?v=a732cbdcd1d2"></head>
+<body data-orders-mode="disputes" data-backend-page="orders-view"><header class="site-header fixed inset-x-0 top-0 z-40 border-b border-[var(--border-color)]" data-twig-section="global/header.html">
     <nav class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-8" aria-label="التنقل الرئيسي" data-twig-section="global/header.html">
         <a href="./index.html" class="flex items-center gap-3 transition-opacity duration-300 hover:opacity-80 focus:outline-none" aria-label="Account - الصفحة الرئيسية" data-twig-section="global/header.html">
             <span class="brand-mark h-11 w-11" data-twig-section="global/header.html">
@@ -1438,7 +1438,19 @@
             </div>
         </div>
     </div>
-</header><main class="management-ui" id="top"><div class="admin-shell"><div class="admin-header"><div><p class="admin-kicker"><span data-admin-i18n="platform_management">إدارة المنصة</span></p><h1><span data-admin-i18n="my_disputes">نزاعات المتجر</span></h1><p class="admin-copy"><span data-admin-i18n="my_disputes_intro">افتح نزاعًا لمنتج اشتريته، وتابع المحادثة والقرار مع الإدارة والطرف الآخر.</span></p></div></div><section id="managementGuest" class="admin-card" hidden><h2 class="admin-title"><span data-admin-i18n="guest_heading">سجّل الدخول للمتابعة</span></h2><p class="admin-copy"><span data-admin-i18n="guest_copy">هذه البيانات خاصة بحسابك. سجّل الدخول أو أنشئ حسابًا للمتابعة.</span></p><a id="managementSignIn" href="./account.html" class="admin-button"><span data-admin-i18n="sign_in">تسجيل الدخول</span></a></section><p id="managementStatus" class="admin-status" role="status" aria-live="polite" hidden></p><div id="disputesMember" hidden><section class="admin-card"><h2 class="admin-title"><span data-admin-i18n="new_dispute">فتح نزاع جديد</span></h2><form id="newDisputeForm" class="admin-form"><label class="admin-field"><span data-admin-i18n="choose_item">اختر منتجًا من طلباتك</span><select name="item" required id="disputeOrderItem"></select></label><label class="admin-field"><span data-admin-i18n="dispute_reason">تفاصيل المشكلة</span><textarea name="reason" required minlength="5" maxlength="2000"></textarea></label><button type="submit" class="admin-button" data-management-mutation><span data-admin-i18n="send_dispute">فتح النزاع</span></button><p id="disputeStatus" class="admin-status" role="status" aria-live="polite" hidden></p></form></section><section class="admin-subsection"><h2 class="admin-title"><span data-admin-i18n="my_disputes">نزاعات المتجر</span></h2><div id="disputeRows" class="admin-grid"></div><button type="button" class="admin-button is-outline" id="customerMore" hidden><span data-admin-i18n="load_more">عرض المزيد</span></button></section></div></div></main><footer class="bg-[var(--footer-bg)] px-5 pb-10 pt-14 text-[var(--text-color)] sm:px-8" data-twig-section="global/footer.html">
+</header><main class="orders-shell">
+<section class="orders-intro"><p class="orders-kicker" data-orders-text="kicker">طلباتي</p><h1 class="orders-title" data-orders-text="title">تابع طلبك واستعرض معلومات الحساب</h1><p class="orders-copy" data-orders-text="intro">هنا تجد مشترياتك وتفاصيل التسليم. إذا واجهت مشكلة في طلبك، يمكنك فتح نزاع ومتابعته مع البائع والإدارة.</p></section>
+<section class="orders-features">
+<article class="orders-feature"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i><h2 data-orders-text="payment">حالة الدفع</h2><p data-orders-text="payment_copy">الطلبات الحالية تجريبية؛ لا تُخصم أموال أو تُحجز مبالغ.</p></article>
+<article class="orders-feature"><i class="fa-solid fa-key" aria-hidden="true"></i><h2 data-orders-text="delivery">تسليم الحسابات</h2><p data-orders-text="delivery_copy">استعرض حالة التسليم ومعلومات طلبك من حسابك الشخصي.</p></article>
+<article class="orders-feature"><i class="fa-solid fa-scale-balanced" aria-hidden="true"></i><h2 data-orders-text="fair">نزاع عادل</h2><p data-orders-text="fair_copy">وضّح المشكلة لتراجع الإدارة تفاصيل النزاع وردود الطرفين.</p></article>
+</section>
+<section id="ordersGuest" class="orders-guest" hidden><p data-orders-text="guest">سجّل الدخول لعرض مشترياتك ومتابعة طلباتك.</p><a class="orders-button" href="./account.html" data-orders-text="login">تسجيل الدخول</a></section>
+<p id="ordersStatus" class="orders-status" role="status" aria-live="polite"></p>
+<section id="ordersMember" hidden>
+<form id="ordersLookup" class="orders-search"><label class="orders-email"><span data-orders-text="email">البريد الإلكتروني المستخدم في الشراء</span><input id="ordersEmail" type="email" readonly autocomplete="email"></label><button id="ordersRefresh" type="submit" class="orders-button"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span data-orders-text="refresh">اعرض طلباتي</span></button></form>
+<div id="orderList"></div>
+</section></main><footer class="bg-[var(--footer-bg)] px-5 pb-10 pt-14 text-[var(--text-color)] sm:px-8" data-twig-section="global/footer.html">
     <div class="mx-auto max-w-7xl" data-twig-section="global/footer.html">
         <div class="grid gap-10 border-t border-[var(--glass-border)] pt-10 lg:grid-cols-[1.4fr_1fr_1fr] lg:gap-12" data-twig-section="global/footer.html">
             <div data-twig-section="global/footer.html">
@@ -1509,9 +1521,9 @@
             <p class="text-center sm:text-left" data-i18n="footer_secure" data-twig-section="global/footer.html">A safe and trusted shopping experience.</p>
         </div>
     </div>
-</footer><script src="./i18n.js?v=6f597ec9f2d9"></script>
+</footer><script src="./i18n.js?v=98ff9a2bc457"></script>
 <script src="./supabase-sdk.js"></script>
 <script src="./supabase-config.js"></script>
-<script src="./supabase-backend.js?v=3eb73491b22d"></script>
-<script src="./app.js?v=4208bf2e869a"></script>
-<script src="./backend-pages.js?v=9a42a2015e7a"></script><script src="./management-text.js?v=2cad7b55d7de"></script><script src="./admin-panel.js?v=b5a4d6ef3051"></script></body></html>
+<script src="./supabase-backend.js?v=c307857ac65f"></script>
+<script src="./app.js?v=7537827eb127"></script>
+<script src="./backend-pages.js?v=23d709849a8f"></script><script src="./order-disputes.js?v=ab3d9e009084"></script><script src="./orders-view.js?v=50ce2a0bc967"></script></body></html>

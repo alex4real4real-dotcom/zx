@@ -10,7 +10,7 @@ window.AccountManagementText = {
   "settlement_needs_review":["التسوية تحتاج مراجعة — تجريبي","Settlement needs review — test"],
   "settlement_legacy":["طلب سابق لسياسة 12 ساعة","Order predates the 12-hour policy"],
   "settlement_deadline":["مهلة النزاع حتى","Dispute deadline"],
-  "settlement_policy":["للطلبات الجديدة: تُعلّق قيمة السلعة 12 ساعة من الشراء. فتح نزاع خلال المهلة يوقف التسوية حتى حسم الإدارة للمشتري أو للبائع. التسوية الحالية محاكاة بلا تحويل أموال حقيقية.","For new orders: the item amount is held for 12 hours after purchase. A dispute opened within that window pauses settlement until a buyer or seller decision. Current settlement is a simulation with no real money transfers."],
+  "settlement_policy":["للطلبات الجديدة: تُعلّق قيمة السلعة 12 ساعة من الشراء. فتح نزاع خلال المهلة يوقف التسوية حتى تنازل أحد الطرفين للآخر أو حسم الإدارة. إغلاق النزاع نهائي. التسوية الحالية محاكاة بلا تحويل أموال حقيقية.","For new orders: the item amount is held for 12 hours after purchase. A dispute opened within that window pauses settlement until one party concedes to the other or support decides. Dispute closure is final. Current settlement is a simulation with no real money transfers."],
   "dashboard": [
     "لوحة الإدارة",
     "Administration"

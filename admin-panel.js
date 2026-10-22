@@ -176,7 +176,7 @@
         if(row.seller_id)actions.append(mutationButton('resolve_seller',function(){decisionDialog(row,'resolved_seller');},true));
         if(row.seller_id)actions.append(mutationButton('ban_seller',function(){banDialog(row.seller_id,true,row.seller_email);},true));
         actions.append(mutationButton('ban_buyer',function(){banDialog(row.buyer_id,true,row.buyer_email);},true));
-      }else if(!settlement || !['released','refunded'].includes(settlement.state))actions.append(mutationButton('reopen',function(){decisionDialog(row,'open');},true));cell.append(actions);tr.append(cell);view.body.append(tr);
+      }cell.append(actions);tr.append(cell);view.body.append(tr);
     });host.append(view.wrap);
   }
   function orderDetails(row) {
@@ -196,7 +196,7 @@
     if(activeTab==='orders')renderOrders(host);node('adminMore').hidden=!listMore;
   }
   function decisionDialog(row,status) {
-    var ui=dialog('decision');ui.el.append(make('p','admin-copy','#'+row.case_number+' · '+row.product_title));var form=make('form','admin-form');var choices=[['resolved_buyer','resolve_buyer']];if(row.seller_id||!settlementFor(row.order_item_id))choices.push(['resolved_seller','resolve_seller']);if(!settlementFor(row.order_item_id))choices.push(['closed','close_case'],['open','reopen']);var control=selectField('decision',choices,status),note=field('decision_note','note','textarea',true,1000);note.querySelector('textarea').minLength=3;var submit=mutationButton('save_decision');submit.type='submit';form.append(control.wrap,note,submit,ui.status);ui.el.append(form);var key=uuid();
+    var ui=dialog('decision');ui.el.append(make('p','admin-copy','#'+row.case_number+' · '+row.product_title));var form=make('form','admin-form');var choices=[['resolved_buyer','resolve_buyer']];if(row.seller_id||!settlementFor(row.order_item_id))choices.push(['resolved_seller','resolve_seller']);var control=selectField('decision',choices,status),note=field('decision_note','note','textarea',true,1000);note.querySelector('textarea').minLength=3;var submit=mutationButton('save_decision');submit.type='submit';form.append(control.wrap,note,submit,ui.status);ui.el.append(form);var key=uuid();
     form.addEventListener('submit',function(event){event.preventDefault();if(!form.reportValidity())return;run(function(){return backend.adminDispute(row.id,control.select.value,form.elements.note.value.trim(),key);},async function(){closeDialog();await refreshAdmin();},ui.status);});
   }
   function renderMessages() {

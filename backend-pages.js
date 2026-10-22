@@ -85,7 +85,7 @@
   async function cartPage() {
     if (!requireUser()) return;
     var container = document.getElementById('cartList'), checkout = document.getElementById('testCheckout'), eligible = false;
-    checkout.before(ui('p', 'للطلبات الجديدة: مهلة النزاع 12 ساعة من الشراء. دون نزاع تُخصّص قيمة السلعة للبائع؛ ومع النزاع تبقى معلّقة حتى حسم الإدارة للمشتري أو للبائع. هذه محاكاة بلا تحويل أموال حقيقية.', 'backend-muted'));
+    checkout.before(ui('p', 'للطلبات الجديدة: مهلة النزاع 12 ساعة من الشراء. دون نزاع تُخصّص قيمة السلعة للبائع؛ ومع النزاع تبقى معلّقة حتى تنازل أحد الطرفين للآخر أو حسم الإدارة. إغلاق النزاع نهائي. هذه محاكاة بلا تحويل أموال حقيقية.', 'backend-muted'));
     async function render() {
       var rows = await backend.cart(), total = 0;
       container.replaceChildren();

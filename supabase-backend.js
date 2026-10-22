@@ -302,6 +302,8 @@
     return rows;
   };
   backend.disputeOpen = async function (item, reason, requestId) { return check(await (await client(true)).rpc('account_dispute_open', { p_item_id: item, p_request_id: requestId, p_reason: reason })); };
+  backend.sellerOrders = async function () { var c=await client(true),rows=[],part;do{part=check(await c.rpc('account_seller_orders',{p_offset:rows.length}));rows=rows.concat(part);}while(part.length===50);return rows; };
+  backend.disputePartyClose = async function (id, requestId) { return check(await (await client(true)).rpc('account_dispute_party_close', { p_id:id, p_request_id:requestId })); };
   backend.disputeReply = async function (id, body, requestId) { return check(await (await client(true)).rpc('account_dispute_reply', { p_id: id, p_request_id: requestId, p_body: body })); };
 
   // Compatibility with the APIs already called by the supplied application.
