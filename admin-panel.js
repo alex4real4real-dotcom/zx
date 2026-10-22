@@ -3,6 +3,11 @@
   var backend = window.accountBackend, TEXT = window.AccountManagementText, page = document.body.dataset.managementPage;
   var user = null, profile = null, sessionEpoch = 0, listRevision = 0, busy = false, activeTab = '', filter = '', target = 50;
   var adminRows = [], topups = [], verificationRows = [], customerRows = [], purchases = [], overview = null, listMore = false, topupTarget = 50, topupMore = false;
+  var settlementRows = [], serverOffset = 0;
+  function settlementFor(id){return settlementRows.find(function(s){return s.order_item_id===id;});}
+  function serverNow(){return Date.now()+serverOffset;}
+  async function fetchSettlements(){return backend.testSettlements();}
+  function saveSettlements(data){settlementRows=data.settlements||[];serverOffset=Date.parse(data.server_now)-Date.now();}
   var activeDialog = null, dialogRevision = 0, conversation = null, conversationMessages = [], conversationTimer = null, conversationBusy = false;
   function node(id) { return document.getElementById(id); }
   function lang() { return window.AppI18N ? window.AppI18N.getLang() : document.documentElement.lang || 'ar'; }
@@ -16,7 +21,7 @@
   function notice(el, key, error) { if (typeof el === 'string') el = node(el); if (!el) return; el.hidden = !key; el.dataset.adminNotice = key || ''; el.textContent = key ? t(key) : ''; el.classList.toggle('is-error', !!error); }
   function errorKey(error) {
     var s = String(error && error.code || '') + ' ' + String(error && error.message || error || '');
-    var keys = [['ADMIN_REQUIRED','admin_required'],['AUTH_REQUIRED','guest_heading'],['OWNER_PROTECTED','owner_protected'],['SELF_PROTECTED','self_protected'],['ACCOUNT_NOT_FOUND','account_not_found'],['ACCOUNT_BANNED','account_banned'],['ALREADY_REVIEWED','already_reviewed'],['REASON_REQUIRED','reason_required'],['RECORD_NOT_FOUND','not_found'],['REQUEST_LIMIT','request_limit'],['VERIFICATION_PENDING|REQUEST_PENDING','verification_pending'],['ALREADY_VERIFIED','already_verified'],['DOCUMENT_REQUIRED','document_required'],['INVALID_DOCUMENT','invalid_document'],['DISPUTE_EXISTS','dispute_exists'],['DISPUTE_CLOSED','dispute_closed'],['INVALID_|23514','invalid_request'],['PGRST202|PGRST205|schema cache|does not exist|PROFILE_NOT_READY','not_ready']];
+    var keys = [['DISPUTE_WINDOW_EXPIRED','window_expired'],['DISPUTE_WINNER_REQUIRED','winner_required'],['SETTLEMENT_FINAL','settlement_final'],['SETTLEMENT_SELLER_REQUIRED','seller_required'],['ADMIN_REQUIRED','admin_required'],['AUTH_REQUIRED','guest_heading'],['OWNER_PROTECTED','owner_protected'],['SELF_PROTECTED','self_protected'],['ACCOUNT_NOT_FOUND','account_not_found'],['ACCOUNT_BANNED','account_banned'],['ALREADY_REVIEWED','already_reviewed'],['REASON_REQUIRED','reason_required'],['RECORD_NOT_FOUND','not_found'],['REQUEST_LIMIT','request_limit'],['VERIFICATION_PENDING|REQUEST_PENDING','verification_pending'],['ALREADY_VERIFIED','already_verified'],['DOCUMENT_REQUIRED','document_required'],['INVALID_DOCUMENT','invalid_document'],['DISPUTE_EXISTS','dispute_exists'],['DISPUTE_CLOSED','dispute_closed'],['INVALID_|23514','invalid_request'],['PGRST202|PGRST205|schema cache|does not exist|PROFILE_NOT_READY','not_ready']];
     for (var i = 0; i < keys.length; i++) if (new RegExp(keys[i][0], 'i').test(s)) return keys[i][1];
     return 'request_failed';
   }
@@ -108,7 +113,9 @@
       do { part = await backend.adminData(tab, rows.length, filter); rows = rows.concat(part.rows); } while (part.more && rows.length < target);
       var creditRows = [], creditPart;
       if (tab === 'orders') do { creditPart = await backend.adminData('topups', creditRows.length, ''); creditRows = creditRows.concat(creditPart.rows); } while (creditPart.more && creditRows.length < topupTarget);
+      var settlementData=(tab==='orders'||tab==='disputes')?await fetchSettlements():null;
       if (revision !== listRevision || epoch !== sessionEpoch) return;
+      if(settlementData)saveSettlements(settlementData);
       var seen = new Set(); adminRows = rows.filter(function (row) { var id = row.id || row.user_id; if (seen.has(id)) return false; seen.add(id); return true; });
       listMore = part.more; topups = creditRows; topupMore = !!(creditPart && creditPart.more); renderAdminRows(); notice('sectionStatus','');
     } catch (error) { if (revision === listRevision && epoch === sessionEpoch) { if (errorKey(error) === 'admin_required') denyAdmin(); else notice('sectionStatus',errorKey(error),true); } }
@@ -162,18 +169,19 @@
   function table(headers) {var wrap=make('div','admin-table-wrap'),el=make('table','admin-table'),head=make('thead'),tr=make('tr');headers.forEach(function(key){tr.append(make('th','',t(key)));});head.append(tr);var body=make('tbody');el.append(head,body);wrap.append(el);return{wrap:wrap,body:body};}
   function renderDisputeTable(host) {
     var view=table(['case','product','buyer','seller','reason','status','conversation','decision']);
-    adminRows.forEach(function(row){var tr=make('tr'),values=['#'+row.case_number,row.product_title,row.buyer_email,row.seller_email||t('platform_store'),row.reason];values.forEach(function(value){tr.append(make('td','',value));});var state=make('td');state.append(badge(row.status));tr.append(state);
+    adminRows.forEach(function(row){var tr=make('tr'),values=['#'+row.case_number,row.product_title,row.buyer_email,row.seller_email||t('platform_store'),row.reason];values.forEach(function(value){tr.append(make('td','',value));});var state=make('td');state.append(badge(row.status));var settlement=settlementFor(row.order_item_id);if(settlement)state.append(make('p','admin-copy',t('settlement_'+settlement.state)));tr.append(state);
       var chat=make('td');chat.append(button('conversation',function(){openConversation(row.id);},true));tr.append(chat);var cell=make('td'),actions=make('div','admin-actions');
       if(row.status==='open'){
         actions.append(mutationButton('resolve_buyer',function(){decisionDialog(row,'resolved_buyer');},true));
+        if(row.seller_id)actions.append(mutationButton('resolve_seller',function(){decisionDialog(row,'resolved_seller');},true));
         if(row.seller_id)actions.append(mutationButton('ban_seller',function(){banDialog(row.seller_id,true,row.seller_email);},true));
         actions.append(mutationButton('ban_buyer',function(){banDialog(row.buyer_id,true,row.buyer_email);},true));
-      }else actions.append(mutationButton('reopen',function(){decisionDialog(row,'open');},true));cell.append(actions);tr.append(cell);view.body.append(tr);
+      }else if(!settlement || !['released','refunded'].includes(settlement.state))actions.append(mutationButton('reopen',function(){decisionDialog(row,'open');},true));cell.append(actions);tr.append(cell);view.body.append(tr);
     });host.append(view.wrap);
   }
   function orderDetails(row) {
     var ui=dialog('order_details');ui.el.append(make('p','admin-copy','#'+row.id.slice(0,8)+' · '+row.buyer_email+' · '+date(row.created_at)),make('p','admin-copy',t('test_payment')));
-    var view=table(['product','quantity','total']);(row.items||[]).forEach(function(item){var tr=make('tr');[item.title,String(item.quantity),money(Number(item.unit_price)*item.quantity)].forEach(function(value){tr.append(make('td','',value));});view.body.append(tr);});ui.el.append(view.wrap,make('p','admin-copy',t('total')+': '+money(row.total)));
+    var view=table(['product','quantity','total','status']);(row.items||[]).forEach(function(item){var tr=make('tr'),settlement=settlementFor(item.id);[item.title,String(item.quantity),money(Number(item.unit_price)*item.quantity),settlement?t('settlement_'+settlement.state)+' · '+t('settlement_deadline')+' '+date(settlement.release_at):t('settlement_legacy')].forEach(function(value){tr.append(make('td','',value));});view.body.append(tr);});ui.el.append(view.wrap,make('p','admin-copy',t('total')+': '+money(row.total)));
   }
   function renderOrders(host) {
     var view=table(['order','buyer','total','status','date','details']);adminRows.forEach(function(row){var tr=make('tr');['#'+row.id.slice(0,8),row.buyer_email,money(row.total),t('test_order'),date(row.created_at)].forEach(function(value){tr.append(make('td','',value));});var cell=make('td');cell.append(button('details',function(){orderDetails(row);},true));tr.append(cell);view.body.append(tr);});host.append(view.wrap);
@@ -188,7 +196,7 @@
     if(activeTab==='orders')renderOrders(host);node('adminMore').hidden=!listMore;
   }
   function decisionDialog(row,status) {
-    var ui=dialog('decision');ui.el.append(make('p','admin-copy','#'+row.case_number+' · '+row.product_title));var form=make('form','admin-form');var control=selectField('decision',[['resolved_buyer','resolve_buyer'],['resolved_seller','resolve_seller'],['closed','close_case'],['open','reopen']],status),note=field('decision_note','note','textarea',true,1000);note.querySelector('textarea').minLength=3;var submit=mutationButton('save_decision');submit.type='submit';form.append(control.wrap,note,submit,ui.status);ui.el.append(form);var key=uuid();
+    var ui=dialog('decision');ui.el.append(make('p','admin-copy','#'+row.case_number+' · '+row.product_title));var form=make('form','admin-form');var choices=[['resolved_buyer','resolve_buyer']];if(row.seller_id||!settlementFor(row.order_item_id))choices.push(['resolved_seller','resolve_seller']);if(!settlementFor(row.order_item_id))choices.push(['closed','close_case'],['open','reopen']);var control=selectField('decision',choices,status),note=field('decision_note','note','textarea',true,1000);note.querySelector('textarea').minLength=3;var submit=mutationButton('save_decision');submit.type='submit';form.append(control.wrap,note,submit,ui.status);ui.el.append(form);var key=uuid();
     form.addEventListener('submit',function(event){event.preventDefault();if(!form.reportValidity())return;run(function(){return backend.adminDispute(row.id,control.select.value,form.elements.note.value.trim(),key);},async function(){closeDialog();await refreshAdmin();},ui.status);});
   }
   function renderMessages() {
@@ -255,7 +263,7 @@
   function renderPurchases() {
     var select=node('disputeOrderItem');if(!select)return;var chosen=select.value || new URL(location.href).searchParams.get('item');select.replaceChildren();
     var claimed=new Set(customerRows.map(function(row){return row.order_item_id;})),items=[];
-    purchases.forEach(function(order){(order.items||[]).forEach(function(item){if(!claimed.has(item.id))items.push({item:item,order:order});});});
+    purchases.forEach(function(order){(order.items||[]).forEach(function(item){var settlement=settlementFor(item.id);if(!claimed.has(item.id)&&(!settlement||(settlement.state==='held'&&serverNow()<Date.parse(settlement.release_at))))items.push({item:item,order:order});});});
     items.forEach(function(row){var option=make('option','',row.item.title+' · '+date(row.order.created_at));option.value=row.item.id;select.append(option);});
     if(items.some(function(row){return row.item.id===chosen;}))select.value=chosen;
     var submit=node('newDisputeForm').querySelector('button[type=submit]');submit.disabled=!items.length||busy;submit.dataset.permanentDisabled=String(!items.length);
@@ -270,7 +278,8 @@
     if(epoch!==sessionEpoch||revision!==listRevision)return;customerRows=rows;node('customerMore').disabled=false;node('customerMore').hidden=part.length!==50;renderCustomerRows();renderPurchases();
   }
   async function disputesPage() {
-    var epoch=sessionEpoch; purchases=await backend.orders();if(epoch!==sessionEpoch)return;await loadCustomerDisputes();if(epoch!==sessionEpoch)return;node('disputesMember').hidden=false;
+    var epoch=sessionEpoch, data=await Promise.all([backend.orders(),fetchSettlements()]);if(epoch!==sessionEpoch)return;purchases=data[0];saveSettlements(data[1]);
+    var policy=make('p','admin-copy',t('settlement_policy'));policy.dataset.adminI18n='settlement_policy';node('newDisputeForm').prepend(policy);if(epoch!==sessionEpoch)return;await loadCustomerDisputes();if(epoch!==sessionEpoch)return;node('disputesMember').hidden=false;
     var form=node('newDisputeForm'),pending=null;form.addEventListener('submit',function(event){event.preventDefault();if(!form.reportValidity())return;var item=form.elements.namedItem('item').value,reason=form.elements.reason.value.trim();
       if(!validId(item)||reason.length<5){notice('disputeStatus','invalid_request',true);return;}var signature=item+'|'+reason;if(!pending||pending.signature!==signature)pending={signature:signature,id:uuid()};
       run(function(){return backend.disputeOpen(item,reason,pending.id);},async function(result){form.reset();pending=null;await loadCustomerDisputes();await openConversation(result.id);},node('disputeStatus'));
@@ -301,7 +310,7 @@
     if(page==='admin')await adminPage();else if(page==='sell')await sellerPage();else await disputesPage();
   }
   window.addEventListener('account:languagechange',localize);
-  window.addEventListener('account:signed-out',function(){sessionEpoch++;listRevision++;user=null;profile=null;overview=null;adminRows=[];topups=[];verificationRows=[];customerRows=[];purchases=[];closeDialog();
+  window.addEventListener('account:signed-out',function(){sessionEpoch++;listRevision++;user=null;profile=null;overview=null;adminRows=[];topups=[];verificationRows=[];customerRows=[];purchases=[];settlementRows=[];closeDialog();
     ['ticketsMember','sellerMember','disputesMember','adminIdentity','adminRefresh'].forEach(function(id){if(node(id))node(id).hidden=true;});
     ['myTicketsList','topupRows','verificationRows','disputeRows','sectionForm'].forEach(function(id){if(node(id))node(id).replaceChildren();});if(node('adminEmail'))node('adminEmail').textContent='';node('managementGuest').hidden=false;
   });

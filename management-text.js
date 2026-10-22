@@ -1,4 +1,16 @@
 window.AccountManagementText = {
+  "window_expired":["انتهت مهلة 12 ساعة لفتح نزاع لهذه السلعة.","The 12-hour dispute window for this item has ended."],
+  "winner_required":["حدد حسم النزاع للمشتري أو للبائع قبل إنهائه؛ يبقى المبلغ معلّقًا دون قرار.","Resolve for the buyer or seller before closing; the amount remains held without a decision."],
+  "settlement_final":["تمت التسوية؛ لا يمكن إعادة فتح النزاع أو تغيير الطرف المستحق.","Settlement is final. The dispute cannot be reopened or the recipient changed."],
+  "seller_required":["لا يوجد بائع صالح لاستلام التسوية؛ يلزم مراجعة الطلب.","No eligible seller is assigned. Review this order."],
+  "settlement_held":["المبلغ معلّق — تجريبي","Amount held — test"],
+  "settlement_disputed":["معلّق حتى قرار الإدارة — تجريبي","Held pending decision — test"],
+  "settlement_released":["خُصّص للبائع — تجريبي","Allocated to seller — test"],
+  "settlement_refunded":["رُد للمشتري — تجريبي","Refunded to buyer — test"],
+  "settlement_needs_review":["التسوية تحتاج مراجعة — تجريبي","Settlement needs review — test"],
+  "settlement_legacy":["طلب سابق لسياسة 12 ساعة","Order predates the 12-hour policy"],
+  "settlement_deadline":["مهلة النزاع حتى","Dispute deadline"],
+  "settlement_policy":["للطلبات الجديدة: تُعلّق قيمة السلعة 12 ساعة من الشراء. فتح نزاع خلال المهلة يوقف التسوية حتى حسم الإدارة للمشتري أو للبائع. التسوية الحالية محاكاة بلا تحويل أموال حقيقية.","For new orders: the item amount is held for 12 hours after purchase. A dispute opened within that window pauses settlement until a buyer or seller decision. Current settlement is a simulation with no real money transfers."],
   "dashboard": [
     "لوحة الإدارة",
     "Administration"

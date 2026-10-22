@@ -95,6 +95,7 @@
     // Interface text in the older account and catalog templates. User content is not scanned.
     var originalPageTitle = document.title;
     var UI_TEXT = {
+        "للطلبات الجديدة: مهلة النزاع 12 ساعة من الشراء. دون نزاع تُخصّص قيمة السلعة للبائع؛ ومع النزاع تبقى معلّقة حتى حسم الإدارة للمشتري أو للبائع. هذه محاكاة بلا تحويل أموال حقيقية.": "For new orders: the dispute window is 12 hours after purchase. Without a dispute, the item amount is allocated to the seller. A dispute holds it until a buyer or seller decision. This is a simulation with no real money transfers.",
         "المتجر": "Shop",
         "تغيير اللغة": "Change language",
         "التنقل الرئيسي": "Main navigation",

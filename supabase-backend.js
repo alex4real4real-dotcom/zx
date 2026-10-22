@@ -222,6 +222,7 @@
   backend.checkout = async function (requestId) {
     return check(await (await client(true)).rpc('account_place_test_order', { p_request_id: requestId }));
   };
+  backend.testSettlements = async function () { return check(await (await client(true)).rpc('account_test_settlements')); };
   backend.orders = async function () {
     var c = await client(true);
     return check(await c.from('account_orders').select('*,items:account_order_items(*)')
