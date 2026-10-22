@@ -60,11 +60,11 @@
       action(event.currentTarget, 'profileStatus', async function () { await backend.signOut(); location.href = 'account.html'; });
     });
   }
-  async function shopPage() {
+  async function shopPage(verifiedOnly) {
     try {
-      var rows = await backend.products(), container = document.getElementById('productList');
+      var rows = await (verifiedOnly ? backend.verifiedSellerProducts() : backend.products()), container = document.getElementById('productList');
       container.replaceChildren();
-      if (!rows.length) container.append(el('p', 'لا توجد منتجات متاحة حاليًا.'));
+      if (!rows.length) container.append(el('p', verifiedOnly ? 'لا توجد سلع متاحة من بائعين موثّقين حاليًا.' : 'لا توجد منتجات متاحة حاليًا.'));
       rows.forEach(function (row) {
         var card = el('article', undefined, 'backend-panel');
         if (row.image_url) { var image = el('img'); image.src = row.image_url; image.alt = row.title; image.className = 'backend-card-image'; card.append(image); }
@@ -168,6 +168,7 @@
     var page = document.body.dataset.backendPage;
     if (page === 'account') await accountPage();
     if (page === 'shop') await shopPage();
+    if (page === 'sellers') await shopPage(true);
     if (page === 'cart') await cartPage();
     if (page === 'orders') await ordersPage();
     if (page === 'connection') await connectionPage();

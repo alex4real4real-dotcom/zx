@@ -188,6 +188,9 @@
   backend.products = async function () {
     return check(await (await client()).from('account_products').select('*').eq('active', true).order('created_at', { ascending: false }));
   };
+  backend.verifiedSellerProducts = async function () {
+    return check(await (await client()).rpc('account_verified_seller_products').order('created_at', { ascending: false }).order('id', { ascending: true }));
+  };
   backend.sellerProducts = async function (offset) {
     var c = await client(true), start = offset || 0;
     return check(await c.from('account_products').select('id,title,description,price,listing_type,active,created_at')
