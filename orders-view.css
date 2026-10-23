@@ -12,3 +12,5 @@
 .order-case-dialog{position:fixed;inset:0;margin:auto;height:fit-content}
 
 .orders-toolbar{display:flex;justify-content:flex-end;margin:12px 0 16px}.orders-toolbar .orders-button{min-height:38px}
+
+.order-secret-field{display:grid;gap:6px;margin:16px 0;font-size:13px}.order-secret-value{display:flex;gap:8px;align-items:center;min-width:0}.order-secret-value input{min-width:0;width:100%;border:1px solid var(--glass-border);border-radius:12px;padding:11px;background:var(--field-bg);color:var(--text-color);font:inherit;text-align:left}.order-secret-toggle{min-height:44px;border:1px solid var(--glass-border);border-radius:12px;padding:8px 12px;color:var(--accent-color);background:transparent;white-space:nowrap}.order-dummy-note{font-size:12px;color:var(--text-muted);line-height:1.8}

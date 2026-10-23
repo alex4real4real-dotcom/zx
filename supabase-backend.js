@@ -208,7 +208,7 @@
   };
   backend.sellerProducts = async function (offset) {
     var c = await client(true), start = offset || 0;
-    return check(await c.from('account_products').select('id,title,description,price,listing_type,active,created_at')
+    return check(await c.from('account_products').select('id,title,description,price,listing_type,active,created_at,sold_at')
       .eq('seller_id', state.user.id).order('created_at', { ascending: false }).order('id', { ascending: true }).range(start, start + 23));
   };
   backend.sellerProduct = async function (id) { return check(await (await client(true)).rpc('account_seller_read_product', { p_id: id })); };
@@ -237,6 +237,7 @@
   backend.checkout = async function (requestId) {
     return check(await (await client(true)).rpc('account_place_test_order', { p_request_id: requestId }));
   };
+  backend.orderDelivery = async function (itemId) { return check(await (await client(true)).rpc('account_order_delivery', { p_order_item_id: itemId })); };
   backend.testSettlements = async function () { return check(await (await client(true)).rpc('account_test_settlements')); };
   backend.orders = async function () {
     var c = await client(true);
