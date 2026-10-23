@@ -653,3 +653,23 @@ select,
 #accountWidgetButton[aria-expanded="true"] #accountWidgetChevron {
     transform: rotate(180deg);
 }
+/* Show the same account summary on phones and desktop. */
+@media(max-width:639px){
+#accountWidgetButton{gap:6px;padding:5px 7px;max-width:154px}
+#accountWidgetButton>span{display:flex}
+#accountWidgetButton .account-widget-avatar{width:32px;height:32px}
+#accountWidgetName{max-width:64px;font-size:12px}
+#accountWidgetBalance{font-size:10px;white-space:nowrap;direction:ltr}
+#accountWidgetBadge{min-width:16px;height:16px;padding:0 4px;font-size:10px}
+#accountWidgetButton>span>span:first-child{gap:5px}
+#accountWidgetChevron{font-size:9px}
+.site-header>nav{gap:8px;padding-inline:10px}
+.site-header>nav>div:last-child{gap:6px}
+}
+@media(max-width:370px){
+#accountWidgetButton{gap:4px;padding-inline:5px}
+#accountWidgetName{max-width:46px}
+#accountWidgetButton .account-widget-avatar{width:28px;height:28px}
+#langButton{padding-inline:8px;gap:6px}
+.site-header>nav>.flex:first-child .brand-mark{width:36px;height:36px}
+}
