@@ -84,8 +84,8 @@
   }
   async function cartPage() {
     if (!requireUser()) return;
-    var container = document.getElementById('cartList'), checkout = document.getElementById('testCheckout'), eligible = false;
-    checkout.before(ui('p', 'للطلبات الجديدة: مهلة النزاع 12 ساعة من الشراء. دون نزاع تُخصّص قيمة السلعة للبائع؛ ومع النزاع تبقى معلّقة حتى تنازل أحد الطرفين للآخر أو حسم الإدارة. إغلاق النزاع نهائي. هذه محاكاة بلا تحويل أموال حقيقية.', 'backend-muted'));
+    var container = document.getElementById('cartList'), checkout = document.getElementById('checkoutUnavailable');
+
     async function render() {
       var rows = await backend.cart(), total = 0;
       container.replaceChildren();
@@ -109,24 +109,12 @@
       });
       if (!rows.length) container.append(ui('p', 'السلة فارغة.'));
       var totalNode = document.getElementById('cartTotal'); totalNode.dataset.currencyAmount = total; totalNode.textContent = money(total);
-      eligible = !!rows.length && rows.every(function (row) { return row.available; });
-      checkout.disabled = !eligible;
+      checkout.disabled = true;
       if (window.updateCartBadge) window.updateCartBadge();
     }
     try { await render(); } catch (error) { checkout.disabled = true; status('cartStatus', backend.errorMessage(error), true); }
-    checkout.addEventListener('click', function () {
-      action(checkout, 'cartStatus', async function () {
-        var storageKey = 'account.test-checkout.' + backend.currentUser().id;
-        var requestId = sessionStorage.getItem(storageKey);
-        if (!requestId) { requestId = crypto.randomUUID(); sessionStorage.setItem(storageKey, requestId); }
-        var response = await backend.checkout(requestId);
-        if (!response.success || response.is_test !== true) throw new Error('تعذّر تأكيد الطلب التجريبي.');
-        sessionStorage.removeItem(storageKey);
-        await render();
-        status('cartStatus', t('حُفظ الطلب التجريبي:') + ' ' + response.order_id + '\n' + t('الإجمالي:') + ' ' + money(response.total) + '\n' + t('لم تُسحب أي أموال.'), false);
-      }).finally(function () { checkout.disabled = !eligible; });
-    });
   }
+
   async function ordersPage() {
     if (!requireUser()) return;
     try {
