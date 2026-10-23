@@ -16,6 +16,28 @@
     }) : Promise.resolve();
     Promise.all([domReady, window.accountBackendReady || Promise.resolve()]).then(initialize);
 })(function () {
+    // Keep the guest sign-in link immediately to the left of Sell in both languages.
+    var headerSell = document.querySelector('a[data-i18n="nav_browse_products"][href$="sell.html"]');
+    if (headerSell) {
+        var guestActions = document.createElement('div');
+        guestActions.style.cssText = 'display:inline-flex;align-items:center;gap:12px;direction:rtl;flex-shrink:0';
+        headerSell.parentNode.insertBefore(guestActions, headerSell);
+        guestActions.appendChild(headerSell);
+        var guestLogin = document.createElement('a');
+        guestLogin.href = './account.html';
+        guestLogin.id = 'guestLoginLink';
+        guestLogin.hidden = true;
+        guestLogin.style.cssText = 'color:var(--text-color);font-size:14px;font-weight:600;white-space:nowrap;min-height:44px;align-content:center;text-decoration:none';
+        guestActions.appendChild(guestLogin);
+        function updateGuestLogin() {
+            guestLogin.textContent = document.documentElement.lang === 'en' ? 'Sign in' : 'تسجيل الدخول';
+            guestLogin.hidden = !!(window.accountBackend && window.accountBackend.currentUser());
+        }
+        updateGuestLogin();
+        window.addEventListener('account:languagechange', updateGuestLogin);
+        window.addEventListener('account:signed-out', updateGuestLogin);
+    }
+
     var navOpenButton = document.getElementById('navOpenButton');
     var navCloseButton = document.getElementById('navCloseButton');
     var navOverlay = document.getElementById('navOverlay');
