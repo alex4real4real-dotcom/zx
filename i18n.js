@@ -72,7 +72,7 @@
         newsletter_desc: 'سجّل بريدك الإلكتروني لتصلك أحدث المنتجات والخصومات من المتاجر الموثّقة قبل الجميع، دون أي رسائل مزعجة.',
         newsletter_email: 'البريد الإلكتروني', newsletter_subscribe: 'اشترك الآن',
         logo_alt: 'شعار Account', avatar_alt: 'صورة الحساب', hero_image_alt: 'واجهات تطبيقات رقمية على هاتف ذكي',
-        product_cart_aria: 'أضف 1191 إلى السلة', product_contact_aria: 'تواصل بخصوص 1191'
+        featured_loading: 'جارٍ تحميل المنتجات…', product_cart_aria: 'أضف إلى السلة', product_contact_aria: 'تواصل بخصوص العرض'
     });
     Object.assign(DICT.en, {
         nav_admin: 'Admin Dashboard', nav_logout: 'Sign Out',
@@ -89,7 +89,7 @@
         newsletter_desc: 'Enter your email to receive the latest products and discounts from verified stores before everyone else, without spam.',
         newsletter_email: 'Email address', newsletter_subscribe: 'Subscribe now',
         logo_alt: 'Account logo', avatar_alt: 'Account photo', hero_image_alt: 'Digital app interfaces on a smartphone',
-        product_cart_aria: 'Add 1191 to cart', product_contact_aria: 'Contact us about 1191'
+        featured_loading: 'Loading products…', product_cart_aria: 'Add to cart', product_contact_aria: 'Contact us about this listing'
     });
 
     // Interface text in the older account and catalog templates. User content is not scanned.

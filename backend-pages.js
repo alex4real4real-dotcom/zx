@@ -132,19 +132,15 @@
     });
   }
   async function syncHomepageProducts() {
-    var cards = document.querySelectorAll('article[data-ai-namespace="products"]');
-    if (!cards.length) return;
+    var host = document.getElementById('featuredProducts');
+    if (!host) return;
     try {
-      var rows = await backend.products();
-      cards.forEach(function (card) {
-        var button = card.querySelector('.js-add-to-cart'); if (!button) return;
-        var row = rows.find(function (entry) { return entry.id === button.dataset.uid; });
-        button.disabled = !row;
-        if (!row) { button.title = t('المنتج غير متاح حاليًا'); return; }
-        card.parentElement.classList.add('catalog-grid');
-        card.replaceWith(listingCard(row, 'h3'));
-      });
-    } catch (error) { cards.forEach(function (card) { var button = card.querySelector('.js-add-to-cart'); if (button) button.title = backend.errorMessage(error); }); }
+      var social = ['x','instagram','snapchat','tiktok','tellonym','discord','playstation','xbox','telegram'];
+      var rows = (await backend.products()).filter(function (row) { return social.includes(row.listing_type) && !row.deleted_at && !row.sold_at; });
+      host.replaceChildren();
+      rows.forEach(function (row) { host.append(listingCard(row, 'h3')); });
+      if (!rows.length) host.append(ui('p', 'لا توجد منتجات متاحة حاليًا.', 'backend-muted'));
+    } catch (error) { host.replaceChildren(ui('p', backend.errorMessage(error), 'backend-status error')); }
   }
   window.addEventListener('account:languagechange', function () {
     document.querySelectorAll('[data-product-title]').forEach(function (node) { node.setAttribute('aria-label', t('كمية') + ' ' + node.dataset.productTitle); });
