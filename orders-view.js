@@ -17,7 +17,8 @@
     pending_note:['لم تُؤكّد عملية دفع حقيقية لهذا الطلب.','A real payment has not been confirmed for this order.'],
     private:['معلومات الحساب خاصة بصاحب الطلب','Account information is private to the buyer'],
     show:['عرض معلومات الحساب','View account information'],
-    test_delivery:['لا توجد بيانات تسليم مؤكدة لهذا الطلب التجريبي. لا يمنح الطلب التجريبي إمكانية الوصول إلى كلمات مرور الحسابات المعروضة.','There is no confirmed delivery for this test order. Test orders do not grant access to the passwords of listed accounts.'],
+    test_delivery:['لم يحدد البائع بيانات وهمية للتسليم في هذا الطلب التجريبي.','The seller has not enabled dummy-data delivery for this test order.'],
+    dummy_note:['بيانات وهمية سلّمها البائع لهذه التجربة.','Dummy details supplied by the seller for this test.'],account_email:['البريد الإلكتروني للحساب','Account email'],email_password:['كلمة مرور البريد','Email password'],account_username:['يوزر الحساب','Account username'],account_password:['كلمة مرور الحساب','Account password'],reveal_password:['إظهار','Show'],hide_password:['إخفاء','Hide'],
     pending_delivery:['لا توجد بيانات تسليم متاحة لهذا الطلب حاليًا. يمكنك متابعة المشكلة من خلال النزاع.','No delivery information is available for this order yet. You can follow up through a dispute.'],
     new_dispute:['فتح نزاع','Open a dispute'], view_dispute:['عرض النزاع','View dispute'],
     chat_note:['تُتابع محادثة النزاع هنا داخل بطاقة السلعة، ولا يمكن إعادة فتح النزاع بعد إغلاقه.','Follow the dispute here in the item card. A closed dispute cannot be reopened.'],
@@ -50,6 +51,26 @@
     box.append(icon(types[type] || 'fa-solid fa-box-open'));
     return box;
   }
+  function deliveryFields(body, result) {
+    body.replaceChildren();
+    if(result.state!=='delivered'){body.append(make('p',t('test_delivery')));return;}
+    body.append(make('p',t('dummy_note'),'order-dummy-note'));
+    ['account_username','account_email','account_password','email_password'].forEach(function(key){
+      var label=make('label',undefined,'order-secret-field'),caption=make('span',t(key)),row=make('span',undefined,'order-secret-value'),input=make('input');
+      input.readOnly=true;input.value=String(result.credentials&&result.credentials[key]||'');input.dir='ltr';input.autocomplete='off';input.spellcheck=false;
+      var secret=/password/.test(key);input.type=secret?'password':'text';row.append(input);
+      if(secret){var button=make('button',t('reveal_password'),'order-secret-toggle');button.type='button';button.setAttribute('aria-pressed','false');button.addEventListener('click',function(){var show=input.type==='password';input.type=show?'text':'password';button.textContent=t(show?'hide_password':'reveal_password');button.setAttribute('aria-pressed',String(show));});row.append(button);}
+      label.append(caption,row);body.append(label);
+    });
+  }
+  function mountDelivery(details,body,item){
+    details.addEventListener('toggle',async function(){
+      if(!details.open){body.replaceChildren();return;}
+      var token=revision,user=backend.currentUser();body.textContent=t('loading');
+      try{var result=await backend.orderDelivery(item.id);if(token!==revision||!details.open||!body.isConnected||!backend.currentUser()||backend.currentUser().id!==user.id)return;deliveryFields(body,result);}
+      catch(error){if(token===revision&&details.open&&body.isConnected)body.textContent=t('failed');}
+    });
+  }
   function settlementFor(item) { return settlements.find(function(s){return s.order_item_id===item.id;}); }
   function serverNow() { return Date.now()+serverOffset; }
   function render() {
@@ -77,7 +98,7 @@
         if(isBuyer){var details=make('details',undefined,'order-delivery'); details.dataset.item=item.id;details.open=expanded.has(item.id);
         var summary=make('summary'),label=make('span',undefined,'order-delivery-label');label.append(icon('fa-solid fa-key'),make('span',t('private')));
         var reveal=make('span',undefined,'orders-button');reveal.append(icon('fa-solid fa-eye'),make('span',t('show')));summary.append(label,reveal);
-        details.append(summary,make('div',t(isTest?'test_delivery':'pending_delivery'),'order-delivery-body'));card.append(details);}
+        var deliveryBody=make('div',undefined,'order-delivery-body');details.append(summary,deliveryBody);mountDelivery(details,deliveryBody,item);card.append(details);}
         var canOpen=isBuyer&&(!settlement||(settlement.state==='held'&&serverNow()<Date.parse(settlement.release_at)));
         window.OrderDisputes.mount(card,{item:item,dispute:dispute,isBuyer:isBuyer,isSeller:isSeller,canOpen:canOpen,refresh:load,
           initialOpen:!!(dispute&&(query.get('id')===dispute.id||query.get('item')===item.id))});
@@ -109,5 +130,6 @@
   domReady.then(function(){localize();node('ordersRefresh').addEventListener('click',load);window.addEventListener('account:languagechange',localize);window.addEventListener('account:signed-out',guest);
     var scope=make('p',t('policy_scope'),'order-policy');scope.dataset.ordersText='policy_scope';document.querySelector('.orders-features').after(scope);
     setInterval(function(){if(ready&&!document.hidden&&!node('ordersRefresh').disabled&&(settlements.some(function(s){return s.state==='held'||s.state==='disputed';})||disputes.some(function(d){return d.status==='open';})))load();},60000);});
+  window.addEventListener('pagehide',function(){document.querySelectorAll('.order-delivery').forEach(function(details){details.open=false;details.querySelector('.order-delivery-body').replaceChildren();});});
   Promise.all([domReady,backend.ready]).then(load).catch(function(){notice(t('failed'),true);});
 })();
