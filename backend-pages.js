@@ -67,7 +67,7 @@
     var card = el('article', undefined, 'catalog-card');
     var header = el('div', undefined, 'catalog-header'), badge = window.ListingPlatforms.create(row.listing_type), identity = el('div', undefined, 'catalog-identity');
     var heading = el(headingTag || 'h2', undefined, 'catalog-title'); heading.append(el('bdi', row.title));
-    identity.append(heading, el('span', badge.title, 'catalog-platform-name')); header.append(badge, identity);
+    identity.append(heading); header.append(badge, identity);
     var description = ['حسابات التواصل الاجتماعي', 'الخدمات الرقمية', 'الألعاب والاشتراكات'].includes(row.description) ? ui('p', row.description, 'catalog-description') : el('p', row.description || '', 'catalog-description');
     description.dir = 'auto';
     if (row.description) description.title = row.description;
