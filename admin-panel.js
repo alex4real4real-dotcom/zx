@@ -17,7 +17,7 @@
   function validId(id) { return /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id || ''); }
   function uuid() { if (crypto.randomUUID) return crypto.randomUUID(); var b = crypto.getRandomValues(new Uint8Array(16)); b[6] = b[6] & 15 | 64; b[8] = b[8] & 63 | 128; var h = Array.from(b, function (v) { return v.toString(16).padStart(2, '0'); }).join(''); return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20); }
   function date(value) { var d = new Date(value); return Number.isNaN(d.valueOf()) ? '' : new Intl.DateTimeFormat(lang() === 'ar' ? 'ar-SA-u-ca-gregory-nu-latn' : 'en-GB', { dateStyle: 'short', timeStyle: 'short' }).format(d); }
-  function money(value) { return new Intl.NumberFormat(lang() === 'ar' ? 'ar-SA' : 'en-GB', { style: 'currency', currency: 'SAR' }).format(Number(value) || 0); }
+  function money(value) { return window.CurrencySystem.format(value); }
   function notice(el, key, error) { if (typeof el === 'string') el = node(el); if (!el) return; el.hidden = !key; el.dataset.adminNotice = key || ''; el.textContent = key ? t(key) : ''; el.classList.toggle('is-error', !!error); }
   function errorKey(error) {
     var s = String(error && error.code || '') + ' ' + String(error && error.message || error || '');

@@ -5,7 +5,7 @@
   var TYPES = {x:['منصة X','X'],instagram:['إنستغرام','Instagram'],snapchat:['سناب شات','Snapchat'],tiktok:['تيك توك','TikTok'],facebook:['فيسبوك','Facebook'],youtube:['يوتيوب','YouTube'],service:['خدمة رقمية','Digital service'],game:['لعبة أو اشتراك','Game or subscription']};
   var TEXT = {
     title:['إضافة خدمة جديدة','Add a new listing'],intro:['أضف بيانات السلعة لتظهر في متجرك وكتالوج السوق.','Add your listing to your store and the marketplace.'],
-    name:['اسم الخدمة *','Listing name *'],user:['يوزر الحساب *','Account username *'],price:['السعر (ر.س) *','Price (SAR) *'],kind:['نوع العرض *','Listing type *'],
+    name:['اسم الخدمة *','Listing name *'],user:['يوزر الحساب *','Account username *'],price:['السعر (SAR) *','Price (SAR) *'],kind:['نوع العرض *','Listing type *'],
     hint:['كل منصة تواصل تظهر برمزها تلقائيًا، أما الخدمات والألعاب فتظهر بأيقونة دون صورة.','Social accounts use their platform icon. Services and games use an icon.'],
     private:['بيانات الحساب المعروض للبيع','Account details for this listing'],email:['البريد الإلكتروني للحساب *','Account email *'],email_password:['باسورد البريد *','Email password *'],username:['يوزر الحساب *','Account username *'],password:['باسورد الحساب *','Account password *'],
     privacy:['بيانات الحساب خاصة ولا تظهر في صفحة المنتج العامة.','Account details are private and hidden from the public listing.'],
@@ -39,7 +39,7 @@
     var key=node('sellerStatus').dataset.messageKey;if(key)node('sellerStatus').textContent=t(key);render();
   }
   function resetForm() { form.reset(); productId=null; editing=false; node('cancelListing').hidden=true; updateKind();node('listingSubmitText').textContent=t(canPublish?'publish':'draft'); }
-  function money(value) { return new Intl.NumberFormat(english()?'en-GB':'ar-SA',{style:'currency',currency:'SAR'}).format(Number(value)); }
+  function money(value) { return window.CurrencySystem.format(value); }
   function render() {
     var host=node('sellerRows');host.replaceChildren();
     if(!rows.length&&user)host.append(make('p','seller-copy',t('empty')));

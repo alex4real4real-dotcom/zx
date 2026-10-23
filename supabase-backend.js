@@ -335,10 +335,6 @@
       return backend.submitMessage(email && email.value || '', form && form.id === 'newsletterForm' ? 'newsletter' : 'contact', fields);
     });
   } };
-  window.CurrencySystem = { format: function (amount) {
-    var lang = document.documentElement.lang || 'ar';
-    return new Intl.NumberFormat(lang === 'ar' ? 'ar-SA' : lang, { style: 'currency', currency: 'SAR' }).format(Number(amount) || 0);
-  } };
   window.DataSystem = { list: function (namespace, options) {
     return result(async function () {
       var records = [], profile;

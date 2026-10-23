@@ -33,7 +33,7 @@
   function t(key) { return TEXT[key][english() ? 1 : 0]; }
   function make(tag, text, cls) { var el = document.createElement(tag); if (text !== undefined) el.textContent = text; if (cls) el.className = cls; return el; }
   function icon(cls) { var el = make('i', undefined, cls); el.setAttribute('aria-hidden','true'); return el; }
-  function money(value) { return new Intl.NumberFormat(english() ? 'en-GB' : 'ar-SA', {style:'currency',currency:'SAR'}).format(Number(value) || 0); }
+  function money(value) { return window.CurrencySystem.format(value); }
   function date(value) { var d = new Date(value); return Number.isNaN(d.valueOf()) ? '' : new Intl.DateTimeFormat(english() ? 'en-GB' : 'ar-SA-u-ca-gregory-nu-latn', {dateStyle:'medium',timeStyle:'short'}).format(d); }
   function uuid(value) { return /^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i.test(value || ''); }
   function testOrder(order) { return order.payment_mode === 'test' || order.is_test === true || /test/i.test(order.status || ''); }
