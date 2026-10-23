@@ -1,8 +1,8 @@
 (function () {
   'use strict';
   var backend = window.accountBackend;
-  var SOCIAL = ['x','instagram','snapchat','tiktok','facebook','youtube'];
-  var TYPES = {x:['منصة X','X'],instagram:['إنستغرام','Instagram'],snapchat:['سناب شات','Snapchat'],tiktok:['تيك توك','TikTok'],facebook:['فيسبوك','Facebook'],youtube:['يوتيوب','YouTube'],service:['خدمة رقمية','Digital service'],game:['لعبة أو اشتراك','Game or subscription']};
+  var SOCIAL = ['x','instagram','snapchat','tiktok','tellonym','discord','playstation','xbox','telegram'];
+  var TYPES = {x:['X','X'],instagram:['إنستغرام','Instagram'],snapchat:['سناب شات','Snapchat'],tiktok:['تيك توك','TikTok'],tellonym:['تيلونيم','Tellonym'],discord:['ديسكورد','Discord'],playstation:['سوني (PlayStation)','PlayStation (Sony)'],xbox:['إكس بوكس','Xbox'],telegram:['تلقرام','Telegram'],service:['خدمة رقمية','Digital service'],game:['لعبة أو اشتراك','Game or subscription']};
   var TEXT = {
     title:['إضافة خدمة جديدة','Add a new listing'],intro:['أضف بيانات السلعة لتظهر في متجرك وكتالوج السوق.','Add your listing to your store and the marketplace.'],
     name:['اسم الخدمة *','Listing name *'],user:['يوزر الحساب *','Account username *'],price:['السعر (SAR) *','Price (SAR) *'],kind:['نوع العرض *','Listing type *'],
@@ -44,7 +44,7 @@
     var host=node('sellerRows');host.replaceChildren();
     if(!rows.length&&user)host.append(make('p','seller-copy',t('empty')));
     rows.forEach(function(row){
-      var card=make('article','seller-product'),top=make('div','seller-product-top'),info=make('div');info.append(make('h3','',row.title),make('strong','',money(row.price)));top.append(info,make('span','seller-badge',t(row.sold_at?'sold':row.active?'live':'hidden')));card.append(top,make('p','',t(row.listing_type||'service')));
+      var card=make('article','seller-product'),top=make('div','seller-product-top'),info=make('div');var title=make('h3','listing-title');title.append(window.ListingPlatforms.create(row.listing_type),make('bdi','',row.title));info.append(title,make('strong','',money(row.price)));top.append(info,make('span','seller-badge',t(row.sold_at?'sold':row.active?'live':'hidden')));card.append(top,make('p','',t(row.listing_type||'service')));
       if(row.description)card.append(make('p','',row.description));
       var actions=make('div','seller-actions');(row.sold_at?[]:[['edit',function(){editProduct(row.id);}], [row.active?'hide':'show',function(){changeVisibility(row);}]]).forEach(function(pair){var b=make('button','seller-button secondary',t(pair[0]));b.type='button';b.dataset.sellerAction='';b.disabled=busy;b.addEventListener('click',pair[1]);actions.append(b);});card.append(actions);host.append(card);
     });node('sellerMore').hidden=!more;

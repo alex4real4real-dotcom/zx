@@ -1,0 +1,9 @@
+.listing-platform{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;flex:0 0 32px;border-radius:9px;font-size:21px;line-height:1;color:#fff;background:#262626;vertical-align:middle}
+.listing-platform img{display:block;width:100%;height:100%;object-fit:contain;border-radius:inherit}
+.listing-platform.is-instagram{background:radial-gradient(circle at 30% 105%,#ffdc80 0%,#f77737 28%,#e1306c 55%,#833ab4 85%)}
+.listing-platform.is-tiktok,.listing-platform.is-x{background:#050505;box-shadow:inset 0 0 0 1px #333}
+.listing-platform.is-snapchat{background:#fffc00;color:#000}.listing-platform.is-discord{background:#5865f2}.listing-platform.is-playstation{background:#003791}.listing-platform.is-xbox{background:#107c10}.listing-platform.is-telegram{background:#229ed9}.listing-platform.is-tellonym{background:#ff4d8d}.listing-platform.is-facebook{background:#1877f2}.listing-platform.is-youtube{background:#ff0033}
+.listing-title{display:flex;align-items:center;gap:10px}.listing-title bdi{overflow-wrap:anywhere}
+.backend-product-icon .listing-platform{width:72px;height:72px;flex-basis:72px;border-radius:19px;font-size:44px}.listing-platform.order-platform{width:64px;height:64px;flex-basis:64px;font-size:36px;border-radius:18px}
+
+.listing-platform.featured-platform{width:64px;height:64px;flex-basis:64px;font-size:38px;border-radius:18px}

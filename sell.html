@@ -1251,7 +1251,8 @@
 <link rel="stylesheet" href="./components.css">
 <link rel="stylesheet" href="./layout.css"><!-- /twig-include:global/head.html -->
 <style id="app-builder-recap-style">.grecaptcha-badge { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; transition: opacity 0.2s ease; }.grecaptcha-badge.app-builder-recap-show { visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; }</style><link rel="stylesheet" href="./backend-pages.css?v=ac8f1b64fa56">
-<link rel="stylesheet" href="./seller-products.css?v=e9fe6177d41e"></head>
+<link rel="stylesheet" href="./seller-products.css?v=e9fe6177d41e"><link rel="stylesheet" href="./listing-platforms.css?v=467cc8d151bd">
+</head>
 <body data-backend-page="seller"><header class="site-header fixed inset-x-0 top-0 z-40 border-b border-[var(--border-color)]" data-twig-section="global/header.html">
     <nav class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3 sm:px-8" aria-label="التنقل الرئيسي" data-twig-section="global/header.html">
         <a href="./index.html" class="flex items-center gap-3 transition-opacity duration-300 hover:opacity-80 focus:outline-none" aria-label="Account - الصفحة الرئيسية" data-twig-section="global/header.html">
@@ -1450,7 +1451,7 @@
           <label class="seller-field" for="listingTitle"><span id="listingNameLabel">يوزر الحساب *</span><input id="listingTitle" name="title" type="text" required minlength="2" maxlength="200" placeholder="مثال: xx7a"></label>
           <label class="seller-field" for="listingPrice"><span data-seller-text="price">السعر (SAR) *</span><input id="listingPrice" name="price" type="number" required min="0.01" max="1000000" step="0.01" inputmode="decimal" placeholder="0.00"></label>
           <label class="seller-field" for="listingKind"><span data-seller-text="kind">نوع العرض *</span><select id="listingKind" name="kind" required>
-            <option value="x" data-seller-type="x">منصة X</option><option value="instagram" data-seller-type="instagram">إنستغرام</option><option value="snapchat" data-seller-type="snapchat">سناب شات</option><option value="tiktok" data-seller-type="tiktok">تيك توك</option><option value="facebook" data-seller-type="facebook">فيسبوك</option><option value="youtube" data-seller-type="youtube">يوتيوب</option><option value="service" data-seller-type="service">خدمة رقمية</option><option value="game" data-seller-type="game">لعبة أو اشتراك</option>
+            <option value="x" data-seller-type="x">X</option><option value="instagram" data-seller-type="instagram">إنستغرام</option><option value="snapchat" data-seller-type="snapchat">سناب شات</option><option value="tiktok" data-seller-type="tiktok">تيك توك</option><option value="tellonym" data-seller-type="tellonym">تيلونيم</option><option value="discord" data-seller-type="discord">ديسكورد</option><option value="playstation" data-seller-type="playstation">سوني (PlayStation)</option><option value="xbox" data-seller-type="xbox">إكس بوكس</option><option value="telegram" data-seller-type="telegram">تلقرام</option><option value="service" data-seller-type="service">خدمة رقمية</option><option value="game" data-seller-type="game">لعبة أو اشتراك</option>
           </select><span class="seller-hint" data-seller-text="hint">كل منصة تواصل تظهر برمزها تلقائيًا، أما الخدمات والألعاب فتظهر بأيقونة دون صورة.</span></label>
           <fieldset id="listingCredentials" class="seller-secrets">
             <legend data-seller-text="private">بيانات الحساب المعروض للبيع</legend>
@@ -1549,7 +1550,8 @@
 </footer><script src="./i18n.js?v=df0b078c069b"></script>
 <script src="./supabase-sdk.js"></script>
 <script src="./supabase-config.js"></script>
+<script src="./listing-platforms.js?v=6163daa02146"></script>
 <script src="./currency.js?v=1089cfad761d"></script>
 <script src="./supabase-backend.js?v=8f589663f303"></script>
 <script src="./app.js?v=c44c48ea3908"></script>
-<script src="./backend-pages.js?v=d6a0c7f15820"></script><script src="./seller-products.js?v=76b08f190943"></script></body></html>
+<script src="./backend-pages.js?v=d2eddc47e3a1"></script><script src="./seller-products.js?v=3a44bb033aa7"></script></body></html>

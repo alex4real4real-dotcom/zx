@@ -46,11 +46,9 @@
   }
   function platform(item) {
     var product = products.find(function(p){return p.id === item.product_id;}) || {};
-    var types = {instagram:'fa-brands fa-instagram',x:'fa-brands fa-x-twitter',tiktok:'fa-brands fa-tiktok',snapchat:'fa-brands fa-snapchat',facebook:'fa-brands fa-facebook',youtube:'fa-brands fa-youtube',game:'fa-solid fa-gamepad',service:'fa-solid fa-briefcase'};
-    var type=product.listing_type || item.listing_type, box=make('span',undefined,'order-platform' + (type==='instagram'?' is-instagram':''));
-    box.append(icon(types[type] || 'fa-solid fa-box-open'));
-    return box;
+    return window.ListingPlatforms.create(product.listing_type || item.listing_type, 'order-platform');
   }
+
   function deliveryFields(body, result) {
     body.replaceChildren();
     if(result.state!=='delivered'){body.append(make('p',t('test_delivery')));return;}

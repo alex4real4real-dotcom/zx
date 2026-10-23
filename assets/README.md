@@ -1,0 +1,1 @@
+Tellonym: original Tello mark from https://info.tellonym.me/assets/brand/tello.png via https://info.tellonym.me/press?language=en. Original PNG pixels embedded unchanged in an SVG wrapper. Other application marks use the existing bundled Font Awesome brand font.
