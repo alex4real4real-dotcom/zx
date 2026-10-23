@@ -4,7 +4,7 @@
   var TEXT = {
     kicker:['طلباتي','MY ORDERS'], title:['تابع طلبك واستعرض معلومات الحساب','Track your order and view account information'],
     intro:['تابع مشترياتك ومبيعاتك. افتح النزاع بجانب السلعة، وتابع المحادثة والقرار من البطاقة نفسها.','Track your purchases and sales. Open a dispute beside the item and follow the conversation and decision in the same card.'],
-    payment:['حالة الدفع','Payment status'], payment_copy:['تُحجز قيمة السلعة 12 ساعة من الشراء، ثم تُخصّص للبائع إذا لم يُفتح نزاع. المحاكاة الحالية بلا أموال حقيقية.','The item amount is held for 12 hours after purchase, then allocated to the seller if no dispute is opened. The current simulation uses no real money.'],
+    payment:['حالة الدفع','Payment status'], payment_copy:['الدفع غير مفعّل حاليًا. تظهر حالة كل طلب وفق سجله، ولا يُؤكّد الدفع دون تحصيل فعلي.','Payments are currently inactive. Each order reflects its recorded status; payment is not confirmed without an actual charge.'],
     delivery:['تسليم الحسابات','Account delivery'], delivery_copy:['استعرض حالة التسليم ومعلومات طلبك من حسابك الشخصي.','View delivery status and order information from your own account.'],
     fair:['نزاع عادل','Fair disputes'], fair_copy:['إغلاق البائع يحسم للمشتري، وإغلاق المشتري لصالح البائع يحسم للبائع. يمكن للإدارة الفصل، والحسم نهائي.','Seller closure awards the buyer; buyer closure in the seller’s favor awards the seller. Support can decide too. Decisions are final.'],
     refresh:['تحديث الطلبات','Refresh orders'],

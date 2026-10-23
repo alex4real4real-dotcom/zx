@@ -107,7 +107,7 @@
         "البائعون الموثّقون": "Verified sellers",
         "تسجيل الدخول وإنشاء حساب": "Sign in and create account",
         "لم ينجح اختبار إعداد قاعدة البيانات.": "The database connection test failed.",
-        "نجح الاتصال بقاعدة البيانات. يمكنك الآن إنشاء حساب وتجربة السلة والطلبات التجريبية.": "Connected to the database. You can now create an account and try the cart and test orders.",
+        "نجح الاتصال بقاعدة البيانات. الحسابات والسلع والسلة مرتبطة بالخادم.": "Connected to the database. Accounts, products and cart use the server.",
         "جارٍ تحميل المنتجات…": "Loading products…",
         "سلع البائعين الموثّقين": "Verified sellers’ listings",
         "تظهر هنا سلع البائعين الموثّقين فقط.": "Only listings from verified sellers appear here.",
