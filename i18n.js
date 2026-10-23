@@ -207,6 +207,8 @@
         "حُفظت بيانات الملف الشخصي.": "Profile saved.",
         "سجّل الدخول أولًا.": "Please sign in first.",
         "هذا الحساب موقوف.": "This account is suspended.",
+        "هذا البريد مسجّل بالفعل. سجّل الدخول أو استخدم استعادة كلمة المرور.": "This email is already registered. Sign in or reset your password.",
+        "تعذّر التحقق من بيانات التسجيل. حاول مجددًا.": "Could not check your registration details. Please try again.",
         "رقم الجوال مستخدم في حساب آخر.": "This phone number is already used by another account.",
         "أدخل رقم جوال صحيحًا مثل 05xxxxxxxx أو رقمًا دوليًا يبدأ بعلامة +.": "Enter a valid phone number, such as 05xxxxxxxx, or an international number beginning with +.",
         "اسم المستخدم يجب أن يكون بين حرفين و120 حرفًا.": "Your username must contain between 2 and 120 characters.",
