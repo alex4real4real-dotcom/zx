@@ -251,6 +251,8 @@
     return check(await (await client()).rpc('account_submit_message', { p_email: email, p_kind: kind, p_fields: fields }));
   };
 
+  backend.submitIdea = async function(id,idea,description){return check(await (await client(true)).rpc('account_submit_idea',{p_id:id,p_idea:idea,p_description:description}));};
+  backend.adminIdeas = async function(offset){var start=offset||0;var rows=check(await (await client(true)).from('account_ideas').select('*').order('created_at',{ascending:false}).order('id',{ascending:true}).range(start,start+50));return {rows:rows.slice(0,50),more:rows.length>50};};
   backend.supportHealth = async function () { return check(await (await client()).rpc('account_support_health')); };
   backend.supportTickets = async function (staff, offset, status) {
     var c = await client(true), query;
@@ -280,7 +282,7 @@
   backend.supportStatus = async function (id, status) { return check(await (await client(true)).rpc('account_support_status', { p_ticket_id: id, p_status: status })); };
   backend.supportRead = async function (id, staff) { return check(await (await client(true)).rpc('account_support_read', { p_ticket_id: id, p_as_staff: !!staff })); };
 
-  backend.adminData = async function (section, offset, filter) { if(section==='withdrawals')return check(await (await client(true)).rpc('account_admin_withdrawals',{p_offset:offset||0,p_filter:filter||''}));return check(await (await client(true)).rpc('account_admin_data', { p_section: section, p_offset: offset || 0, p_filter: filter || '' })); };
+  backend.adminData = async function (section, offset, filter) { if(section==='ideas')return backend.adminIdeas(offset);if(section==='withdrawals')return check(await (await client(true)).rpc('account_admin_withdrawals',{p_offset:offset||0,p_filter:filter||''}));return check(await (await client(true)).rpc('account_admin_data', { p_section: section, p_offset: offset || 0, p_filter: filter || '' })); };
   backend.adminMembership = async function (email, name, remove) { return check(await (await client(true)).rpc('account_admin_membership', { p_email: email, p_name: name || '', p_remove: !!remove })); };
   backend.adminBan = async function (id, banned, reason) { return check(await (await client(true)).rpc('account_admin_ban', { p_user_id: id, p_banned: !!banned, p_reason: reason || '' })); };
   backend.adminVerify = async function (id, approve, note) { return check(await (await client(true)).rpc('account_admin_verify', { p_id: id, p_approve: !!approve, p_note: note || '' })); };

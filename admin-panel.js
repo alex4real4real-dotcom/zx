@@ -97,7 +97,7 @@
     }); node('sectionForm').append(form);
   }
   function chooseTab(tab, nextFilter) {
-    if (!['verifications','disputes','accounts','orders','tickets','members','withdrawals'].includes(tab)) tab = 'verifications';
+    if (!['verifications','disputes','accounts','orders','tickets','members','withdrawals','ideas'].includes(tab)) tab = 'verifications';
     activeTab = tab; filter = nextFilter !== undefined ? nextFilter : (tab === 'verifications'||tab === 'withdrawals') ? 'pending' : tab === 'disputes' ? 'open' : ''; target = 50; topupTarget = 50; adminRows = []; topups = [];
     document.querySelectorAll('[data-admin-tab]').forEach(function (el) { var selected = el.dataset.adminTab === tab; el.setAttribute('aria-selected',String(selected)); el.tabIndex = selected ? 0 : -1; });
     node('adminSection').setAttribute('aria-labelledby','tab-' + tab); node('sectionTitle').textContent = t(tab); node('sectionCopy').textContent = t(tab + '_copy'); node('sectionForm').replaceChildren();
@@ -199,7 +199,7 @@
   function renderAdminRows() {
     if(!activeTab||!node('myTicketsList')||!user)return;var host=node('myTicketsList');host.replaceChildren();host.className=['orders','disputes'].includes(activeTab)?'':'admin-grid';
     if(!adminRows.length)empty(host);
-    else if(activeTab==='members')renderMembers(host);else if(activeTab==='accounts')renderAccounts(host);else if(activeTab==='tickets')renderTickets(host);
+    else if(activeTab==='ideas')adminRows.forEach(function(row){var box=card(row.idea);box.append(make('p','admin-copy',row.submitter_name+' · '+row.submitter_email),make('p','admin-copy',date(row.created_at)));var description=make('p','',row.description);description.style.whiteSpace='pre-wrap';description.style.overflowWrap='anywhere';box.append(description);host.append(box);});else if(activeTab==='members')renderMembers(host);else if(activeTab==='accounts')renderAccounts(host);else if(activeTab==='tickets')renderTickets(host);
     else if(activeTab==='verifications')adminRows.forEach(function(row){host.append(verificationCard(row,true));});else if(activeTab==='disputes')renderDisputeTable(host);
     if(activeTab==='orders')renderOrders(host);if(activeTab==='withdrawals')renderWithdrawals(host);node('adminMore').hidden=!listMore;
   }

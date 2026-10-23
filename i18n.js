@@ -11,6 +11,7 @@
 
     var DICT = {
         ar: {
+        nav_ideas: 'شاركنا بأفكارك',
             nav_home: 'الرئيسية', nav_help: 'مركز المساعدة', nav_shop: 'المتجر', nav_sellers: 'البائعون', nav_dashboard: 'لوحة البائع',
             nav_start_selling: 'ابدأ البيع', nav_browse_products: 'بيع', nav_account: 'حسابي', nav_cart: 'سلة التسوق', nav_contact: 'تواصل معنا',
             nav_menu: 'القائمة', nav_subtitle: 'سوق موثوق', open_menu: 'فتح القائمة', close_menu: 'إغلاق القائمة',
@@ -33,6 +34,7 @@
             footer_copyright: '© 2026 Account. جميع الحقوق محفوظة.', footer_secure: 'تجربة تسوق آمنة وموثوقة.'
         },
         en: {
+        nav_ideas: 'Share your ideas',
             nav_home: 'Home', nav_help: 'Help Center', nav_shop: 'Shop', nav_sellers: 'Sellers', nav_dashboard: 'Seller Dashboard',
             nav_start_selling: 'Start Selling', nav_browse_products: 'Sell', nav_account: 'My Account', nav_cart: 'Cart', nav_contact: 'Contact Us',
             nav_menu: 'Menu', nav_subtitle: 'TRUSTED MARKET', open_menu: 'Open menu', close_menu: 'Close menu',

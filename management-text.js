@@ -1,4 +1,5 @@
 window.AccountManagementText = {
+"ideas":["فكرة","Ideas"],"ideas_copy":["أفكار المستخدمين واقتراحاتهم لتطوير المنصة.","User ideas and suggestions to improve the platform."],
 "payments_inactive":["خدمات الدفع والسحب غير مفعّلة حاليًا؛ هذه سجلات سابقة.","Payments and withdrawals are currently inactive; these are historical records."],
   "withdrawals":["طلبات السحب", "Withdrawals"],
   "withdrawals_copy":["راجع طلبات السحب التجريبية. المبلغ محجوز أثناء المراجعة؛ الرفض يعيده للرصيد المتاح.", "Review test withdrawal requests. Amounts are reserved during review; rejection restores the available balance."],
