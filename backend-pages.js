@@ -63,22 +63,25 @@
       action(event.currentTarget, 'profileStatus', async function () { await backend.signOut(); location.href = 'account.html'; });
     });
   }
+  function listingCard(row, headingTag) {
+    var card = el('article', undefined, 'catalog-card');
+    var header = el('div', undefined, 'catalog-header'), badge = window.ListingPlatforms.create(row.listing_type), identity = el('div', undefined, 'catalog-identity');
+    var heading = el(headingTag || 'h2', undefined, 'catalog-title'); heading.append(el('bdi', row.title));
+    identity.append(heading, el('span', badge.title, 'catalog-platform-name')); header.append(badge, identity);
+    var description = ['حسابات التواصل الاجتماعي', 'الخدمات الرقمية', 'الألعاب والاشتراكات'].includes(row.description) ? ui('p', row.description, 'catalog-description') : el('p', row.description || '', 'catalog-description');
+    description.dir = 'auto';
+    if (row.description) description.title = row.description;
+    var footer = el('div', undefined, 'catalog-footer'), price = amount(row.price); price.className = 'catalog-price';
+    var button = el('button', undefined, 'backend-button js-add-to-cart catalog-buy'), mark = el('i', undefined, 'fa-solid fa-cart-shopping');
+    mark.setAttribute('aria-hidden', 'true'); button.type = 'button'; button.dataset.uid = row.id; button.append(mark, ui('span', 'أضف إلى السلة'));
+    footer.append(price, button); card.append(header, description, footer); return card;
+  }
   async function shopPage(verifiedOnly) {
     try {
       var rows = await (verifiedOnly ? backend.verifiedSellerProducts() : backend.products()), container = document.getElementById('productList');
-      container.replaceChildren();
+      container.classList.add('catalog-grid'); container.replaceChildren();
       if (!rows.length) container.append(ui('p', verifiedOnly ? 'لا توجد سلع متاحة من بائعين موثّقين حاليًا.' : 'لا توجد منتجات متاحة حاليًا.'));
-      rows.forEach(function (row) {
-        var card = el('article', undefined, 'backend-panel');
-        if (row.image_url) { var image = el('img'); image.src = row.image_url; image.alt = row.title; image.className = 'backend-card-image'; card.append(image); }
-        else {
-          var icon = el('div', undefined, 'backend-product-icon'); icon.append(window.ListingPlatforms.create(row.listing_type)); card.append(icon);
-        }
-        var description = ['حسابات التواصل الاجتماعي', 'الخدمات الرقمية', 'الألعاب والاشتراكات'].includes(row.description) ? ui('p', row.description, 'backend-muted') : el('p', row.description, 'backend-muted');
-        var heading = el('h2', undefined, 'listing-title'); heading.append(window.ListingPlatforms.create(row.listing_type), el('bdi', row.title));
-        card.append(heading, description, amount(row.price));
-        var button = ui('button', 'أضف إلى السلة', 'backend-button js-add-to-cart'); button.type = 'button'; button.dataset.uid = row.id; card.append(button); container.append(card);
-      });
+      rows.forEach(function (row) { container.append(listingCard(row)); });
       status('shopStatus', '', false);
     } catch (error) { status('shopStatus', backend.errorMessage(error), true); }
   }
@@ -138,11 +141,8 @@
         var row = rows.find(function (entry) { return entry.id === button.dataset.uid; });
         button.disabled = !row;
         if (!row) { button.title = t('المنتج غير متاح حاليًا'); return; }
-        var title = card.querySelector('h3'), price = card.querySelector('[data-mc-price]');
-        if (title) title.textContent = row.title;
-        var badge = card.querySelector('.platform-icon, .featured-platform');
-        if (badge) badge.replaceWith(window.ListingPlatforms.create(row.listing_type, 'featured-platform'));
-        if (price) { price.dataset.mcPrice = row.price; price.dataset.currencyAmount = row.price; price.textContent = money(row.price); }
+        card.parentElement.classList.add('catalog-grid');
+        card.replaceWith(listingCard(row, 'h3'));
       });
     } catch (error) { cards.forEach(function (card) { var button = card.querySelector('.js-add-to-cart'); if (button) button.title = backend.errorMessage(error); }); }
   }
