@@ -227,7 +227,7 @@
     return data.map(function (row) {
       var product = row.product || {};
       return { unique_id_txt: row.product_id, id: row.product_id, title: product.title || 'منتج غير متاح',
-        price: Number(product.price || 0), count: row.quantity, image: product.image_url || '', available: !!product.id };
+        price: Number(product.price || 0), count: row.quantity, image: product.image_url || '', listing_type: product.listing_type || '', available: !!product.id };
     });
   };
   backend.setCart = async function (id, quantity, increment) {
