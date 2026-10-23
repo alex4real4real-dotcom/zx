@@ -53,6 +53,10 @@
     var response = await state.client.from('account_profiles').select('*').eq('id', state.user.id).maybeSingle();
     if (response.error) throw response.error;
     state.profile = response.data;
+    if (state.profile && state.profile.avatar_path && /^[a-f0-9-]{36}\/avatar\.(png|jpg|webp)$/.test(state.profile.avatar_path)) {
+      var signed = await state.client.storage.from('account-avatars').createSignedUrl(state.profile.avatar_path, 3600);
+      if (!signed.error && signed.data) state.profile.signed_avatar_url = signed.data.signedUrl;
+    }
     return state.profile;
   }
 
@@ -109,7 +113,7 @@
   backend.recoverySession = function () { return state.recovery && !!state.user; };
   backend.avatarUrl = function (profile) {
     var path = profile && profile.avatar_path;
-    return path && /^[a-f0-9-]{36}\/avatar\.(png|jpg|webp)$/.test(path) ? config.url + '/storage/v1/object/public/account-avatars/' + path + '?v=' + Date.now() : '';
+    return path && /^[a-f0-9-]{36}\/avatar\.(png|jpg|webp)$/.test(path) ? profile.signed_avatar_url || '' : '';
   };
   backend.normalizePhone = function (value) {
     var phone = String(value || '').trim().replace(/[٠-٩]/g, function (c) { return String(c.charCodeAt(0) - 1632); }).replace(/[۰-۹]/g, function (c) { return String(c.charCodeAt(0) - 1776); }).replace(/[\s()\-]/g, '');
