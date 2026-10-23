@@ -5,11 +5,11 @@
     instagram: ['Instagram', 'fa-brands fa-instagram'],
     snapchat: ['Snapchat', 'fa-brands fa-snapchat'],
     tiktok: ['TikTok', 'fa-brands fa-tiktok'],
-    tellonym: ['Tellonym', null, './assets/tellonym-user.png'],
+    tellonym: ['Tellonym', null, './assets/tellonym.svg'],
     discord: ['Discord', 'fa-brands fa-discord'],
     playstation: ['PlayStation', 'fa-brands fa-playstation'],
     xbox: ['Xbox', 'fa-brands fa-xbox'],
-    telegram: ['Telegram', null, './assets/telegram-user.png'],
+    telegram: ['Telegram', 'fa-solid fa-paper-plane'],
     service: ['Digital service', 'fa-solid fa-briefcase'],
     game: ['Game', 'fa-solid fa-gamepad'],
     facebook: ['Facebook', 'fa-brands fa-facebook-f'],
@@ -20,8 +20,8 @@
     var badge = document.createElement('span');
     badge.className = 'listing-platform is-' + (known ? type : 'service') + (className ? ' ' + className : '');
     badge.setAttribute('role', 'img'); badge.setAttribute('aria-label', data[0]); badge.title = data[0];
-    var mark = document.createElement(data[2] ? 'img' : 'i');
-    if (data[2]) { mark.src = data[2]; mark.alt = ''; }
+    var mark = document.createElement(data[2] ? 'span' : 'i');
+    if (data[2]) { mark.className = 'listing-silver-mark'; }
     else mark.className = data[1];
     mark.setAttribute('aria-hidden', 'true'); badge.append(mark); return badge;
   }

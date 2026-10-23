@@ -4,6 +4,7 @@
   var SOCIAL = ['x','instagram','snapchat','tiktok','tellonym','discord','playstation','xbox','telegram'];
   var TYPES = {x:['X','X'],instagram:['إنستغرام','Instagram'],snapchat:['سناب شات','Snapchat'],tiktok:['تيك توك','TikTok'],tellonym:['تيلونيم','Tellonym'],discord:['ديسكورد','Discord'],playstation:['سوني (PlayStation)','PlayStation (Sony)'],xbox:['إكس بوكس','Xbox'],telegram:['تلقرام','Telegram'],service:['خدمة رقمية','Digital service'],game:['لعبة أو اشتراك','Game or subscription']};
   var TEXT = {
+    delete:['حذف السلعة','Delete listing'],restore:['استعادة كمسودة','Restore as draft'],deleted:['محذوفة','Deleted'],deleted_list:['المحذوفات','Deleted listings'],active_list:['العودة إلى سلعي','Back to my listings'],deleted_empty:['لا توجد سلع محذوفة.','No deleted listings.'],deleted_saved:['حُذفت السلعة من العرض. يمكنك استعادتها من المحذوفات.','Listing removed. You can restore it from Deleted listings.'],restored_saved:['استُعيدت السلعة كمسودة.','Listing restored as a draft.'],delete_confirm:['هل تريد حذف هذه السلعة من العرض؟ تبقى الطلبات السابقة محفوظة، ويمكنك استعادتها من المحذوفات.','Remove this listing? Existing orders are preserved. You can restore it from Deleted listings.'],
     title:['إضافة خدمة جديدة','Add a new listing'],intro:['أضف بيانات السلعة لتظهر في متجرك وكتالوج السوق.','Add your listing to your store and the marketplace.'],
     name:['اسم الخدمة *','Listing name *'],user:['يوزر الحساب *','Account username *'],price:['السعر (SAR) *','Price (SAR) *'],kind:['نوع العرض *','Listing type *'],
     hint:['كل منصة تواصل تظهر برمزها تلقائيًا، أما الخدمات والألعاب فتظهر بأيقونة دون صورة.','Social accounts use their platform icon. Services and games use an icon.'],
@@ -17,15 +18,15 @@
     failed:['تعذّر تنفيذ الطلب. حاول مرة أخرى.','The request failed. Please try again.'],unavailable:['الخدمة غير جاهزة حاليًا. حاول لاحقًا.','This service is not ready. Please try later.'],invalid:['راجع اسم السلعة والسعر والحقول المطلوبة.','Check the listing name, price and required fields.'],invalid_credentials:['أكمل بيانات الحساب المعروض للبيع.','Complete the account details for this listing.'],not_found:['هذه السلعة غير موجودة أو لا تخص حسابك.','This listing is unavailable or does not belong to you.'],blocked:['حسابك موقوف ولا يمكنه إضافة السلع.','Your account is suspended.'],limit:['وصلت إلى الحد الأقصى للسلع.','You have reached the listing limit.'],email_required:['فعّل بريد حسابك قبل إضافة السلع.','Confirm your email before adding listings.'],
     placeholder:['مثال: لعبة فيفا 27','For example: FIFA 27'],user_placeholder:['مثال: xx7a','For example: xx7a'],description_placeholder:['اكتب وصفًا مختصرًا للخدمة…','Write a short description…']
   };
-  var form, user, profile, canPublish = false, busy = false, epoch = 0, listEpoch = 0, rows = [], more = false, editing = false, productId = null;
+  var form, user, profile, canPublish = false, busy = false, epoch = 0, listEpoch = 0, rows = [], more = false, editing = false, productId = null, viewDeleted = false;
   function node(id) { return document.getElementById(id); }
   function uuid() { if (crypto.randomUUID) return crypto.randomUUID(); var bytes=crypto.getRandomValues(new Uint8Array(16));bytes[6]=bytes[6]&15|64;bytes[8]=bytes[8]&63|128;var h=Array.from(bytes,function(b){return b.toString(16).padStart(2,'0');}).join('');return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20); }
   function english() { return window.AppI18N && window.AppI18N.getLang() !== 'ar'; }
   function t(key) { var text = TEXT[key] || TYPES[key]; return text ? text[english()?1:0] : key; }
   function status(key, error) { var el = node('sellerStatus'); el.dataset.messageKey = key || ''; el.hidden = !key; el.textContent = key ? t(key) : ''; el.classList.toggle('is-error', !!error); }
-  function errorKey(error) { var s = String(error && error.message || error || ''); if(/PRODUCT_SOLD/.test(s))return 'sold_notice'; if(/SELLER_VERIFICATION_REQUIRED/.test(s))return 'verify_hint'; if(/EMAIL_CONFIRMATION_REQUIRED/.test(s))return 'email_required'; if(/INVALID_CREDENTIALS/.test(s))return 'invalid_credentials'; if(/INVALID_PRODUCT|23514/.test(s))return 'invalid'; if(/PRODUCT_NOT_FOUND/.test(s))return 'not_found'; if(/PRODUCT_LIMIT/.test(s))return 'limit'; if(/ACCOUNT_BANNED/.test(s))return 'blocked'; if(/AUTH_REQUIRED/.test(s))return 'login'; if(/schema|PGRST20[25]|does not exist|permission denied/i.test(s))return 'unavailable'; return 'failed'; }
+  function errorKey(error) { var s = String(error && error.message || error || ''); if(/PRODUCT_DELETED/.test(s))return 'not_found'; if(/PRODUCT_SOLD/.test(s))return 'sold_notice'; if(/SELLER_VERIFICATION_REQUIRED/.test(s))return 'verify_hint'; if(/EMAIL_CONFIRMATION_REQUIRED/.test(s))return 'email_required'; if(/INVALID_CREDENTIALS/.test(s))return 'invalid_credentials'; if(/INVALID_PRODUCT|23514/.test(s))return 'invalid'; if(/PRODUCT_NOT_FOUND/.test(s))return 'not_found'; if(/PRODUCT_LIMIT/.test(s))return 'limit'; if(/ACCOUNT_BANNED/.test(s))return 'blocked'; if(/AUTH_REQUIRED/.test(s))return 'login'; if(/schema|PGRST20[25]|does not exist|permission denied/i.test(s))return 'unavailable'; return 'failed'; }
   function make(tag,css,text) { var el=document.createElement(tag);if(css)el.className=css;if(text!==undefined)el.textContent=text;return el; }
-  function setBusy(value) { busy=value; node('listingFields').disabled=value||!user; node('cancelListing').disabled=value; node('sellerRefresh').disabled=value; document.querySelectorAll('[data-seller-action]').forEach(function(el){el.disabled=value;}); }
+  function setBusy(value) { busy=value; node('listingFields').disabled=value||!user; node('cancelListing').disabled=value; node('sellerRefresh').disabled=value;if(node('sellerDeletedToggle'))node('sellerDeletedToggle').disabled=value; document.querySelectorAll('[data-seller-action]').forEach(function(el){el.disabled=value;}); }
   function updateKind() {
     var social=SOCIAL.includes(form.elements.kind.value);node('listingCredentials').hidden=!social;node('listingCredentials').disabled=!social;
     node('listingNameLabel').textContent=t(social?'user':'name');form.elements.title.placeholder=t(social?'user_placeholder':'placeholder');
@@ -36,23 +37,24 @@
     document.querySelectorAll('[data-seller-type]').forEach(function(el){el.textContent=t(el.dataset.sellerType);});
     document.title=t('title')+' | Account';
     if(form){updateKind();form.elements.description.placeholder=t('description_placeholder');node('listingSubmitText').textContent=t(editing?'update':canPublish?'publish':'draft');}
+    if(node('sellerDeletedToggle'))node('sellerDeletedToggle').textContent=t(viewDeleted?'active_list':'deleted_list');
     var key=node('sellerStatus').dataset.messageKey;if(key)node('sellerStatus').textContent=t(key);render();
   }
   function resetForm() { form.reset(); productId=null; editing=false; node('cancelListing').hidden=true; updateKind();node('listingSubmitText').textContent=t(canPublish?'publish':'draft'); }
   function money(value) { return window.CurrencySystem.format(value); }
   function render() {
     var host=node('sellerRows');host.replaceChildren();
-    if(!rows.length&&user)host.append(make('p','seller-copy',t('empty')));
+    if(!rows.length&&user)host.append(make('p','seller-copy',t(viewDeleted?'deleted_empty':'empty')));
     rows.forEach(function(row){
-      var card=make('article','seller-product'),top=make('div','seller-product-top'),info=make('div');var title=make('h3','listing-title');title.append(window.ListingPlatforms.create(row.listing_type),make('bdi','',row.title));info.append(title,make('strong','',money(row.price)));top.append(info,make('span','seller-badge',t(row.sold_at?'sold':row.active?'live':'hidden')));card.append(top,make('p','',t(row.listing_type||'service')));
+      var card=make('article','seller-product'),top=make('div','seller-product-top'),info=make('div');var title=make('h3','listing-title');title.append(window.ListingPlatforms.create(row.listing_type),make('bdi','',row.title));info.append(title,make('strong','',money(row.price)));top.append(info,make('span','seller-badge',t(row.deleted_at?'deleted':row.sold_at?'sold':row.active?'live':'hidden')));card.append(top,make('p','',t(row.listing_type||'service')));
       if(row.description)card.append(make('p','',row.description));
-      var actions=make('div','seller-actions');(row.sold_at?[]:[['edit',function(){editProduct(row.id);}], [row.active?'hide':'show',function(){changeVisibility(row);}]]).forEach(function(pair){var b=make('button','seller-button secondary',t(pair[0]));b.type='button';b.dataset.sellerAction='';b.disabled=busy;b.addEventListener('click',pair[1]);actions.append(b);});card.append(actions);host.append(card);
+      var actions=make('div','seller-actions');(row.deleted_at?[['restore',function(){archiveProduct(row,true);}]]:(row.sold_at?[]:[['edit',function(){editProduct(row.id);}], [row.active?'hide':'show',function(){changeVisibility(row);}] ]).concat([['delete',function(){archiveProduct(row,false);}]] )).forEach(function(pair){var b=make('button','seller-button secondary',t(pair[0]));b.type='button';b.dataset.sellerAction='';b.disabled=busy;b.addEventListener('click',pair[1]);actions.append(b);});card.append(actions);host.append(card);
     });node('sellerMore').hidden=!more;
   }
   async function loadProducts(append) {
     var current=++listEpoch,session=epoch,offset=append?rows.length:0;
     node('sellerMore').disabled=true;
-    try { var batch=await backend.sellerProducts(offset);if(current!==listEpoch||session!==epoch)return;rows=append?rows.concat(batch):batch;more=batch.length===24;render(); }
+    try { var batch=await backend.sellerProducts(offset,viewDeleted);if(current!==listEpoch||session!==epoch)return;rows=append?rows.concat(batch):batch;more=batch.length===24;render(); }
     finally { if(current===listEpoch)node('sellerMore').disabled=false; }
   }
   async function act(operation) {
@@ -69,11 +71,17 @@
       ['account_email','email_password','account_username','account_password'].forEach(function(key){form.elements[key].value=secrets[key]||'';});updateKind();node('cancelListing').hidden=false;node('listingSubmitText').textContent=t('update');node('listingCard').scrollIntoView({behavior:'smooth',block:'start'});form.elements.title.focus();
     });
   }
+  function archiveProduct(row,restore) {
+    if(!restore&&!window.confirm(t('delete_confirm')))return;
+    act(async function(session){await backend.sellerArchiveProduct(row.id,restore);if(session!==epoch)return;if(productId===row.id)resetForm();await refreshedAfterSave(restore?'restored_saved':'deleted_saved',session);});
+  }
   function changeVisibility(row) {
     act(async function(session){if(!row.active&&!canPublish)throw new Error('SELLER_VERIFICATION_REQUIRED');await backend.sellerSetVisibility(row.id,!row.active);if(session!==epoch)return;await refreshedAfterSave(row.active?'hidden_saved':'saved',session);});
   }
   async function initialize() {
-    form=node('sellerProductForm');localize();
+    form=node('sellerProductForm');
+    var deletedToggle=make('button','seller-button secondary',t('deleted_list'));deletedToggle.id='sellerDeletedToggle';deletedToggle.type='button';node('sellerRefresh').parentElement.append(deletedToggle);deletedToggle.addEventListener('click',function(){act(async function(){viewDeleted=!viewDeleted;localize();await loadProducts(false);});});
+    localize();
     form.elements.kind.addEventListener('change',updateKind);node('cancelListing').addEventListener('click',function(){if(!busy){resetForm();status('');}});
     node('sellerRefresh').addEventListener('click',function(){act(async function(){await loadProducts(false);});});node('sellerMore').addEventListener('click',function(){act(async function(){await loadProducts(true);});});
     form.addEventListener('submit',function(event){event.preventDefault();if(!form.reportValidity())return;
@@ -90,7 +98,7 @@
     try{profile=await backend.profile();if(session!==epoch)return;canPublish=!!(profile&&(profile.is_verified||profile.role==='admin'));node('sellerVerification').hidden=canPublish;node('sellerProducts').hidden=false;setBusy(false);localize();await loadProducts(false);}catch(error){status(errorKey(error),true);}
   }
   window.addEventListener('account:languagechange',function(){if(form)localize();});
-  window.addEventListener('account:signed-out',function(){epoch++;listEpoch++;user=null;profile=null;rows=[];more=false;if(form)resetForm();node('sellerRows').replaceChildren();node('sellerProducts').hidden=true;node('sellerVerification').hidden=true;node('sellerGuest').hidden=false;status('');setBusy(false);});
+  window.addEventListener('account:signed-out',function(){epoch++;listEpoch++;user=null;profile=null;rows=[];more=false;viewDeleted=false;if(form)resetForm();node('sellerRows').replaceChildren();node('sellerProducts').hidden=true;node('sellerVerification').hidden=true;node('sellerGuest').hidden=false;status('');setBusy(false);});
   window.addEventListener('pagehide',function(){if(form){['account_email','email_password','account_username','account_password'].forEach(function(key){form.elements[key].value='';});}});
   var ready=document.readyState==='loading'?new Promise(function(resolve){document.addEventListener('DOMContentLoaded',resolve,{once:true});}):Promise.resolve();
   ready.then(initialize).catch(function(error){status(errorKey(error),true);});

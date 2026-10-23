@@ -207,11 +207,13 @@
   backend.verifiedSellerProducts = async function () {
     return check(await (await client()).rpc('account_verified_seller_products').order('created_at', { ascending: false }).order('id', { ascending: true }));
   };
-  backend.sellerProducts = async function (offset) {
+  backend.sellerProducts = async function (offset, deleted) {
     var c = await client(true), start = offset || 0;
-    return check(await c.from('account_products').select('id,title,description,price,listing_type,active,created_at,sold_at')
-      .eq('seller_id', state.user.id).order('created_at', { ascending: false }).order('id', { ascending: true }).range(start, start + 23));
+    var query = c.from('account_products').select('id,title,description,price,listing_type,active,created_at,sold_at,deleted_at').eq('seller_id', state.user.id);
+    query = deleted ? query.not('deleted_at', 'is', null) : query.is('deleted_at', null);
+    return check(await query.order('created_at', { ascending: false }).order('id', { ascending: true }).range(start, start + 23));
   };
+  backend.sellerArchiveProduct = async function (id, restore) { return check(await (await client(true)).rpc('account_seller_archive_product', {p_id:id,p_restore:!!restore})); };
   backend.sellerProduct = async function (id) { return check(await (await client(true)).rpc('account_seller_read_product', { p_id: id })); };
   backend.sellerSaveProduct = async function (product) {
     return check(await (await client(true)).rpc('account_seller_save_product', {
