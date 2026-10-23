@@ -38,6 +38,22 @@
         window.addEventListener('account:signed-out', updateGuestLogin);
     }
 
+    var withdrawalLinks = document.querySelectorAll('a[href$="withdraw.html"]');
+    function hideWithdrawals() {
+        withdrawalLinks.forEach(function (link) { link.style.display = 'none'; });
+    }
+    hideWithdrawals();
+    if (window.accountBackend && window.accountBackend.currentUser()) {
+        var withdrawalUser = window.accountBackend.currentUser().id;
+        window.accountBackend.profile().then(function (profile) {
+            if (!window.accountBackend.currentUser() || window.accountBackend.currentUser().id !== withdrawalUser) return;
+            if (profile && profile.is_verified === true && !profile.banned) {
+                withdrawalLinks.forEach(function (link) { link.style.removeProperty('display'); });
+            }
+        }).catch(hideWithdrawals);
+    }
+    window.addEventListener('account:signed-out', hideWithdrawals);
+
     var navOpenButton = document.getElementById('navOpenButton');
     var navCloseButton = document.getElementById('navCloseButton');
     var navOverlay = document.getElementById('navOverlay');
