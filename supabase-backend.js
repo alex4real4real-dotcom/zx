@@ -6,6 +6,7 @@
 
   function message(error) {
     var text = String(error && (error.message || error.error_description || error) || '');
+    if (/PAYMENTS_NOT_ENABLED/.test(text)) return 'الدفع والسحب غير متاحين حاليًا.';
     if (/AUTH_REQUIRED/.test(text)) return 'سجّل الدخول أولًا.';
     if (/ACCOUNT_BANNED/.test(text)) return 'هذا الحساب موقوف.';
     if (/EMAIL_IN_USE|User already registered|email_exists/i.test(text)) return 'هذا البريد مسجّل بالفعل. سجّل الدخول أو استخدم استعادة كلمة المرور.';

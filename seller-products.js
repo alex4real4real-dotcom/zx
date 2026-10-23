@@ -8,7 +8,7 @@
     name:['اسم الخدمة *','Listing name *'],user:['يوزر الحساب *','Account username *'],price:['السعر (ر.س) *','Price (SAR) *'],kind:['نوع العرض *','Listing type *'],
     hint:['كل منصة تواصل تظهر برمزها تلقائيًا، أما الخدمات والألعاب فتظهر بأيقونة دون صورة.','Social accounts use their platform icon. Services and games use an icon.'],
     private:['بيانات الحساب المعروض للبيع','Account details for this listing'],email:['البريد الإلكتروني للحساب *','Account email *'],email_password:['باسورد البريد *','Email password *'],username:['يوزر الحساب *','Account username *'],password:['باسورد الحساب *','Account password *'],
-    privacy:['لا تظهر البيانات في صفحة المنتج العامة. التسليم في الطلب التجريبي يتطلب تحديد أنها بيانات وهمية أدناه.','Details are hidden from the public listing. Test delivery requires marking them as dummy data below.'],
+    privacy:['بيانات الحساب خاصة ولا تظهر في صفحة المنتج العامة.','Account details are private and hidden from the public listing.'],
     test_delivery:['هذه بيانات وهمية للاختبار، وأسمح بتسليمها لمشتري الطلب التجريبي.','These are dummy test details. Allow delivery to the test-order buyer.'],sold:['تم البيع','Sold'],sold_notice:['تم بيع هذا الحساب ولا يمكن نشره مجددًا.','This account has been sold and cannot be published again.'],
     description:['وصف مختصر للخدمة','Short description'],publish:['نشر المنتج','Publish listing'],draft:['حفظ السلعة كمسودة','Save listing as a draft'],update:['حفظ التعديلات','Save changes'],cancel:['إلغاء التعديل','Cancel editing'],
     mine:['سلعي','My listings'],refresh:['تحديث','Refresh'],edit:['تعديل','Edit'],hide:['إخفاء','Hide'],show:['نشر','Publish'],live:['منشور','Published'],hidden:['مسودة / مخفي','Draft / hidden'],more:['عرض المزيد','Load more'],empty:['لم تُضف أي سلع بعد. أضف سلعتك الأولى من النموذج أعلاه.','No listings yet. Add your first listing using the form above.'],
@@ -66,7 +66,7 @@
   function editProduct(id) {
     act(async function(session){var result=await backend.sellerProduct(id);if(session!==epoch)return;var row=result.product,secrets=result.credentials||{};
       productId=row.id;editing=true;form.elements.title.value=row.title;form.elements.price.value=row.price;form.elements.kind.value=row.listing_type||'service';form.elements.description.value=row.description;form.dataset.wasActive=String(row.active);
-      ['account_email','email_password','account_username','account_password'].forEach(function(key){form.elements[key].value=secrets[key]||'';});form.elements.test_delivery.checked=secrets.test_delivery===true;updateKind();node('cancelListing').hidden=false;node('listingSubmitText').textContent=t('update');node('listingCard').scrollIntoView({behavior:'smooth',block:'start'});form.elements.title.focus();
+      ['account_email','email_password','account_username','account_password'].forEach(function(key){form.elements[key].value=secrets[key]||'';});updateKind();node('cancelListing').hidden=false;node('listingSubmitText').textContent=t('update');node('listingCard').scrollIntoView({behavior:'smooth',block:'start'});form.elements.title.focus();
     });
   }
   function changeVisibility(row) {
@@ -79,7 +79,7 @@
     form.addEventListener('submit',function(event){event.preventDefault();if(!form.reportValidity())return;
       act(async function(session){
         var currentProfile=await backend.profile();if(session!==epoch)return;profile=currentProfile;canPublish=!!(profile&&(profile.is_verified||profile.role==='admin'));
-        var social=SOCIAL.includes(form.elements.kind.value),credentials={};if(social)['account_email','email_password','account_username','account_password'].forEach(function(key){credentials[key]=form.elements[key].value;});if(social)credentials.test_delivery=form.elements.test_delivery.checked;
+        var social=SOCIAL.includes(form.elements.kind.value),credentials={};if(social)['account_email','email_password','account_username','account_password'].forEach(function(key){credentials[key]=form.elements[key].value;});if(social)credentials.test_delivery=false;
         if(!productId)productId=uuid();
         var record=await backend.sellerSaveProduct({id:productId,title:form.elements.title.value.trim(),price:Number(form.elements.price.value),kind:form.elements.kind.value,description:form.elements.description.value.trim(),credentials:credentials,active:canPublish&&(!editing||form.dataset.wasActive==='true')});
         if(session!==epoch)return;resetForm();node('sellerVerification').hidden=canPublish;await refreshedAfterSave(record.active?'saved':canPublish?'hidden_updated':'draft_saved',session);
