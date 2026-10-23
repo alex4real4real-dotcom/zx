@@ -2,6 +2,8 @@ begin;
 select set_config('withdraw_test.buyer',(select id::text from public.account_profiles where role='buyer' and not banned limit 1),true),
  set_config('withdraw_test.seller',(select id::text from public.account_profiles where role='admin' and not banned limit 1),true),
  set_config('withdraw_test.product','qa-withdraw-'||gen_random_uuid()::text,true);
+-- Verified identities for withdrawal fixtures, reverted with all test data below.
+update public.account_profiles set is_verified=true where id in(current_setting('withdraw_test.buyer')::uuid,current_setting('withdraw_test.seller')::uuid);
 create temp table withdraw_qa(label text primary key,id uuid,key uuid default gen_random_uuid());grant select,insert,update on withdraw_qa to authenticated;
 create function pg_temp.iban(body text) returns text language sql as $$ select 'SA'||lpad((98-mod((body||'281000')::numeric,97))::text,2,'0')||body;$$;
 select set_config('withdraw_test.iban',pg_temp.iban('80'||lpad('987654321',18,'0')),true);

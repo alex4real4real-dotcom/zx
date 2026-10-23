@@ -53,6 +53,7 @@ returns jsonb language plpgsql security definer set search_path='' as $$
 declare uid uuid; accounts jsonb; rows jsonb;
 begin
  uid:=account_admin_private.require_user();
+ if not exists(select 1 from public.account_profiles where id=uid and is_verified=true and not banned) then raise exception 'IDENTITY_VERIFICATION_REQUIRED'; end if;
  select coalesce(jsonb_agg(jsonb_build_object('id',b.id,'bank_name',b.bank_name,'holder_name',b.holder_name,'iban_masked','SA•• •••• •••• '||right(b.iban,4)) order by b.created_at),'[]'::jsonb)
  into accounts from account_withdrawal_private.bank_accounts b where b.user_id=uid;
  select coalesce(jsonb_agg(to_jsonb(x)),'[]'::jsonb) into rows from (
@@ -67,6 +68,7 @@ returns jsonb language plpgsql security definer set search_path='' as $$
 declare uid uuid; existing account_withdrawal_private.bank_accounts; normalized text:=regexp_replace(upper(coalesce(p_iban,'')),'[[:space:]-]','','g'); bank text:=btrim(coalesce(p_bank,'')); holder text:=btrim(coalesce(p_holder,''));
 begin
  uid:=account_admin_private.require_user();
+ if not exists(select 1 from public.account_profiles where id=uid and is_verified=true and not banned) then raise exception 'IDENTITY_VERIFICATION_REQUIRED'; end if;
  if p_request_id is null or char_length(bank) not between 2 and 100 or char_length(holder) not between 2 and 120 or not account_withdrawal_private.valid_iban(normalized) then raise exception 'INVALID_BANK_ACCOUNT'; end if;
  select * into existing from account_withdrawal_private.bank_accounts where user_id=uid and request_id=p_request_id;
  if found then
@@ -85,6 +87,7 @@ begin
  -- require_user locks this user's profile. Every reservation/review takes the same lock.
  -- Concurrent requests therefore cannot spend the same available test balance.
  uid:=account_admin_private.require_user();
+ if not exists(select 1 from public.account_profiles where id=uid and is_verified=true and not banned) then raise exception 'IDENTITY_VERIFICATION_REQUIRED'; end if;
  if p_request_id is null or p_amount is null or p_amount::text in('NaN','Infinity','-Infinity') or p_amount<=0 or p_amount<>trunc(p_amount,2) or char_length(coalesce(p_note,''))>1000 then raise exception 'INVALID_WITHDRAWAL_AMOUNT'; end if;
  select * into existing from account_withdrawal_private.requests where user_id=uid and request_id=p_request_id;
  if found then
