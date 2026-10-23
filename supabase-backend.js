@@ -8,6 +8,7 @@
     var text = String(error && (error.message || error.error_description || error) || '');
     if (/AUTH_REQUIRED/.test(text)) return 'سجّل الدخول أولًا.';
     if (/ACCOUNT_BANNED/.test(text)) return 'هذا الحساب موقوف.';
+    if (/EMAIL_IN_USE|User already registered|email_exists/i.test(text)) return 'هذا البريد مسجّل بالفعل. سجّل الدخول أو استخدم استعادة كلمة المرور.';
     if (/PHONE_IN_USE|account_profiles_confirmed_phone|duplicate key.*phone/i.test(text)) return 'رقم الجوال مستخدم في حساب آخر.';
     if (/INVALID_PHONE/.test(text)) return 'أدخل رقم جوال صحيحًا مثل 05xxxxxxxx أو رقمًا دوليًا يبدأ بعلامة +.';
     if (/INVALID_NAME/.test(text)) return 'اسم المستخدم يجب أن يكون بين حرفين و120 حرفًا.';
@@ -142,6 +143,12 @@
   };
   backend.signUp = async function (email, password, name, phone) {
     var c = await client();
+    email = email.trim().toLowerCase();
+    phone = backend.normalizePhone(phone);
+    var availability = check(await c.rpc('account_signup_availability', { p_email: email, p_phone: phone }));
+    if (availability === 'email_in_use') throw new Error('EMAIL_IN_USE');
+    if (availability === 'phone_in_use') throw new Error('PHONE_IN_USE');
+    if (availability !== 'available') throw new Error('تعذّر التحقق من بيانات التسجيل. حاول مجددًا.');
     var data = check(await c.auth.signUp({ email: email, password: password, options: {
       data: { name: name, phone: backend.normalizePhone(phone) }, emailRedirectTo: new URL('account.html', location.href).href
     } }));
