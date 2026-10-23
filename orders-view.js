@@ -76,7 +76,7 @@
     host.replaceChildren();
     if (!backend.currentUser()) return;
     var count=0;
-    orders.forEach(function(order){
+    orders.filter(function(order){return !testOrder(order);}).forEach(function(order){
       (order.items || []).forEach(function(item){
         var settlement=settlementFor(item), dispute=disputes.find(function(d){return d.order_item_id===item.id;}), isTest=testOrder(order);
         if(disputesOnly&&!dispute)return;count++;
@@ -112,14 +112,13 @@
     if(!backend.currentUser()){guest();return;}
     var token=++revision, user=backend.currentUser();node('ordersGuest').hidden=true;node('ordersMember').hidden=false;node('ordersRefresh').disabled=true;notice(t('loading'));
     try {
-      var result=await Promise.allSettled([backend.orders(),allDisputes(),backend.products(),backend.testSettlements(),backend.sellerOrders()]);
+      var result=await Promise.allSettled([backend.orders(),allDisputes(),backend.products(),backend.sellerOrders()]);
       if(token!==revision || !backend.currentUser() || backend.currentUser().id!==user.id)return;
       if(result[0].status!=='fulfilled')throw result[0].reason;
       if(result[3].status!=='fulfilled')throw result[3].reason;
       if(result[1].status!=='fulfilled')throw result[1].reason;
-      if(result[4].status!=='fulfilled')throw result[4].reason;
-      settlements=result[3].value.settlements || [];serverOffset=Date.parse(result[3].value.server_now)-Date.now();
-      var merged=new Map();(result[0].value||[]).concat(result[4].value||[]).forEach(function(order){var existing=merged.get(order.id);if(!existing)merged.set(order.id,Object.assign({},order,{items:(order.items||[]).slice()}));else(order.items||[]).forEach(function(item){if(!existing.items.some(function(i){return i.id===item.id;}))existing.items.push(item);});});orders=Array.from(merged.values()).sort(function(a,b){return Date.parse(b.created_at)-Date.parse(a.created_at);});disputes=result[1].status==='fulfilled'?result[1].value || []:[];products=result[2].status==='fulfilled'?result[2].value || []:[];
+      settlements=[];serverOffset=0;
+      var merged=new Map();(result[0].value||[]).concat(result[3].value||[]).filter(function(order){return !testOrder(order);}).forEach(function(order){var existing=merged.get(order.id);if(!existing)merged.set(order.id,Object.assign({},order,{items:(order.items||[]).slice()}));else(order.items||[]).forEach(function(item){if(!existing.items.some(function(i){return i.id===item.id;}))existing.items.push(item);});});orders=Array.from(merged.values()).sort(function(a,b){return Date.parse(b.created_at)-Date.parse(a.created_at);});disputes=result[1].status==='fulfilled'?result[1].value || []:[];products=result[2].status==='fulfilled'?result[2].value || []:[];
       ready=true;render();notice('');
     }catch(error){if(token!==revision)return;orders=[];ready=false;node('orderList').replaceChildren();notice(t('failed'),true);}
     finally{if(token===revision)node('ordersRefresh').disabled=false;}

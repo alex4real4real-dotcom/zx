@@ -238,7 +238,7 @@
     }));
   };
   backend.checkout = async function (requestId) {
-    return check(await (await client(true)).rpc('account_place_test_order', { p_request_id: requestId }));
+    throw new Error('PAYMENTS_NOT_ENABLED');
   };
   backend.orderDelivery = async function (itemId) { return check(await (await client(true)).rpc('account_order_delivery', { p_order_item_id: itemId })); };
   backend.testSettlements = async function () { return check(await (await client(true)).rpc('account_test_settlements')); };
