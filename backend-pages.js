@@ -115,28 +115,13 @@
     try { await render(); } catch (error) { checkout.disabled = true; status('cartStatus', backend.errorMessage(error), true); }
   }
 
-  async function ordersPage() {
-    if (!requireUser()) return;
-    try {
-      var rows = await backend.orders(), container = document.getElementById('orderList');
-      container.replaceChildren();
-      if (!rows.length) container.append(ui('p', 'لا توجد طلبات بعد.'));
-      rows.forEach(function (row) {
-        var panel = el('article', undefined, 'backend-panel');
-        panel.append(ui('h2', 'طلب تجريبي'), el('p', row.id, 'backend-order-id'));
-        var date = el('p', new Date(row.created_at).toLocaleString(document.documentElement.lang === 'en' ? 'en-GB' : 'ar-SA'), 'backend-muted'); date.dataset.localeDate = row.created_at; panel.append(date, amount(row.total));
-        (row.items || []).forEach(function (item) { panel.append(el('p', item.title + ' × ' + item.quantity + ' — ' + money(item.unit_price * item.quantity))); });
-        panel.append(ui('p', 'محاكاة فقط؛ لا يُمثّل هذا الطلب دفعة حقيقية.')); container.append(panel);
-      });
-    } catch (error) { status('ordersStatus', backend.errorMessage(error), true); }
-  }
   async function connectionPage() {
     document.getElementById('backendProjectUrl').textContent = window.ACCOUNT_CONFIG.url;
     document.getElementById('checkConnection').addEventListener('click', function (event) {
       action(event.currentTarget, 'connectionStatus', async function () {
         var result = await backend.health();
         if (!result || result.ready !== true) throw new Error('لم ينجح اختبار إعداد قاعدة البيانات.');
-        status('connectionStatus', 'نجح الاتصال بقاعدة البيانات. يمكنك الآن إنشاء حساب وتجربة السلة والطلبات التجريبية.', false);
+        status('connectionStatus', 'نجح الاتصال بقاعدة البيانات. الحسابات والسلع والسلة مرتبطة بالخادم.', false);
       });
     });
   }
@@ -166,7 +151,6 @@
     if (page === 'shop') await shopPage();
     if (page === 'sellers') await shopPage(true);
     if (page === 'cart') await cartPage();
-    if (page === 'orders') await ordersPage();
     if (page === 'connection') await connectionPage();
     if (!page) await syncHomepageProducts();
   }).catch(function (error) { var node = document.querySelector('.backend-status'); if (node) { if (window.AppI18N) window.AppI18N.bindText(node, backend.errorMessage(error)); else node.textContent = backend.errorMessage(error); node.classList.add('error'); } });
