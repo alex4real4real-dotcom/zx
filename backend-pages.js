@@ -146,7 +146,7 @@
         if (!row) { button.title = t('المنتج غير متاح حاليًا'); return; }
         var title = card.querySelector('h3'), price = card.querySelector('[data-mc-price]');
         if (title) title.textContent = row.title;
-        if (price) { price.dataset.mcPrice = row.price; price.textContent = Number(row.price).toFixed(2); }
+        if (price) { price.dataset.mcPrice = row.price; price.dataset.currencyAmount = row.price; price.textContent = money(row.price); }
       });
     } catch (error) { cards.forEach(function (card) { var button = card.querySelector('.js-add-to-cart'); if (button) button.title = backend.errorMessage(error); }); }
   }
