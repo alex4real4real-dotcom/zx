@@ -18,7 +18,7 @@
     if (/same_password|different from the old password/i.test(text)) return 'اختر كلمة مرور مختلفة عن السابقة.';
     if (/CART_EMPTY/.test(text)) return 'السلة فارغة.';
     if (/INVALID_QUANTITY/.test(text)) return 'الكمية المسموحة من 1 إلى 99.';
-    if (/PRODUCT_UNAVAILABLE/.test(text)) return 'أحد المنتجات غير متاح حاليًا.';
+    if (/PRODUCT_UNAVAILABLE|PRODUCT_SOLD/.test(text)) return 'أحد المنتجات غير متاح حاليًا.';
     if (/PLEASE_WAIT/.test(text)) return 'انتظر دقيقتين قبل إرسال رسالة أخرى.';
     if (/Invalid login credentials/i.test(text)) return 'بيانات الدخول غير صحيحة.';
     if (/Email not confirmed/i.test(text)) return 'فعّل حسابك من رسالة التأكيد في بريدك الإلكتروني.';
@@ -208,7 +208,7 @@
   };
   backend.sellerProducts = async function (offset) {
     var c = await client(true), start = offset || 0;
-    return check(await c.from('account_products').select('id,title,description,price,listing_type,active,created_at')
+    return check(await c.from('account_products').select('id,title,description,price,listing_type,active,created_at,sold_at')
       .eq('seller_id', state.user.id).order('created_at', { ascending: false }).order('id', { ascending: true }).range(start, start + 23));
   };
   backend.sellerProduct = async function (id) { return check(await (await client(true)).rpc('account_seller_read_product', { p_id: id })); };
@@ -237,6 +237,7 @@
   backend.checkout = async function (requestId) {
     return check(await (await client(true)).rpc('account_place_test_order', { p_request_id: requestId }));
   };
+  backend.orderDelivery = async function (itemId) { return check(await (await client(true)).rpc('account_order_delivery', { p_order_item_id: itemId })); };
   backend.testSettlements = async function () { return check(await (await client(true)).rpc('account_test_settlements')); };
   backend.orders = async function () {
     var c = await client(true);

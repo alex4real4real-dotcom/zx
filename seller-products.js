@@ -8,7 +8,8 @@
     name:['اسم الخدمة *','Listing name *'],user:['يوزر الحساب *','Account username *'],price:['السعر (ر.س) *','Price (SAR) *'],kind:['نوع العرض *','Listing type *'],
     hint:['كل منصة تواصل تظهر برمزها تلقائيًا، أما الخدمات والألعاب فتظهر بأيقونة دون صورة.','Social accounts use their platform icon. Services and games use an icon.'],
     private:['بيانات الحساب المعروض للبيع','Account details for this listing'],email:['البريد الإلكتروني للحساب *','Account email *'],email_password:['باسورد البريد *','Email password *'],username:['يوزر الحساب *','Account username *'],password:['باسورد الحساب *','Account password *'],
-    privacy:['هذه البيانات خاصة بك ولا تظهر في صفحة المنتج العامة أو الطلبات التجريبية.','These details are private and are not shown in the public listing or test orders.'],
+    privacy:['لا تظهر البيانات في صفحة المنتج العامة. التسليم في الطلب التجريبي يتطلب تحديد أنها بيانات وهمية أدناه.','Details are hidden from the public listing. Test delivery requires marking them as dummy data below.'],
+    test_delivery:['هذه بيانات وهمية للاختبار، وأسمح بتسليمها لمشتري الطلب التجريبي.','These are dummy test details. Allow delivery to the test-order buyer.'],sold:['تم البيع','Sold'],sold_notice:['تم بيع هذا الحساب ولا يمكن نشره مجددًا.','This account has been sold and cannot be published again.'],
     description:['وصف مختصر للخدمة','Short description'],publish:['نشر المنتج','Publish listing'],draft:['حفظ السلعة كمسودة','Save listing as a draft'],update:['حفظ التعديلات','Save changes'],cancel:['إلغاء التعديل','Cancel editing'],
     mine:['سلعي','My listings'],refresh:['تحديث','Refresh'],edit:['تعديل','Edit'],hide:['إخفاء','Hide'],show:['نشر','Publish'],live:['منشور','Published'],hidden:['مسودة / مخفي','Draft / hidden'],more:['عرض المزيد','Load more'],empty:['لم تُضف أي سلع بعد. أضف سلعتك الأولى من النموذج أعلاه.','No listings yet. Add your first listing using the form above.'],
     loading:['جارٍ تحميل سلعك…','Loading your listings…'],saved:['حُفظت السلعة ونُشرت في المتجر.','Your listing was saved and published.'],draft_saved:['حُفظت السلعة كمسودة. يمكنك نشرها بعد توثيق الحساب.','Your listing was saved as a draft. Verify your account to publish it.'],hidden_saved:['أُخفيت السلعة من المتجر.','Your listing is now hidden.'],hidden_updated:['حُفظت التعديلات. السلعة مخفية حاليًا ويمكنك نشرها من قائمة سلعك.','Changes saved. This listing is hidden; publish it from your listings.'],saved_refresh:['حُفظت السلعة، لكن تعذّر تحديث القائمة. اضغط تحديث.','Saved, but the list could not refresh. Select Refresh.'],
@@ -22,7 +23,7 @@
   function english() { return window.AppI18N && window.AppI18N.getLang() !== 'ar'; }
   function t(key) { var text = TEXT[key] || TYPES[key]; return text ? text[english()?1:0] : key; }
   function status(key, error) { var el = node('sellerStatus'); el.dataset.messageKey = key || ''; el.hidden = !key; el.textContent = key ? t(key) : ''; el.classList.toggle('is-error', !!error); }
-  function errorKey(error) { var s = String(error && error.message || error || ''); if(/SELLER_VERIFICATION_REQUIRED/.test(s))return 'verify_hint'; if(/EMAIL_CONFIRMATION_REQUIRED/.test(s))return 'email_required'; if(/INVALID_CREDENTIALS/.test(s))return 'invalid_credentials'; if(/INVALID_PRODUCT|23514/.test(s))return 'invalid'; if(/PRODUCT_NOT_FOUND/.test(s))return 'not_found'; if(/PRODUCT_LIMIT/.test(s))return 'limit'; if(/ACCOUNT_BANNED/.test(s))return 'blocked'; if(/AUTH_REQUIRED/.test(s))return 'login'; if(/schema|PGRST20[25]|does not exist|permission denied/i.test(s))return 'unavailable'; return 'failed'; }
+  function errorKey(error) { var s = String(error && error.message || error || ''); if(/PRODUCT_SOLD/.test(s))return 'sold_notice'; if(/SELLER_VERIFICATION_REQUIRED/.test(s))return 'verify_hint'; if(/EMAIL_CONFIRMATION_REQUIRED/.test(s))return 'email_required'; if(/INVALID_CREDENTIALS/.test(s))return 'invalid_credentials'; if(/INVALID_PRODUCT|23514/.test(s))return 'invalid'; if(/PRODUCT_NOT_FOUND/.test(s))return 'not_found'; if(/PRODUCT_LIMIT/.test(s))return 'limit'; if(/ACCOUNT_BANNED/.test(s))return 'blocked'; if(/AUTH_REQUIRED/.test(s))return 'login'; if(/schema|PGRST20[25]|does not exist|permission denied/i.test(s))return 'unavailable'; return 'failed'; }
   function make(tag,css,text) { var el=document.createElement(tag);if(css)el.className=css;if(text!==undefined)el.textContent=text;return el; }
   function setBusy(value) { busy=value; node('listingFields').disabled=value||!user; node('cancelListing').disabled=value; node('sellerRefresh').disabled=value; document.querySelectorAll('[data-seller-action]').forEach(function(el){el.disabled=value;}); }
   function updateKind() {
@@ -43,9 +44,9 @@
     var host=node('sellerRows');host.replaceChildren();
     if(!rows.length&&user)host.append(make('p','seller-copy',t('empty')));
     rows.forEach(function(row){
-      var card=make('article','seller-product'),top=make('div','seller-product-top'),info=make('div');info.append(make('h3','',row.title),make('strong','',money(row.price)));top.append(info,make('span','seller-badge',t(row.active?'live':'hidden')));card.append(top,make('p','',t(row.listing_type||'service')));
+      var card=make('article','seller-product'),top=make('div','seller-product-top'),info=make('div');info.append(make('h3','',row.title),make('strong','',money(row.price)));top.append(info,make('span','seller-badge',t(row.sold_at?'sold':row.active?'live':'hidden')));card.append(top,make('p','',t(row.listing_type||'service')));
       if(row.description)card.append(make('p','',row.description));
-      var actions=make('div','seller-actions');[['edit',function(){editProduct(row.id);}], [row.active?'hide':'show',function(){changeVisibility(row);}]].forEach(function(pair){var b=make('button','seller-button secondary',t(pair[0]));b.type='button';b.dataset.sellerAction='';b.disabled=busy;b.addEventListener('click',pair[1]);actions.append(b);});card.append(actions);host.append(card);
+      var actions=make('div','seller-actions');(row.sold_at?[]:[['edit',function(){editProduct(row.id);}], [row.active?'hide':'show',function(){changeVisibility(row);}]]).forEach(function(pair){var b=make('button','seller-button secondary',t(pair[0]));b.type='button';b.dataset.sellerAction='';b.disabled=busy;b.addEventListener('click',pair[1]);actions.append(b);});card.append(actions);host.append(card);
     });node('sellerMore').hidden=!more;
   }
   async function loadProducts(append) {
@@ -65,7 +66,7 @@
   function editProduct(id) {
     act(async function(session){var result=await backend.sellerProduct(id);if(session!==epoch)return;var row=result.product,secrets=result.credentials||{};
       productId=row.id;editing=true;form.elements.title.value=row.title;form.elements.price.value=row.price;form.elements.kind.value=row.listing_type||'service';form.elements.description.value=row.description;form.dataset.wasActive=String(row.active);
-      ['account_email','email_password','account_username','account_password'].forEach(function(key){form.elements[key].value=secrets[key]||'';});updateKind();node('cancelListing').hidden=false;node('listingSubmitText').textContent=t('update');node('listingCard').scrollIntoView({behavior:'smooth',block:'start'});form.elements.title.focus();
+      ['account_email','email_password','account_username','account_password'].forEach(function(key){form.elements[key].value=secrets[key]||'';});form.elements.test_delivery.checked=secrets.test_delivery===true;updateKind();node('cancelListing').hidden=false;node('listingSubmitText').textContent=t('update');node('listingCard').scrollIntoView({behavior:'smooth',block:'start'});form.elements.title.focus();
     });
   }
   function changeVisibility(row) {
@@ -78,7 +79,7 @@
     form.addEventListener('submit',function(event){event.preventDefault();if(!form.reportValidity())return;
       act(async function(session){
         var currentProfile=await backend.profile();if(session!==epoch)return;profile=currentProfile;canPublish=!!(profile&&(profile.is_verified||profile.role==='admin'));
-        var social=SOCIAL.includes(form.elements.kind.value),credentials={};if(social)['account_email','email_password','account_username','account_password'].forEach(function(key){credentials[key]=form.elements[key].value;});
+        var social=SOCIAL.includes(form.elements.kind.value),credentials={};if(social)['account_email','email_password','account_username','account_password'].forEach(function(key){credentials[key]=form.elements[key].value;});if(social)credentials.test_delivery=form.elements.test_delivery.checked;
         if(!productId)productId=uuid();
         var record=await backend.sellerSaveProduct({id:productId,title:form.elements.title.value.trim(),price:Number(form.elements.price.value),kind:form.elements.kind.value,description:form.elements.description.value.trim(),credentials:credentials,active:canPublish&&(!editing||form.dataset.wasActive==='true')});
         if(session!==epoch)return;resetForm();node('sellerVerification').hidden=canPublish;await refreshedAfterSave(record.active?'saved':canPublish?'hidden_updated':'draft_saved',session);

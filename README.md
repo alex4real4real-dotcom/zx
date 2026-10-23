@@ -20,3 +20,10 @@ Bank accounts and immutable request bank snapshots are held in an unexposed priv
 
 ## Unique registration identifiers
 Apply `supabase/unique-signup-identifiers.sql` to reserve normalized email and phone identifiers when an account is first created, including pending email verification. Existing accounts are preserved. Private reservations survive identifier changes and account removal. Client preflight gives a clear duplicate message; database triggers and unique keys enforce the rule even if preflight is bypassed. Run `tests/unique-signup-identifiers.sql` in a rollback transaction to verify email/phone collisions, normalization, pending accounts, profile updates and private-table access.
+
+## Social-account sales and dummy delivery
+Apply `supabase/social-account-delivery.sql` and `supabase/social-checkout-lock.sql` together. New social account purchases atomically reserve one sale, hide the catalog listing, prevent republishing, and preserve order history. Only details explicitly marked as fictitious by the seller are copied into test receipts and delivered by an authenticated buyer-only RPC. Public listings never include these fields. Services and games retain their existing stock behavior. Real credentials are not delivered through test orders.
+
+`supabase/repair-declared-dummy-order.sql` repairs only the one pictured order whose seller explicitly declared the data fictitious. It does not modify other historical orders.
+
+Validation: `tests/social-account-delivery.sql` and `tests/social-account-delivery-modes.sql` passed in rollback transactions. These cover buyer-only access, immutable dummy snapshots, no release without opt-in, second purchase and republishing prevention, idempotency, repeatable services, and seller/buyer eligibility checks. UI delivery fields were verified with synthetic fixtures.
