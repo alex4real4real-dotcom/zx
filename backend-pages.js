@@ -72,11 +72,11 @@
         var card = el('article', undefined, 'backend-panel');
         if (row.image_url) { var image = el('img'); image.src = row.image_url; image.alt = row.title; image.className = 'backend-card-image'; card.append(image); }
         else {
-          var icons = {x:'fa-brands fa-x-twitter',instagram:'fa-brands fa-instagram',snapchat:'fa-brands fa-snapchat',tiktok:'fa-brands fa-tiktok',facebook:'fa-brands fa-facebook',youtube:'fa-brands fa-youtube',game:'fa-solid fa-gamepad',service:'fa-solid fa-briefcase'};
-          var icon = el('div', undefined, 'backend-product-icon'), mark = el('i', undefined, icons[row.listing_type] || icons.service); mark.setAttribute('aria-hidden', 'true'); icon.append(mark); card.append(icon);
+          var icon = el('div', undefined, 'backend-product-icon'); icon.append(window.ListingPlatforms.create(row.listing_type)); card.append(icon);
         }
         var description = ['حسابات التواصل الاجتماعي', 'الخدمات الرقمية', 'الألعاب والاشتراكات'].includes(row.description) ? ui('p', row.description, 'backend-muted') : el('p', row.description, 'backend-muted');
-        card.append(el('h2', row.title), description, amount(row.price));
+        var heading = el('h2', undefined, 'listing-title'); heading.append(window.ListingPlatforms.create(row.listing_type), el('bdi', row.title));
+        card.append(heading, description, amount(row.price));
         var button = ui('button', 'أضف إلى السلة', 'backend-button js-add-to-cart'); button.type = 'button'; button.dataset.uid = row.id; card.append(button); container.append(card);
       });
       status('shopStatus', '', false);
@@ -93,13 +93,7 @@
         total += row.price * row.count;
         var item = el('div', undefined, 'backend-item'), info = el('div');
         var heading = el('h3', undefined, 'cart-account-heading');
-        var platforms = {instagram:['fa-instagram','Instagram'],tiktok:['fa-tiktok','TikTok'],x:['fa-x-twitter','X'],snapchat:['fa-snapchat','Snapchat'],facebook:['fa-facebook-f','Facebook'],youtube:['fa-youtube','YouTube']};
-        var platform = Object.prototype.hasOwnProperty.call(platforms, row.listing_type) ? platforms[row.listing_type] : null;
-        if (platform) {
-          var badge = el('span', undefined, 'cart-platform-icon is-' + row.listing_type), icon = el('i');
-          badge.setAttribute('role', 'img'); badge.setAttribute('aria-label', platform[1]); badge.title = platform[1];
-          icon.className = 'fa-brands ' + platform[0]; icon.setAttribute('aria-hidden', 'true'); badge.append(icon); heading.append(badge);
-        }
+        heading.append(window.ListingPlatforms.create(row.listing_type));
         heading.append(el('bdi', row.title));
         info.append(heading, row.available ? amount(row.price) : ui('p', 'هذا المنتج غير متاح حاليًا.', 'backend-muted'));
         var controls = el('div', undefined, 'backend-actions'), quantity = el('input');
@@ -146,6 +140,8 @@
         if (!row) { button.title = t('المنتج غير متاح حاليًا'); return; }
         var title = card.querySelector('h3'), price = card.querySelector('[data-mc-price]');
         if (title) title.textContent = row.title;
+        var badge = card.querySelector('.platform-icon, .featured-platform');
+        if (badge) badge.replaceWith(window.ListingPlatforms.create(row.listing_type, 'featured-platform'));
         if (price) { price.dataset.mcPrice = row.price; price.dataset.currencyAmount = row.price; price.textContent = money(row.price); }
       });
     } catch (error) { cards.forEach(function (card) { var button = card.querySelector('.js-add-to-cart'); if (button) button.title = backend.errorMessage(error); }); }
