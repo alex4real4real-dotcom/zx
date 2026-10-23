@@ -92,7 +92,16 @@
       rows.forEach(function (row) {
         total += row.price * row.count;
         var item = el('div', undefined, 'backend-item'), info = el('div');
-        info.append(el('h3', row.title), row.available ? amount(row.price) : ui('p', 'هذا المنتج غير متاح حاليًا.', 'backend-muted'));
+        var heading = el('h3', undefined, 'cart-account-heading');
+        var platforms = {instagram:['fa-instagram','Instagram'],tiktok:['fa-tiktok','TikTok'],x:['fa-x-twitter','X'],snapchat:['fa-snapchat','Snapchat'],facebook:['fa-facebook-f','Facebook'],youtube:['fa-youtube','YouTube']};
+        var platform = Object.prototype.hasOwnProperty.call(platforms, row.listing_type) ? platforms[row.listing_type] : null;
+        if (platform) {
+          var badge = el('span', undefined, 'cart-platform-icon is-' + row.listing_type), icon = el('i');
+          badge.setAttribute('role', 'img'); badge.setAttribute('aria-label', platform[1]); badge.title = platform[1];
+          icon.className = 'fa-brands ' + platform[0]; icon.setAttribute('aria-hidden', 'true'); badge.append(icon); heading.append(badge);
+        }
+        heading.append(el('bdi', row.title));
+        info.append(heading, row.available ? amount(row.price) : ui('p', 'هذا المنتج غير متاح حاليًا.', 'backend-muted'));
         var controls = el('div', undefined, 'backend-actions'), quantity = el('input');
         quantity.type = 'number'; quantity.min = '1'; quantity.max = '99'; quantity.value = row.count; quantity.dataset.productTitle = row.title; quantity.setAttribute('aria-label', t('كمية') + ' ' + row.title);
         quantity.addEventListener('change', function () {
