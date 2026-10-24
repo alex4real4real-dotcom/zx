@@ -1464,7 +1464,7 @@
             <button id="bioStart" type="button" class="seller-button secondary" data-seller-text="bio_start">إصدار كود الملكية</button>
             <div id="bioCodePanel" hidden>
               <p id="bioAccount" class="seller-hint"></p>
-              <label class="seller-field"><span data-seller-text="bio_code">كود الملكية</span><input id="bioCode" type="text" readonly dir="ltr" autocomplete="off"></label>
+              <label class="seller-field"><span data-seller-text="bio_code">كود الملكية</span><input id="bioCode" type="text" readonly dir="ltr" inputmode="numeric" minlength="8" maxlength="8" pattern="[0-9]{8}" autocomplete="off"></label>
               <div class="seller-actions"><button id="bioCopy" type="button" class="seller-button secondary" data-seller-text="bio_copy">نسخ الكود</button><a id="bioProfile" class="seller-button secondary" target="_blank" rel="noopener noreferrer" data-seller-text="bio_profile" hidden>فتح الحساب</a></div>
               <div class="seller-actions"><button id="bioCheck" type="button" class="seller-button" data-seller-text="bio_check">وضعت الكود — تحقق من البايو</button><button id="bioRefresh" type="button" class="seller-button secondary" data-seller-text="bio_refresh">تحديث حالة التحقق</button></div>
               <p id="bioReviewNote" class="seller-hint"></p>

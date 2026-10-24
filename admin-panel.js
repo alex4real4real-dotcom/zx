@@ -202,7 +202,7 @@
     ui.el.append(make('p','admin-copy',row.platform+' · @'+row.username));
     var form=make('form','admin-form');
     if(approve){
-      form.append(field('ownership_observed_code','code','text',true,64));
+      var observed=field('ownership_observed_code','code','text',true,8),codeInput=observed.querySelector('input');codeInput.minLength=8;codeInput.pattern='[0-9]{8}';codeInput.inputMode='numeric';codeInput.autocomplete='off';form.append(observed);
       var confirm=make('label','admin-switch'),check=make('input');check.type='checkbox';check.name='confirmed';check.required=true;confirm.append(check,label('ownership_confirmed'));form.append(confirm);
     }
     form.append(field('decision_note','note','textarea',false,1000));

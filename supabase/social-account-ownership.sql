@@ -33,13 +33,25 @@ language sql immutable set search_path='' as $$
  when 'snapchat' then 'https://www.snapchat.com/add/'||p_name when 'tiktok' then 'https://www.tiktok.com/@'||p_name
  when 'tellonym' then 'https://tellonym.me/'||p_name when 'telegram' then 'https://t.me/'||p_name else null end;
 $$;
+create function account_bio_private.new_code() returns text
+language plpgsql volatile set search_path='' as $$
+declare value bigint;
+begin
+ -- Reject the incomplete modulo bucket so all 100,000,000 codes are equally likely.
+ loop
+  value:=('x'||encode(extensions.gen_random_bytes(4),'hex'))::bit(32)::bigint;
+  exit when value<4200000000;
+ end loop;
+ return lpad((value%100000000)::text,8,'0');
+end;$$;
+
 create table account_bio_private.challenges (
  id uuid primary key default gen_random_uuid(),
  user_id uuid not null references public.account_profiles(id) on delete cascade,
  product_id text not null,
  platform text not null check(platform in ('x','instagram','snapchat','tiktok','tellonym','discord','telegram')),
  username text not null,
- code text not null unique default ('ACCT-'||upper(encode(extensions.gen_random_bytes(8),'hex'))),
+ code text not null unique default account_bio_private.new_code() check(code ~ '^[0-9]{8}$'),
  profile_url text,
  status text not null default 'issued' check(status in ('issued','pending','approved','rejected')),
  created_at timestamptz not null default clock_timestamp(),
@@ -67,7 +79,7 @@ language sql stable set search_path='' as $$
 $$;
 create function account_bio_private.start(p_product_id text,p_platform text,p_username text) returns jsonb
 language plpgsql security definer set search_path='' as $$
-declare uid uuid;name text;proof account_bio_private.challenges;owner_id uuid;
+declare uid uuid;name text;proof account_bio_private.challenges;owner_id uuid;attempt integer;
 begin
  uid:=account_admin_private.require_user();name:=account_bio_private.username(p_platform,p_username);
  if not exists(select 1 from auth.users where id=uid and email_confirmed_at is not null) then raise exception 'EMAIL_CONFIRMATION_REQUIRED';end if;
@@ -79,9 +91,15 @@ begin
   and status<>'rejected' and (expires_at>clock_timestamp() or (status='approved' and consumed_at is not null)) order by created_at desc limit 1;
  if found then return account_bio_private.visible(proof);end if;
  if (select count(*) from account_bio_private.challenges where user_id=uid and created_at>clock_timestamp()-interval '1 hour')>=20 then raise exception 'BIO_REQUEST_LIMIT';end if;
- insert into account_bio_private.challenges(user_id,product_id,platform,username,profile_url)
- values(uid,p_product_id,p_platform,name,account_bio_private.profile_url(p_platform,name)) returning * into proof;
- return account_bio_private.visible(proof);
+ for attempt in 1..10 loop
+  begin
+   insert into account_bio_private.challenges(user_id,product_id,platform,username,profile_url)
+   values(uid,p_product_id,p_platform,name,account_bio_private.profile_url(p_platform,name)) returning * into proof;
+   return account_bio_private.visible(proof);
+  exception when unique_violation then null;
+  end;
+ end loop;
+ raise exception 'BIO_REQUEST_LIMIT';
 end;$$;
 create function account_bio_private.latest(p_product_id text) returns jsonb
 language plpgsql security definer set search_path='' as $$

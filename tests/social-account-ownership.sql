@@ -10,7 +10,7 @@ begin
  if owner_id is null or other_id is null then raise exception 'TEST_ROLES_REQUIRED';end if;
  perform set_config('request.jwt.claim.sub',owner_id::text,true);
  proof:=public.account_bio_start(p,'x','@qa_bio_owner');
- if proof->>'username'<>'qa_bio_owner' or proof->>'status'<>'issued' or proof->>'code'!~'^ACCT-[A-F0-9]{16}$' then raise exception 'BAD_CHALLENGE';end if;
+ if proof->>'username'<>'qa_bio_owner' or proof->>'status'<>'issued' or proof->>'code'!~'^[0-9]{8}$' then raise exception 'BAD_CHALLENGE';end if;
  perform set_config('bio_test.proof',proof->>'id',true);perform set_config('bio_test.code',proof->>'code',true);
  if public.account_bio_start(p,'x','qa_bio_owner')->>'id'<>proof->>'id' then raise exception 'CHALLENGE_NOT_IDEMPOTENT';end if;
  begin perform public.account_seller_save_product(p,'qa_bio_owner',10,'x','QA','{"account_email":"qa@example.test","email_password":"dummy","account_username":"qa_bio_owner","account_password":"dummy"}',true);raise exception 'UNVERIFIED_PUBLISH_ALLOWED';exception when raise_exception then if sqlerrm<>'BIO_VERIFICATION_REQUIRED' then raise;end if;end;

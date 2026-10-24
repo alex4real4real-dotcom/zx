@@ -1,5 +1,5 @@
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const CODE=/^ACCT-[0-9A-F]{16}$/;
+const CODE=/^[0-9]{8}$/;
 const NAME=/^[a-z0-9][a-z0-9_.-]{0,63}$/;
 export async function boundedText(response,max=2_000_000) {
  if(!response.ok||!response.body)throw new Error('PROFILE_UNAVAILABLE');
@@ -51,7 +51,7 @@ export async function verifyPublicBio(proof,send=fetch) {
   if(!(response.headers.get('content-type')||'').includes('text/html'))return {verified:false,reason:'profile_unavailable'};
   const bio=biography(proof.platform,proof.username,await boundedText(response));
   if(bio===null)return {verified:false,reason:'profile_unavailable'};
-  const present=new RegExp('(^|[^A-Za-z0-9])'+proof.code+'($|[^A-Za-z0-9])').test(bio);
+  const present=new RegExp('(^|[^\\p{L}\\p{N}])'+proof.code+'($|[^\\p{L}\\p{N}])','u').test(bio);
   return {verified:present,reason:present?'':'code_missing'};
  }catch{return {verified:false,reason:'profile_unavailable'};}
 }

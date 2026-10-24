@@ -1,11 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {verifyPublicBio,biography,createHandler} from '../supabase/functions/account-social-ownership/verifier.mjs';
-const code='ACCT-0123456789ABCDEF',uid='11111111-1111-4111-8111-111111111111',id='22222222-2222-4222-8222-222222222222';
+const code='01234567',uid='11111111-1111-4111-8111-111111111111',id='22222222-2222-4222-8222-222222222222';
 const proof={id,platform:'tiktok',username:'owner',code,status:'issued'};
 const json=value=>new Response(JSON.stringify(value),{headers:{'content-type':'application/json'}});
 const html=(name='owner',signature=code,extra='')=>'<script id="__UNIVERSAL_DATA_FOR_REHYDRATION__">'+JSON.stringify({__DEFAULT_SCOPE__:{'webapp.user-detail':{userInfo:{user:{uniqueId:name,signature}}}}})+'</script>'+extra;
 const page=value=>new Response(value,{headers:{'content-type':'text/html'}});
+test('ownership codes are exactly eight digits and preserve a leading zero',async()=>{
+ assert.equal(code.length,8);assert.equal(code[0],'0');
+ assert.equal((await verifyPublicBio(proof,async()=>page(html()))).verified,true);
+ for(const invalid of ['1234567','123456789','ACCT-01234567','abcdefgh'])await assert.rejects(verifyPublicBio({...proof,code:invalid},async()=>page(html())),/INVALID_REQUEST/);
+ assert.equal((await verifyPublicBio(proof,async()=>page(html('owner','١'+code)))).verified,false);
+});
 test('only the named account biography can prove ownership',async()=>{
  assert.equal((await verifyPublicBio(proof,async()=>page(html()))).verified,true);
  assert.equal((await verifyPublicBio(proof,async()=>page(html('someone_else')))).verified,false);
