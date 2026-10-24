@@ -68,18 +68,68 @@
       action(event.currentTarget, 'profileStatus', async function () { await backend.signOut(); location.href = 'account.html'; });
     });
   }
+  var listingDialog, listingDialogTrigger;
+  function closeListingDetails() {
+    if (listingDialog && listingDialog.open) listingDialog.close();
+    document.documentElement.classList.remove('catalog-dialog-open');
+    var trigger = listingDialogTrigger; listingDialogTrigger = null;
+    if (trigger && trigger.isConnected) trigger.focus({preventScroll:true});
+  }
+  function listingDescription(row, tag, className) {
+    if (!row.description) return ui(tag, 'لا يوجد وصف لهذا المنتج.', className);
+    return ['حسابات التواصل الاجتماعي', 'الخدمات الرقمية', 'الألعاب والاشتراكات'].includes(row.description) ? ui(tag, row.description, className) : el(tag, row.description, className);
+  }
+  function cartButton(row, className) {
+    var button = el('button', undefined, 'backend-button js-add-to-cart ' + className), mark = el('i', undefined, 'fa-solid fa-cart-shopping');
+    mark.setAttribute('aria-hidden', 'true'); button.type = 'button'; button.dataset.uid = row.id; button.append(mark, ui('span', 'أضف إلى السلة'));
+    return button;
+  }
+  function showListingDetails(row, trigger) {
+    if (!listingDialog) {
+      listingDialog = el('dialog', undefined, 'catalog-dialog');
+      listingDialog.setAttribute('aria-labelledby', 'catalogDetailsTitle');
+      listingDialog.addEventListener('close', function () {
+        if (!listingDialog.open) closeListingDetails();
+      });
+      listingDialog.addEventListener('cancel', function (event) { event.preventDefault(); closeListingDetails(); });
+      listingDialog.addEventListener('click', function (event) {
+        if (event.target !== listingDialog) return;
+        var box = listingDialog.getBoundingClientRect();
+        if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) closeListingDetails();
+      });
+      document.body.append(listingDialog);
+    }
+    listingDialogTrigger = trigger;
+    var header = el('div', undefined, 'catalog-dialog-header'), title = el('h2', row.title, 'catalog-dialog-title');
+    title.id = 'catalogDetailsTitle'; title.dir = 'auto';
+    var close = ui('button', 'إغلاق', 'catalog-dialog-close'); close.type = 'button'; close.autofocus = true;
+    close.addEventListener('click', closeListingDetails);
+    header.append(window.ListingPlatforms.create(row.listing_type), title, close);
+    var body = el('div', undefined, 'catalog-dialog-body'), description = listingDescription(row, 'p', 'catalog-description-full');
+    var descriptionLabel = ui('h3', 'الوصف الكامل'); descriptionLabel.id = 'catalogDescriptionLabel';
+    body.tabIndex = 0; body.setAttribute('role', 'region'); body.setAttribute('aria-labelledby', descriptionLabel.id);
+    description.dir = 'auto'; body.append(descriptionLabel, description);
+    var footer = el('div', undefined, 'catalog-dialog-footer'), price = amount(row.price), buy = cartButton(row, 'catalog-dialog-buy');
+    price.className = 'catalog-dialog-price';
+    buy.addEventListener('click', closeListingDetails);
+    footer.append(price, buy); listingDialog.replaceChildren(header, body, footer);
+    document.documentElement.classList.add('catalog-dialog-open');
+    if (!listingDialog.open) listingDialog.showModal();
+  }
   function listingCard(row, headingTag) {
     var card = el('article', undefined, 'catalog-card');
     var header = el('div', undefined, 'catalog-header'), badge = window.ListingPlatforms.create(row.listing_type), identity = el('div', undefined, 'catalog-identity');
-    var heading = el(headingTag || 'h2', undefined, 'catalog-title'); heading.append(el('bdi', row.title));
+    var heading = el(headingTag || 'h2', undefined, 'catalog-title'), titleButton = el('button', undefined, 'catalog-title-trigger');
+    titleButton.type = 'button'; titleButton.setAttribute('aria-haspopup', 'dialog'); titleButton.append(el('bdi', row.title));
+    titleButton.addEventListener('click', function () { showListingDetails(row, titleButton); }); heading.append(titleButton);
     identity.append(heading); header.append(badge, identity);
-    var description = ['حسابات التواصل الاجتماعي', 'الخدمات الرقمية', 'الألعاب والاشتراكات'].includes(row.description) ? ui('p', row.description, 'catalog-description') : el('p', row.description || '', 'catalog-description');
+    var preview = el('button', undefined, 'catalog-preview'), description = listingDescription(row, 'span', 'catalog-description');
+    preview.type = 'button'; preview.setAttribute('aria-haspopup', 'dialog');
     description.dir = 'auto';
-    if (row.description) description.title = row.description;
+    preview.append(description, ui('span', 'عرض التفاصيل', 'catalog-details'));
+    preview.addEventListener('click', function () { showListingDetails(row, preview); });
     var footer = el('div', undefined, 'catalog-footer'), price = amount(row.price); price.className = 'catalog-price';
-    var button = el('button', undefined, 'backend-button js-add-to-cart catalog-buy'), mark = el('i', undefined, 'fa-solid fa-cart-shopping');
-    mark.setAttribute('aria-hidden', 'true'); button.type = 'button'; button.dataset.uid = row.id; button.append(mark, ui('span', 'أضف إلى السلة'));
-    footer.append(price, button); card.append(header, description, footer); return card;
+    footer.append(price, cartButton(row, 'catalog-buy')); card.append(header, preview, footer); return card;
   }
   function filterListings(rows, filters) {
     var query = String(filters.search || '').trim().toLocaleLowerCase();
