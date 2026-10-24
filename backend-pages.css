@@ -1,5 +1,5 @@
 .backend-shell{max-width:1100px;margin:auto;padding:145px 24px 80px;min-height:75vh}
-.backend-shell h1{font-size:clamp(1.8rem,4vw,2.8rem);margin:0 0 16px;color:var(--text-color)}
+.backend-shell h1{font-size:clamp(1.8rem,4vw,2.8rem);margin:0 0 16px;color:var(--accent-color)}
 .backend-shell h2{font-size:1.3rem;margin:0 0 20px}.backend-shell p{line-height:1.9}
 .backend-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-top:28px}
 .backend-panel{border:1px solid var(--glass-border);background:var(--surface-color);border-radius:24px;padding:28px;margin:20px 0}
@@ -30,7 +30,7 @@
 .catalog-identity{min-width:0}.backend-shell .catalog-title,#featured .catalog-title{margin:0;font-size:19px;font-weight:700;line-height:1.45;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:0}
 .backend-shell .catalog-description,#featured .catalog-description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;white-space:pre-line;overflow-wrap:anywhere;margin:26px 0 10px;color:#b8b8ba;font-size:14px;line-height:1.5;text-align:right;height:42px;flex:0 0 42px}
 .catalog-footer{display:flex;flex-direction:column;align-items:stretch;gap:14px;margin-top:auto;flex-shrink:0}.backend-shell .catalog-price,#featured .catalog-price{margin:0;font-size:22px;font-weight:700;line-height:1.4;text-align:center;color:#f5f5f6;white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:-.4px}
-.catalog-buy.backend-button{box-sizing:border-box;width:100%;height:40px;min-height:40px;padding:9px 5px;border:0;border-radius:11px;background:linear-gradient(110deg,#e1bf65,#eccf83 45%,#b98e3d);color:#111114;font-size:14px;gap:6px;white-space:nowrap}.catalog-buy.backend-button:hover{filter:brightness(1.08)}.catalog-buy:focus-visible{outline:2px solid #f2d577;outline-offset:4px}
+.catalog-buy.backend-button{box-sizing:border-box;width:100%;height:40px;min-height:40px;padding:9px 5px;border:0;border-radius:11px;background:var(--accent-gradient);color:#111114;font-size:14px;gap:6px;white-space:nowrap}.catalog-buy.backend-button:hover{filter:brightness(1.08)}.catalog-buy:focus-visible{outline:2px solid var(--primary-hover);outline-offset:4px}
 #shopStatus:empty{display:none}
 /* Keep the filters on the physical left in both Arabic and English. */
 .catalog-layout{display:grid;grid-template-columns:minmax(0,1fr);gap:24px;margin-top:28px;direction:ltr;align-items:start}

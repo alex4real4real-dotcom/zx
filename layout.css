@@ -10,7 +10,7 @@
 
 .hero-split {
     background:
-        linear-gradient(115deg, rgba(11, 11, 13, 0.96) 0%, rgba(11, 11, 13, 0.86) 52%, rgba(212, 175, 55, 0.14) 100%);
+        linear-gradient(115deg, rgba(11, 11, 13, 0.96) 0%, rgba(11, 11, 13, 0.86) 52%, rgba(var(--accent-rgb), 0.14) 100%);
 }
 
 .orb {
@@ -27,7 +27,7 @@
     height: 24rem;
     inset-inline-end: 6%;
     top: 8%;
-    background: rgba(212, 175, 55, 0.16);
+    background: rgba(var(--accent-rgb), 0.16);
 }
 
 .orb-terracotta {
@@ -35,11 +35,11 @@
     height: 18rem;
     inset-inline-start: 4%;
     bottom: 8%;
-    background: rgba(201, 162, 75, 0.20);
+    background: rgba(var(--accent-rgb), 0.20);
 }
 
 .contact-section {
     background:
-        radial-gradient(circle at 92% 16%, rgba(212, 175, 55, 0.12), transparent 24rem),
+        radial-gradient(circle at 92% 16%, rgba(var(--accent-rgb), 0.12), transparent 24rem),
         linear-gradient(180deg, var(--background-color), var(--surface-color));
 }

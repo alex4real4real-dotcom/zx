@@ -32,7 +32,7 @@
 .support-ticket-meta { font-size: .72rem; color: var(--text-muted); line-height: 1.8; }
 .support-preview { color: var(--text-muted); font-size: .85rem; line-height: 1.8; white-space: pre-wrap; }
 .support-ticket-cta { display: inline-flex; align-items: center; gap: 8px; margin-top: auto; color: var(--accent-color); font-size: .78rem; font-weight: 700; }
-.support-badge { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; border-radius: 999px; padding: 4px 9px; font-size: .68rem; background: rgba(212,175,55,.15); color: var(--accent-color); }
+.support-badge { display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0; border-radius: 999px; padding: 4px 9px; font-size: .68rem; background: rgba(var(--accent-rgb), .15); color: var(--accent-color); }
 .support-badge.is-closed { background: rgba(100,170,140,.15); color: #9fceb6; }
 .support-badge.is-progress { background: rgba(100,150,220,.15); color: #a9c8f3; }
 .support-unread { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-color); }

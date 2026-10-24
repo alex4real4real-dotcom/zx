@@ -13,7 +13,7 @@
 .seller-field input,.seller-field select,.seller-field textarea{box-sizing:border-box;min-width:0;width:100%;border:1px solid var(--glass-border);border-radius:999px;background:var(--field-bg);padding:11px 18px;color:var(--text-color);font:400 14px/1.6 var(--font-body);outline:none;min-height:46px}
 .seller-field textarea{border-radius:24px;resize:vertical;min-height:140px}
 .seller-field input::placeholder,.seller-field textarea::placeholder{color:var(--text-muted);opacity:1}
-.seller-field input:focus,.seller-field select:focus,.seller-field textarea:focus{border-color:var(--accent-color);box-shadow:0 0 0 3px #d4af371b}
+.seller-field input:focus,.seller-field select:focus,.seller-field textarea:focus{border-color:var(--accent-color);box-shadow:0 0 0 3px rgba(var(--accent-rgb), .106)}
 .seller-field select option{background:#171719;color:var(--text-color)}
 .seller-field input[type=number]{direction:ltr;text-align:start}
 .seller-field input[type=email],.seller-field input[type=password]{direction:ltr;text-align:start}
@@ -43,7 +43,7 @@
 .seller-product h3{font:700 16px/1.7 var(--font-heading);margin:0 0 8px}
 .seller-product p{font-size:13px;color:var(--text-muted);line-height:1.8;margin:0 0 12px;white-space:pre-wrap}
 .seller-product strong{color:var(--accent-color);font-size:15px}
-.seller-badge{white-space:nowrap;padding:5px 12px;background:#d4af371f;border-radius:999px;font-size:11px;color:var(--accent-color)}
+.seller-badge{white-space:nowrap;padding:5px 12px;background:rgba(var(--accent-rgb), .122);border-radius:999px;font-size:11px;color:var(--accent-color)}
 .seller-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
 .seller-actions .seller-button{min-height:40px;font-size:12px;padding:9px 16px}
 .seller-more{display:block;margin:20px auto 0}

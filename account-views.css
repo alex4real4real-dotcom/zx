@@ -1,7 +1,7 @@
-/* Account screens follow the supplied black-and-gold references. Scoped to these two pages. */
+/* Account screens share the site palette. Scoped to these two pages. */
 .account-body{background:var(--background-color)}
 .account-ui{position:relative;isolation:isolate;box-sizing:border-box;color:var(--text-color);font-family:var(--font-body);direction:rtl}
-.account-ui::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 100% 45%,rgba(212,175,55,.115),transparent 58%)}
+.account-ui::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 100% 45%,rgba(var(--accent-rgb), .115),transparent 58%)}
 .account-ui [hidden]{display:none!important}
 .account-auth-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:64px;align-items:center;align-content:start;max-width:1200px;min-height:calc(100vh - 80px);margin:80px auto 0;padding:48px 24px 120px}
 .account-intro{padding:0;text-align:start}
@@ -23,7 +23,7 @@
 .account-field{display:grid;gap:10px;margin:0 0 18px;font-size:14px;font-weight:800;line-height:1.25}
 .account-field input{box-sizing:border-box;min-width:0;width:100%;height:48px;border:1px solid var(--glass-border);border-radius:999px;background:var(--field-bg);padding:0 20px;color:var(--text-color);font:400 16px var(--font-body);outline:none}
 .account-field input::placeholder{color:var(--text-muted);opacity:1}
-.account-field input:focus{border-color:var(--accent-color);box-shadow:0 0 0 3px rgba(212,175,55,.12)}
+.account-field input:focus{border-color:var(--accent-color);box-shadow:0 0 0 3px rgba(var(--accent-rgb), .12)}
 .account-field input[readonly]{opacity:.7}
 .account-field .account-otp{text-align:center;letter-spacing:.34em;direction:ltr}
 .account-primary{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;min-height:48px;box-sizing:border-box;padding:10px 20px;border:0;border-radius:999px;background:var(--button-color);box-shadow:var(--shadow-button);color:var(--background-color);font-size:18px;line-height:1.4;font-weight:500;text-decoration:none;cursor:pointer}
