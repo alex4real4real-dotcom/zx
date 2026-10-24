@@ -5,7 +5,7 @@ const PLATFORMS=['x','instagram','snapchat','tiktok','tellonym','discord','plays
 export function capabilities(env=()=>undefined) {
  return Object.fromEntries(PLATFORMS.map(platform=>[platform,
   ['telegram','tellonym','tiktok'].includes(platform)?'public_bio':
-  platform==='x'&&env('X_API_BEARER_TOKEN')||platform==='snapchat'&&env('SNAPCHAT_PROFILE_ACCESS_TOKEN')?'official_api':'connection_required']));
+  ((platform==='x'&&env('X_API_BEARER_TOKEN'))||(platform==='snapchat'&&env('SNAPCHAT_PROFILE_ACCESS_TOKEN')))?'official_api':'connection_required']));
 }
 function validName(platform,name) {
  return typeof name==='string'&&(platform==='xbox'?/^(?=.{1,64}$)[\p{L}\p{N}][\p{L}\p{N} ,]*(?:#[0-9]{1,4})?$/u.test(name):NAME.test(name));
@@ -66,7 +66,7 @@ export async function verifyPublicBio(proof,send=fetch,env=()=>undefined) {
  else if(proof.platform==='tiktok')url='https://www.tiktok.com/@'+proof.username;
  else if(proof.platform==='tellonym'){url='https://api.tellonym.me/profiles/name/'+encodeURIComponent(proof.username);json=true;}
  else if(proof.platform==='x'&&env('X_API_BEARER_TOKEN')){url='https://api.x.com/2/users/by/username/'+encodeURIComponent(proof.username)+'?user.fields=description';headers.authorization='Bearer '+env('X_API_BEARER_TOKEN');json=true;}
- else if(proof.platform==='snapchat'&&env('SNAPCHAT_PROFILE_ACCESS_TOKEN')){url='https://businessapi.snapchat.com/public/v1/public_profiles/search?query='+encodeURIComponent(proof.username)+'&category=CATEGORY_PERSON&tier=TIER_PUBLIC&includeStandard=true&limit=100';headers.authorization='Bearer '+env('SNAPCHAT_PROFILE_ACCESS_TOKEN');json=true;}
+ else if(proof.platform==='snapchat'&&env('SNAPCHAT_PROFILE_ACCESS_TOKEN')){url='https://businessapi.snapchat.com/public/v1/public_profiles/search?query='+encodeURIComponent(proof.username)+'&category=CATEGORY_PERSON&includeStandard=true&limit=100';headers.authorization='Bearer '+env('SNAPCHAT_PROFILE_ACCESS_TOKEN');json=true;}
  else return {verified:false,reason:'automatic_unavailable'};
  try {
   headers.accept=json?'application/json':'text/html';
