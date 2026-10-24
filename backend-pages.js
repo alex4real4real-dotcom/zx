@@ -125,9 +125,12 @@
     if (!section || section === CATALOG_SECTIONS.social) select('category', 'فئة الحساب', [['', 'الكل'], ['2', 'ثنائي'], ['3', 'ثلاثي'], ['4', 'رباعي'], ['5', 'خماسي'], ['6', 'سداسي'], ['other', 'أخرى']]);
     var priceGroup = el('fieldset', undefined, 'catalog-filter-field catalog-price-filter');
     priceGroup.append(ui('legend', 'الفئة السعرية'));
-    [['above', 'أكثر من (500 SAR)'], ['below', 'أقل من (500 SAR)']].forEach(function (option) {
+    [['above', 'أكثر من'], ['below', 'أقل من']].forEach(function (option) {
       var label = el('label'), radio = el('input'); radio.type = 'radio'; radio.name = 'price'; radio.value = option[0];
-      label.append(radio, ui('span', option[1])); priceGroup.append(label);
+      var caption = el('span'), threshold = el('bdi', money(500));
+      threshold.dataset.currencyAmount = '500';
+      caption.append(ui('span', option[1]), document.createTextNode(' '), threshold);
+      label.append(radio, caption); priceGroup.append(label);
     });
     var reset = ui('button', 'إعادة تعيين', 'catalog-filter-reset'); reset.type = 'reset';
     form.append(priceGroup, reset); sidebar.append(form);
