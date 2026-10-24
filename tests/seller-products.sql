@@ -1,4 +1,5 @@
 begin;
+update account_bio_private.settings set enabled=true where singleton;
 select set_config('account_test.owner',(select p.id::text from public.account_profiles p join auth.users u on u.id=p.id where p.role='admin' and not p.banned and u.email_confirmed_at is not null limit 1),true),
        set_config('account_test.buyer',(select p.id::text from public.account_profiles p join auth.users u on u.id=p.id where p.role='buyer' and not p.banned and not p.is_verified and u.email_confirmed_at is not null limit 1),true),
        set_config('account_test.product',gen_random_uuid()::text,true);

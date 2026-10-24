@@ -3,6 +3,19 @@ create schema if not exists account_bio_private;
 revoke all on schema account_bio_private from public, anon, authenticated;
 grant usage on schema account_bio_private to authenticated, service_role;
 
+-- Rollout is explicit: activate after the matching frontend has deployed.
+create table account_bio_private.settings (
+ singleton boolean primary key default true check(singleton),
+ enabled boolean not null default false
+);
+alter table account_bio_private.settings enable row level security;
+revoke all on account_bio_private.settings from public,anon,authenticated,service_role;
+insert into account_bio_private.settings(singleton,enabled) values(true,false);
+create function account_bio_private.enabled() returns boolean
+language sql stable security definer set search_path='' as $$
+ select coalesce((select enabled from account_bio_private.settings where singleton),false);
+$$;
+
 create function account_bio_private.is_social(p_kind text) returns boolean
 language sql immutable set search_path='' as $$
  select coalesce(p_kind in ('x','instagram','snapchat','tiktok','tellonym','discord','telegram'),false);
@@ -94,6 +107,7 @@ end;$$;
 create function account_bio_private.enforce_listing() returns trigger
 language plpgsql security definer set search_path='' as $$
 begin
+ if not account_bio_private.enabled() then return new;end if;
  if new.active and account_bio_private.is_social(new.listing_type) then
   if tg_op='UPDATE' then
    -- Background changes to price, bans and settlement do not republish a listing.
@@ -208,7 +222,7 @@ begin
   if found and existing_owner is distinct from uid then raise exception 'PRODUCT_NOT_FOUND'; end if;
   if exists(select 1 from public.account_products where id=p_id and seller_id=uid and deleted_at is not null) then raise exception 'PRODUCT_DELETED';end if;
   if not found and (select count(*) from public.account_products where seller_id=uid)>=500 then raise exception 'PRODUCT_LIMIT'; end if;
-  if p_active and account_bio_private.is_social(p_listing_type) then
+  if p_active and account_bio_private.enabled() and account_bio_private.is_social(p_listing_type) then
     if account_bio_private.username(p_listing_type,p_title) is distinct from account_bio_private.username(p_listing_type,credentials->>'account_username') then raise exception 'BIO_USERNAME_MISMATCH';end if;
     perform account_bio_private.require_claim(uid,p_id,p_listing_type,p_title,true);
   end if;
@@ -228,5 +242,4 @@ begin
     delete from account_seller_private.product_secrets where product_id=p_id;
   end if;
   return to_jsonb(saved);
-end;$function$
-
+end;$function$;

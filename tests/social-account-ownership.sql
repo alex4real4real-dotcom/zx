@@ -1,5 +1,6 @@
 -- All fixtures, approvals and product changes are rolled back.
 begin;
+update account_bio_private.settings set enabled=true where singleton;
 select set_config('bio_test.owner',(select p.id::text from public.account_profiles p join auth.users u on u.id=p.id where p.role='admin' and not p.banned and u.email_confirmed_at is not null limit 1),true),
  set_config('bio_test.other',(select p.id::text from public.account_profiles p join auth.users u on u.id=p.id where p.role<>'admin' and not p.banned and u.email_confirmed_at is not null limit 1),true),
  set_config('bio_test.product',gen_random_uuid()::text,true),set_config('bio_test.draft',gen_random_uuid()::text,true);

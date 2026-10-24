@@ -1,6 +1,6 @@
 # Social-account bio ownership
 
-Deploy `supabase/social-account-ownership.sql` before deploying this function and updating `sell.html` and `admin.html`.
+Deploy `supabase/social-account-ownership.sql` before deploying this function and updating `sell.html` and `admin.html`. The private rollout flag starts disabled, so an interrupted frontend release preserves the previous listing behavior. After the frontend deployment succeeds, an operator activates the feature with `update account_bio_private.settings set enabled=true where singleton;`. Sellers cannot change this flag.
 
 The seller requests a cryptographically random, 24-hour code bound to their authenticated user, proposed product UUID, platform and normalized username. A client cannot mark a proof approved. All challenge rows are private, have RLS enabled with no user table privileges, and are accessed through owner/admin-checked RPCs.
 
