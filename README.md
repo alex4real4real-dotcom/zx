@@ -1,6 +1,10 @@
 # zx
 xz
 
+## Current bank payout preparation
+
+The current withdrawal page uses a separate real-funds ledger and seller-requested payouts from the marketplace's **Al Rajhi business account**. Users can prepare their private bank details; live withdrawal submission and bank transfers remain disabled. No historical test balance becomes real money. The account header reads the same real available balance. Apply `supabase/bank-payout-preparation.sql` and follow the activation requirements and tests in `supabase/functions/account-bank-payout/README.md`. The commercial bank adapter, approved banking credentials/specification, live collection/settlement integration and certification are still required. The older test-withdrawal notes below describe historical simulation behavior.
+
 
 ## 12-hour settlement simulation
 

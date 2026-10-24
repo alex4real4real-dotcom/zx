@@ -381,46 +381,13 @@
     };
 
     window.getUserBalance = function (email) {
-        var target = String(email || '').toLowerCase();
-        if (!target) {
-            return Promise.resolve(0);
-        }
-        return Promise.all([
-            window.findSellerByEmail(target),
-            window.listAllRows('products'),
-            window.listAllRows('withdrawals')
-        ]).then(function (results) {
-            var seller = results[0];
-            var products = results[1] || [];
-            var withdrawals = results[2] || [];
-            var storeName = seller ? String(seller.store_name || '') : '';
-            var mine = products.filter(function (p) {
-                var sameEmail = String(p.seller_email || '').toLowerCase() === target;
-                var sameStore = storeName !== '' && String(p.seller_name || '') === storeName;
-                return sameEmail || sameStore;
-            });
-            var uids = mine.map(function (p) { return p.unique_id_txt; }).filter(function (u) { return !!u; });
-
-            var salesPromise;
-            if (!uids.length || !window.ServerFunction || typeof window.ServerFunction.call !== 'function') {
-                salesPromise = Promise.resolve(0);
-            } else {
-                salesPromise = window.ServerFunction.call('seller_sales', { product_uids: uids }).then(function (r) {
-                    return r && typeof r.totalSales !== 'undefined' ? Number(r.totalSales) : 0;
-                }).catch(function () {
-                    return 0;
-                });
-            }
-
-            return salesPromise.then(function (totalSales) {
-                var withdrawn = withdrawals.filter(function (w) {
-                    return String(w.seller_email || '').toLowerCase() === target && String(w.status || '') !== 'مرفوض';
-                }).reduce(function (sum, w) {
-                    return sum + (Number(w.amount) || 0);
-                }, 0);
-                return Math.max(0, totalSales - withdrawn);
-            });
-        });
+        var target = String(email || '').toLowerCase(), backend = window.accountBackend;
+        if (!target || !backend || typeof backend.payoutBalance !== 'function') return Promise.resolve(0);
+        return backend.ready.then(function () {
+            var current = backend.currentUser();
+            if (!current || String(current.email || '').toLowerCase() !== target) return 0;
+            return backend.payoutBalance().then(function (wallet) { return Math.max(0, Number(wallet.available) || 0); });
+        }).catch(function () { return 0; });
     };
 
     window.makeKey = function (prefix) {

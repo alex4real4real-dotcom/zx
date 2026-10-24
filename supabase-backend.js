@@ -196,10 +196,11 @@
     storeSession(state.session, state.user);
     return state.profile;
   };
-  backend.withdrawalDashboard = async function (offset) { return check(await (await client(true)).rpc('account_withdrawal_dashboard',{p_offset:offset||0})); };
-  backend.addBank = async function (data,key) { return check(await (await client(true)).rpc('account_add_bank',{p_request_id:key,p_bank:data.bank,p_holder:data.holder,p_iban:data.iban})); };
-  backend.requestWithdrawal = async function (data,key) { return check(await (await client(true)).rpc('account_request_withdrawal',{p_request_id:key,p_bank_id:data.bankId,p_amount:data.amount,p_note:data.note||''})); };
-  backend.adminWithdrawalReview = async function (id,approve,note,key) { return check(await (await client(true)).rpc('account_admin_withdrawal_review',{p_id:id,p_approve:approve,p_note:note||'',p_request_id:key})); };
+  backend.withdrawalDashboard = async function (offset) { return check(await (await client(true)).rpc('account_payout_dashboard',{p_offset:offset||0})); };
+  backend.payoutBalance = async function () { return check(await (await client(true)).rpc('account_payout_wallet')); };
+  backend.addBank = async function (data,key) { return check(await (await client(true)).rpc('account_payout_add_bank',{p_request_id:key,p_bank:data.bank,p_holder:data.holder,p_iban:data.iban})); };
+  backend.requestWithdrawal = async function (data,key) { return check(await (await client(true)).rpc('account_payout_request',{p_request_id:key,p_bank_id:data.bankId,p_amount:data.amount,p_note:data.note||''})); };
+  backend.cancelPayout = async function (id) { return check(await (await client(true)).rpc('account_payout_cancel',{p_id:id})); };
   backend.profileSummary = async function () { return check(await (await client(true)).rpc('account_profile_summary')); };
   backend.products = async function () {
     return check(await (await client()).from('account_products').select('*').eq('active', true).order('created_at', { ascending: false }));
@@ -282,7 +283,7 @@
   backend.supportStatus = async function (id, status) { return check(await (await client(true)).rpc('account_support_status', { p_ticket_id: id, p_status: status })); };
   backend.supportRead = async function (id, staff) { return check(await (await client(true)).rpc('account_support_read', { p_ticket_id: id, p_as_staff: !!staff })); };
 
-  backend.adminData = async function (section, offset, filter) { if(section==='ideas')return backend.adminIdeas(offset);if(section==='withdrawals')return check(await (await client(true)).rpc('account_admin_withdrawals',{p_offset:offset||0,p_filter:filter||''}));return check(await (await client(true)).rpc('account_admin_data', { p_section: section, p_offset: offset || 0, p_filter: filter || '' })); };
+  backend.adminData = async function (section, offset, filter) { if(section==='ideas')return backend.adminIdeas(offset);if(section==='withdrawals')return check(await (await client(true)).rpc('account_payout_admin',{p_offset:offset||0,p_filter:filter||''}));return check(await (await client(true)).rpc('account_admin_data', { p_section: section, p_offset: offset || 0, p_filter: filter || '' })); };
   backend.adminMembership = async function (email, name, remove) { return check(await (await client(true)).rpc('account_admin_membership', { p_email: email, p_name: name || '', p_remove: !!remove })); };
   backend.adminBan = async function (id, banned, reason) { return check(await (await client(true)).rpc('account_admin_ban', { p_user_id: id, p_banned: !!banned, p_reason: reason || '' })); };
   backend.adminVerify = async function (id, approve, note) { return check(await (await client(true)).rpc('account_admin_verify', { p_id: id, p_approve: !!approve, p_note: note || '' })); };
@@ -363,7 +364,7 @@
     });
   } };
   // Test orders never create real money, real withdrawable balances, or real sales.
-  // The dedicated withdrawal API reserves simulation credits only.
+  // The payout API uses a separate real-funds ledger; simulation credits are excluded.
   window.ServerFunction = { call: function (name) {
     return result(async function () { if (name !== 'seller_sales') throw new Error('هذه الوظيفة غير مهيأة.'); var summary = await backend.profileSummary(); return { success: true, totalSales: Number(summary.totalSales), is_test: true }; });
   } };

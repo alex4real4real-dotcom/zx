@@ -3,7 +3,7 @@
   var backend = window.accountBackend, TEXT = window.AccountManagementText, page = document.body.dataset.managementPage;
   var user = null, profile = null, sessionEpoch = 0, listRevision = 0, busy = false, activeTab = '', filter = '', target = 50;
   var adminRows = [], topups = [], verificationRows = [], customerRows = [], purchases = [], overview = null, listMore = false, topupTarget = 50, topupMore = false;
-  var settlementRows = [], serverOffset = 0;
+  var settlementRows = [], serverOffset = 0, payoutIntegration = null;
   function settlementFor(id){return settlementRows.find(function(s){return s.order_item_id===id;});}
   function serverNow(){return Date.now()+serverOffset;}
   async function fetchSettlements(){return backend.testSettlements();}
@@ -82,7 +82,7 @@
       var wrap = make('label', 'admin-switch'), check = make('input'); check.type = 'checkbox'; check.checked = filter === 'open'; wrap.append(check, label('only_open')); host.append(wrap);
       check.addEventListener('change', function () { filter = check.checked ? 'open' : ''; target = 50; loadAdminRows(); });
     } else if (tab === 'tickets' || tab === 'verifications' || tab === 'withdrawals') {
-      var opts = tab === 'tickets' ? [['','all'],['open','open'],['in_progress','in_progress'],['closed','closed']] : [['','all'],['pending','pending'],['approved','approved'],['rejected','rejected']].concat(tab==='verifications'?[['cancelled','cancelled']]:[]);
+      var opts = tab === 'withdrawals' ? [['','all'],['queued','payout_queued'],['processing','payout_processing'],['reconciling','payout_reconciling'],['paid','payout_paid'],['failed','payout_failed'],['cancelled','payout_cancelled']] : tab === 'tickets' ? [['','all'],['open','open'],['in_progress','in_progress'],['closed','closed']] : [['','all'],['pending','pending'],['approved','approved'],['rejected','rejected']].concat(tab==='verifications'?[['cancelled','cancelled']]:[]);
       var control = selectField('status', opts, filter); if (tab === 'tickets') control.select.id = 'ticketFilter'; host.append(control.wrap);
       control.select.addEventListener('change', function () { filter = control.select.value; target = 50; loadAdminRows(); });
     }
@@ -98,7 +98,7 @@
   }
   function chooseTab(tab, nextFilter) {
     if (!['verifications','disputes','accounts','orders','tickets','members','withdrawals','ideas'].includes(tab)) tab = 'verifications';
-    activeTab = tab; filter = nextFilter !== undefined ? nextFilter : (tab === 'verifications'||tab === 'withdrawals') ? 'pending' : tab === 'disputes' ? 'open' : ''; target = 50; topupTarget = 50; adminRows = []; topups = [];
+    activeTab = tab; payoutIntegration = null; filter = nextFilter !== undefined ? nextFilter : tab === 'verifications' ? 'pending' : tab === 'disputes' ? 'open' : ''; target = 50; topupTarget = 50; adminRows = []; topups = [];
     document.querySelectorAll('[data-admin-tab]').forEach(function (el) { var selected = el.dataset.adminTab === tab; el.setAttribute('aria-selected',String(selected)); el.tabIndex = selected ? 0 : -1; });
     node('adminSection').setAttribute('aria-labelledby','tab-' + tab); node('sectionTitle').textContent = t(tab); node('sectionCopy').textContent = t(tab + '_copy'); node('sectionForm').replaceChildren();
     node('topupSection').hidden = tab !== 'orders'; node('adminMore').hidden = true; filtersFor(tab); if (tab === 'members') membershipForm();
@@ -115,7 +115,7 @@
       if (tab === 'orders') do { creditPart = await backend.adminData('topups', creditRows.length, ''); creditRows = creditRows.concat(creditPart.rows); } while (creditPart.more && creditRows.length < topupTarget);
       var settlementData=(tab==='orders'||tab==='disputes')?await fetchSettlements():null;
       if (revision !== listRevision || epoch !== sessionEpoch) return;
-      if(settlementData)saveSettlements(settlementData);
+      if(settlementData)saveSettlements(settlementData);if(tab==='withdrawals')payoutIntegration=part.integration||null;
       var seen = new Set(); adminRows = rows.filter(function (row) { var id = row.id || row.user_id; if (seen.has(id)) return false; seen.add(id); return true; });
       listMore = part.more; topups = creditRows; topupMore = !!(creditPart && creditPart.more); renderAdminRows(); notice('sectionStatus','');
     } catch (error) { if (revision === listRevision && epoch === sessionEpoch) { if (errorKey(error) === 'admin_required') denyAdmin(); else notice('sectionStatus',errorKey(error),true); } }
@@ -188,20 +188,20 @@
     var credits=node('topupRows');credits.replaceChildren();topups.forEach(function(row){var box=card(row.email,row.status);box.append(make('p','',money(row.amount)),make('p','',t('test_topup')),make('p','',row.note));
       box.append(make('p','admin-copy',t('payments_inactive')));credits.append(box);});if(!topups.length)empty(credits);node('topupMore').hidden=!topupMore;
   }
-  function withdrawalReview(row,approved){
-    var ui=dialog(approved?'withdrawal_approve':'withdrawal_reject'),form=make('form','admin-form'),note=field('review_note','note','textarea',!approved,1000),submit=mutationButton('save_decision');submit.type='submit';if(!approved)note.querySelector('textarea').minLength=3;
-    ui.el.append(make('p','admin-copy',row.email+' · '+money(row.amount)),make('p','admin-copy',t('withdrawal_test')));form.append(note,submit,ui.status);ui.el.append(form);var key=uuid();
-    form.addEventListener('submit',function(event){event.preventDefault();if(!form.reportValidity())return;run(function(){return backend.adminWithdrawalReview(row.id,approved,form.elements.note.value.trim(),key);},async function(){closeDialog();await refreshAdmin();},ui.status);});
-  }
   function renderWithdrawals(host){
-    adminRows.forEach(function(row){var box=card(row.email),top=make('div','admin-card-top');top.append(make('strong','',money(row.amount)),make('span','admin-badge',t('withdrawal_'+row.status)));box.append(top,make('p','admin-copy',row.bank_name+' · '+row.holder_name),make('p','admin-copy',row.iban_masked),make('p','admin-copy',date(row.created_at)),make('p','admin-copy',t('withdrawal_test')));if(row.note)box.append(make('p','',row.note));if(row.review_note)box.append(make('p','',row.review_note));box.append(make('p','admin-copy',t('payments_inactive')));host.append(box);});
+    var setup=make('article','admin-card');setup.append(make('h3','admin-title',t('payout_setup_title')),make('p','admin-copy',t('payout_business_account')));
+    [['collections_ready','payout_collection'],['bank_ready','payout_bank_contract'],['adapter_ready','payout_adapter'],['enabled','payout_activation']].forEach(function(pair){setup.append(make('p','admin-copy',t(pair[1])+': '+t(payoutIntegration&&payoutIntegration[pair[0]]?'payout_ready':'payout_waiting')));});
+    setup.append(make('p','admin-copy',t('payout_setup_note')));host.append(setup);
+    if(!adminRows.length)empty(host);
+    adminRows.forEach(function(row){var box=card(row.email),top=make('div','admin-card-top');top.append(make('strong','',money(row.amount)),make('span','admin-badge',t('payout_'+row.status)));box.append(top,make('p','admin-copy',row.bank_name+' · '+row.holder_name),make('p','admin-copy',row.iban_masked),make('p','admin-copy',date(row.created_at)));if(row.note)box.append(make('p','',row.note));if(row.provider_reference)box.append(make('p','admin-copy',t('payout_reference')+': '+row.provider_reference));host.append(box);});
   }
   function renderAdminRows() {
     if(!activeTab||!node('myTicketsList')||!user)return;var host=node('myTicketsList');host.replaceChildren();host.className=['orders','disputes'].includes(activeTab)?'':'admin-grid';
+    if(activeTab==='withdrawals'){renderWithdrawals(host);node('adminMore').hidden=!listMore;return;}
     if(!adminRows.length)empty(host);
     else if(activeTab==='ideas')adminRows.forEach(function(row){var box=card(row.idea);box.append(make('p','admin-copy',row.submitter_name+' · '+row.submitter_email),make('p','admin-copy',date(row.created_at)));var description=make('p','',row.description);description.style.whiteSpace='pre-wrap';description.style.overflowWrap='anywhere';box.append(description);host.append(box);});else if(activeTab==='members')renderMembers(host);else if(activeTab==='accounts')renderAccounts(host);else if(activeTab==='tickets')renderTickets(host);
     else if(activeTab==='verifications')adminRows.forEach(function(row){host.append(verificationCard(row,true));});else if(activeTab==='disputes')renderDisputeTable(host);
-    if(activeTab==='orders')renderOrders(host);if(activeTab==='withdrawals')renderWithdrawals(host);node('adminMore').hidden=!listMore;
+    if(activeTab==='orders')renderOrders(host);node('adminMore').hidden=!listMore;
   }
   function decisionDialog(row,status) {
     var ui=dialog('decision');ui.el.append(make('p','admin-copy','#'+row.case_number+' · '+row.product_title));var form=make('form','admin-form');var choices=[['resolved_buyer','resolve_buyer']];if(row.seller_id||!settlementFor(row.order_item_id))choices.push(['resolved_seller','resolve_seller']);var control=selectField('decision',choices,status),note=field('decision_note','note','textarea',true,1000);note.querySelector('textarea').minLength=3;var submit=mutationButton('save_decision');submit.type='submit';form.append(control.wrap,note,submit,ui.status);ui.el.append(form);var key=uuid();
