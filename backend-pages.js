@@ -1,6 +1,11 @@
 (function () {
   'use strict';
   var backend = window.accountBackend;
+  var CATALOG_SECTIONS = {
+    social: {title:'حسابات التواصل الاجتماعي', types:['x','instagram','snapchat','tiktok','tellonym','discord','telegram']},
+    services: {title:'الخدمات الرقمية', types:['service']},
+    games: {title:'الألعاب والاشتراكات', types:['game','playstation','xbox']}
+  };
   function el(tag, text, className) { var node = document.createElement(tag); if (text !== undefined) node.textContent = text; if (className) node.className = className; return node; }
   function t(text) { return window.AppI18N ? window.AppI18N.text(text) : text; }
   function ui(tag, text, className) { var node = el(tag, undefined, className); return window.AppI18N ? window.AppI18N.bindText(node, text) : (node.textContent = text, node); }
@@ -91,7 +96,7 @@
       return true;
     });
   }
-  function mountCatalog(rows, host, headingTag, emptyText) {
+  function mountCatalog(rows, host, headingTag, emptyText, section) {
     var layout = el('div', undefined, 'catalog-layout');
     var toggle = ui('button', 'الفلاتر', 'catalog-filter-toggle backend-button secondary');
     var sidebar = el('aside', undefined, 'catalog-filters'), form = el('form');
@@ -115,8 +120,9 @@
     }
     var search = field('search', 'كلمة البحث', el('input'));
     search.type = 'search'; search.placeholder = t('أدخل كلمة البحث'); search.setAttribute('data-i18n-placeholder', 'أدخل كلمة البحث');
-    select('type', 'نوع الحساب', [['', 'الكل'], ['x', 'X'], ['instagram', 'Instagram'], ['snapchat', 'Snapchat'], ['tiktok', 'TikTok'], ['tellonym', 'Tellonym'], ['discord', 'Discord'], ['playstation', 'PlayStation'], ['xbox', 'Xbox'], ['telegram', 'Telegram'], ['service', 'الخدمات الرقمية'], ['game', 'الألعاب والاشتراكات']]);
-    select('category', 'فئة الحساب', [['', 'الكل'], ['2', 'ثنائي'], ['3', 'ثلاثي'], ['4', 'رباعي'], ['5', 'خماسي'], ['6', 'سداسي'], ['other', 'أخرى']]);
+    var typeOptions = [['', 'الكل'], ['x', 'X'], ['instagram', 'Instagram'], ['snapchat', 'Snapchat'], ['tiktok', 'TikTok'], ['tellonym', 'Tellonym'], ['discord', 'Discord'], ['playstation', 'PlayStation'], ['xbox', 'Xbox'], ['telegram', 'Telegram'], ['service', 'الخدمات الرقمية'], ['game', 'الألعاب والاشتراكات']];
+    select('type', 'نوع الحساب', typeOptions.filter(function(option){return !section || !option[0] || section.types.includes(option[0]);}));
+    if (!section || section === CATALOG_SECTIONS.social) select('category', 'فئة الحساب', [['', 'الكل'], ['2', 'ثنائي'], ['3', 'ثلاثي'], ['4', 'رباعي'], ['5', 'خماسي'], ['6', 'سداسي'], ['other', 'أخرى']]);
     var priceGroup = el('fieldset', undefined, 'catalog-filter-field catalog-price-filter');
     priceGroup.append(ui('legend', 'الفئة السعرية'));
     [['above', 'أكثر من (500 SAR)'], ['below', 'أقل من (500 SAR)']].forEach(function (option) {
@@ -131,7 +137,7 @@
     results.append(host); layout.append(toggle, sidebar, results);
     function render() {
       var selected = form.querySelector('input[name="price"]:checked');
-      var visible = filterListings(rows, {search: fields.search.value, type: fields.type.value, category: fields.category.value, price: selected ? selected.value : ''});
+      var visible = filterListings(rows, {search: fields.search.value, type: fields.type.value, category: fields.category ? fields.category.value : '', price: selected ? selected.value : ''});
       host.replaceChildren();
       visible.forEach(function (row) { host.append(listingCard(row, headingTag)); });
       if (!visible.length) host.append(ui('p', rows.length ? 'لا توجد منتجات تطابق خيارات البحث.' : emptyText || 'لا توجد منتجات متاحة حاليًا.', 'backend-muted catalog-empty'));
@@ -144,11 +150,18 @@
   async function shopPage(verifiedOnly) {
     try {
       var rows = await (verifiedOnly ? backend.verifiedSellerProducts() : backend.products()), container = document.getElementById('productList');
+      var sectionName = new URLSearchParams(location.search).get('category');
+      var section = !verifiedOnly && Object.prototype.hasOwnProperty.call(CATALOG_SECTIONS,sectionName) ? CATALOG_SECTIONS[sectionName] : null;
+      if (section) {
+        rows = rows.filter(function(row){return section.types.includes(row.listing_type);});
+        var heading = document.querySelector('main h1');
+        if (heading) {if(window.AppI18N)window.AppI18N.bindText(heading,section.title);else heading.textContent=section.title;}
+      }
       if (verifiedOnly) {
         container.classList.add('catalog-grid'); container.replaceChildren();
         if (!rows.length) container.append(ui('p', 'لا توجد سلع متاحة من بائعين موثّقين حاليًا.'));
         rows.forEach(function (row) { container.append(listingCard(row)); });
-      } else mountCatalog(rows, container);
+      } else mountCatalog(rows, container, undefined, undefined, section);
       status('shopStatus', '', false);
     } catch (error) { status('shopStatus', backend.errorMessage(error), true); }
   }
@@ -202,8 +215,7 @@
     var host = document.getElementById('featuredProducts');
     if (!host) return;
     try {
-      var social = ['x','instagram','snapchat','tiktok','tellonym','discord','playstation','xbox','telegram'];
-      var rows = (await backend.products()).filter(function (row) { return social.includes(row.listing_type) && !row.deleted_at && !row.sold_at; });
+      var rows = (await backend.products()).filter(function (row) { return !row.deleted_at && !row.sold_at; });
       mountCatalog(rows, host, 'h3');
     } catch (error) { host.replaceChildren(ui('p', backend.errorMessage(error), 'backend-status error')); }
   }
