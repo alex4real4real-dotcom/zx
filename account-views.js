@@ -57,7 +57,7 @@
   function syncHeader(profile) {
     var name = node('accountWidgetName'), image = node('accountWidgetAvatar');
     if (name) name.textContent = profile.display_name;
-    if (image) image.src = backend.avatarUrl(profile) || './800_6ad36bdac7565.png';
+    if (image) image.src = backend.avatarUrl(profile) || './assets/account-logo-soft.png';
   }
   async function finishSignup() {
     var pending = readStored(pendingKey);
@@ -154,7 +154,7 @@
       profile = await backend.profile();
       node('profileHeadingName').textContent = profile.display_name;
       node('profileDisplayName').textContent = profile.display_name;
-      node('profileAvatar').src = backend.avatarUrl(profile) || './800_6ad36bdac7565.png';
+      node('profileAvatar').src = backend.avatarUrl(profile) || './assets/account-logo-soft.png';
       var badge = node('profileVerified'); bindText(badge, profile.is_verified === true ? '✓ موثّق' : 'غير موثّق');
       badge.className = 'verified-badge ' + (profile.is_verified === true ? 'is-approved' : 'is-unverified');
       node('profileCard').hidden = false;
@@ -164,7 +164,7 @@
     }
     node('editProfile').addEventListener('click', function () {
       var form = node('profileForm'); form.elements.fullname.value = profile.display_name; form.elements.email.value = backend.currentUser().email; form.elements.phone.value = profile.phone;
-      node('editAvatarPreview').src = backend.avatarUrl(profile) || './800_6ad36bdac7565.png';
+      node('editAvatarPreview').src = backend.avatarUrl(profile) || './assets/account-logo-soft.png';
       node('editAvatar').value = ''; changedAvatar = null; node('profileCard').hidden = true; node('profileEditor').hidden = false; notify('profileStatus', '', false);
     });
     node('cancelProfileEdit').addEventListener('click', function () { node('profileEditor').hidden = true; node('profileCard').hidden = false; notify('profileStatus', '', false); });
