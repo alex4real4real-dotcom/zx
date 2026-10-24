@@ -290,7 +290,6 @@
     return response.data;
   };
   backend.adminOwnership = async function(offset,filter){return check(await (await client(true)).rpc('account_bio_admin_list',{p_offset:offset||0,p_filter:filter||''}));};
-  backend.adminOwnershipReview = async function(id,approve,code,confirmed,note){return check(await (await client(true)).rpc('account_bio_review',{p_id:id,p_approve:approve,p_observed_code:code,p_confirmed:confirmed,p_note:note||''}));};
   backend.adminData = async function (section, offset, filter) { if(section==='ownership')return backend.adminOwnership(offset,filter);if(section==='ideas')return backend.adminIdeas(offset);if(section==='withdrawals')return check(await (await client(true)).rpc('account_admin_withdrawals',{p_offset:offset||0,p_filter:filter||''}));return check(await (await client(true)).rpc('account_admin_data', { p_section: section, p_offset: offset || 0, p_filter: filter || '' })); };
   backend.adminMembership = async function (email, name, remove) { return check(await (await client(true)).rpc('account_admin_membership', { p_email: email, p_name: name || '', p_remove: !!remove })); };
   backend.adminBan = async function (id, banned, reason) { return check(await (await client(true)).rpc('account_admin_ban', { p_user_id: id, p_banned: !!banned, p_reason: reason || '' })); };

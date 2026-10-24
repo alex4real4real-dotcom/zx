@@ -4,24 +4,27 @@
   var SOCIAL = ['x','instagram','snapchat','tiktok','tellonym','discord','playstation','xbox','telegram'];
   var TYPES = {x:['X','X'],instagram:['إنستغرام','Instagram'],snapchat:['سناب شات','Snapchat'],tiktok:['تيك توك','TikTok'],tellonym:['تيلونيم','Tellonym'],discord:['ديسكورد','Discord'],playstation:['سوني (PlayStation)','PlayStation (Sony)'],xbox:['إكس بوكس','Xbox'],telegram:['تلقرام','Telegram'],service:['خدمة رقمية','Digital service'],game:['لعبة أو اشتراك','Game or subscription']};
   var TEXT = {
+    bio_checking:["جارٍ فحص البايو آليًا…", "Checking the biography automatically…"],
+    bio_connection:["الفحص الآلي لهذه المنصة غير متاح حاليًا ويحتاج ربطها بالموقع. لا يمكن نشر الحساب قبل تفعيل الفحص.", "Automatic verification for this platform is not connected yet. This account cannot be published until verification is available."],
+    bio_unavailable:["تعذّرت قراءة البايو آليًا من المنصة. لن يُنشر الحساب دون تحقق آلي ناجح. يمكنك إعادة المحاولة لاحقًا.", "The platform biography could not be read automatically. Publication requires successful automatic verification. You can retry later."],
     bio_title:["إثبات ملكية حساب التواصل","Prove social account ownership"],
     bio_hint:["ضع الكود في بايو الحساب المعروض للبيع واجعله ظاهرًا حتى يكتمل التحقق. لا يمكن نشر الحساب قبل إثبات ملكيته.","Place the code in the account bio and keep it visible until verification is complete. Ownership must be verified before publishing."],
     bio_start:["إصدار كود الملكية","Get ownership code"],
     bio_code:["كود الملكية","Ownership code"],
     bio_copy:["نسخ الكود","Copy code"],
     bio_check:["وضعت الكود — تحقق من البايو","Code added — verify bio"],
-    bio_refresh:["تحديث حالة التحقق","Refresh verification status"],
+    bio_refresh:["إعادة الفحص الآلي", "Run automatic check again"],
     bio_profile:["فتح الحساب","Open profile"],
     bio_draft:["حفظ كمسودة","Save as draft"],
     bio_required:["أثبت ملكية الحساب من قسم البايو أولًا. للسلع المحفوظة، افتح «تعديل» لإصدار الكود.","Verify account ownership in the bio section first. For saved listings, open Edit to get the code."],
     bio_username:["أدخل يوزر الحساب بالأعلى أولًا، دون رابط أو مسافات.","First enter the username above, without a URL or spaces."],
     bio_mismatch:["يوزر بيانات التسليم يجب أن يطابق يوزر الحساب الذي تم التحقق منه.","The delivery username must match the verified username."],
     bio_issued:["انسخ الكود إلى البايو ثم اضغط التحقق. الكود خاص بهذا الحساب وهذه السلعة وصالح لمدة 24 ساعة.","Copy the code into the bio, then verify. This code is tied to this account and listing and expires in 24 hours."],
-    bio_pending:["بانتظار مراجعة الإدارة للبايو. أبقِ الكود ظاهرًا، ثم حدّث الحالة بعد المراجعة. السلعة لا تُنشر قبل الموافقة.","Awaiting an administrator’s bio review. Keep the code visible and refresh the status after review. The listing cannot be published before approval."],
-    bio_missing:["لم يظهر الكود في البايو. تأكد من الحساب والكود ثم أعد التحقق. الطلب متاح للإدارة للمراجعة.","The code was not found in the bio. Check the username and code, then verify again. Administrators can also review the request."],
+    bio_pending:["لم يكتمل الفحص الآلي. اضغط التحقق لإعادة المحاولة؛ لا توجد مراجعة يدوية للملكية.", "Automatic verification is incomplete. Run the check again; ownership is never approved manually."],
+    bio_missing:["لم يظهر الكود في بايو الحساب. تأكد من الحساب والكود ثم أعد الفحص الآلي.", "The code was not found in the account bio. Check the username and code, then run automatic verification again."],
     bio_approved:["تم إثبات الملكية. يمكنك نشر هذا الحساب بعد إكمال بيانات السلعة وتوثيق البائع.","Ownership verified. Complete the listing and seller verification to publish."],
     bio_expired:["انتهت صلاحية الكود. أصدر كودًا جديدًا وضعه في البايو.","Code expired. Get a new code and add it to the bio."],
-    bio_rejected:["لم تتم الموافقة على إثبات الملكية. راجع الملاحظة وأصدر كودًا جديدًا.","Ownership was not approved. Read the note and get a new code."],
+    bio_rejected:["لم يتم إثبات الملكية آليًا. تأكد من البايو وأعد الفحص أو أصدر كودًا جديدًا.", "Automatic ownership verification did not succeed. Check the bio and retry or request a new code."],
     bio_rate:["انتظر قليلًا قبل إعادة التحقق أو إصدار أكواد إضافية.","Please wait before checking again or requesting more codes."],
     bio_copied:["نُسخ كود الملكية.","Ownership code copied."],
     bio_copy_failed:["انسخ الكود من الخانة يدويًا.","Copy the code from the field manually."],
@@ -45,14 +48,14 @@
   function normalizedUsername(value){return String(value||'').trim().replace(/^@/,'').toLowerCase();}
   function bioRequired(){return form&&BIO.includes(form.elements.kind.value);}
   function bioMatches(){return !!(bioProof&&bioProof.product_id===productId&&bioProof.platform===form.elements.kind.value&&bioProof.username===normalizedUsername(form.elements.title.value));}
-  function bioValid(){return bioMatches()&&bioProof.status==='approved'&&(bioProof.consumed_at||Date.parse(bioProof.expires_at)>Date.now()+bioOffset);}
+  function bioValid(){return bioMatches()&&bioProof.status==='approved'&&['public_bio','official_api'].includes(bioProof.method)&&(bioProof.consumed_at||Date.parse(bioProof.expires_at)>Date.now()+bioOffset);}
   function receiveBio(value){bioProof=value;bioOffset=value&&value.server_now?Date.parse(value.server_now)-Date.now():0;renderBio();}
   function renderBio(){
     if(!node('bioOwnership')||!form)return;var required=bioRequired(),matches=bioMatches(),expired=matches&&!bioProof.consumed_at&&Date.parse(bioProof.expires_at)<=Date.now()+bioOffset;
     node('bioOwnership').hidden=!required;node('bioCodePanel').hidden=!matches;node('bioStart').hidden=matches&&!expired&&bioProof.status!=='rejected';
-    node('bioCheck').disabled=busy||!matches||expired||bioProof.status==='approved'||bioProof.status==='rejected';node('bioRefresh').disabled=busy||!productId;
+    node('bioCheck').disabled=busy||!matches||expired||bioValid()||bioProof.status==='rejected';node('bioRefresh').disabled=busy||!productId;
     if(matches){node('bioCode').value=bioProof.code;node('bioAccount').textContent=t(bioProof.platform)+' · @'+bioProof.username;node('bioProfile').hidden=!bioProof.profile_url;if(bioProof.profile_url)node('bioProfile').href=bioProof.profile_url;}
-    var key=!matches?'bio_hint':expired?'bio_expired':bioProof.status==='approved'?'bio_approved':bioProof.status==='rejected'?'bio_rejected':bioProof.status==='pending'?(bioProof.check_reason==='code_missing'?'bio_missing':'bio_pending'):'bio_issued';
+    var key=!matches?'bio_hint':expired?'bio_expired':bioValid()?'bio_approved':bioProof.status==='rejected'?'bio_rejected':bioProof.check_reason==='code_missing'?'bio_missing':bioProof.check_reason==='automatic_unavailable'?'bio_connection':bioProof.check_reason==='profile_unavailable'?'bio_unavailable':bioProof.status==='pending'?'bio_pending':'bio_issued';
     node('bioMessage').textContent=t(key);node('bioReviewNote').textContent=matches?bioProof.review_note||'':'';
     var publishing=canPublish&&(!editing||form.dataset.wasActive==='true');
     node('listingPublish').disabled=busy||(required&&publishing&&!bioValid());node('bioDraft').hidden=!canPublish;node('bioDraft').disabled=busy;
@@ -123,8 +126,8 @@
     localize();
     form.elements.title.addEventListener('input',renderBio);
     node('bioStart').addEventListener('click',function(){act(async function(session){var name=normalizedUsername(form.elements.title.value);if(!/^[a-z0-9][a-z0-9_.-]{0,63}$/.test(name))throw new Error('BIO_INVALID_USERNAME');if(!productId)productId=uuid();var result=await backend.ownershipStart(productId,form.elements.kind.value,name);if(session===epoch)receiveBio(result);});});
-    node('bioCheck').addEventListener('click',function(){act(async function(session){if(!bioMatches())throw new Error('BIO_VERIFICATION_REQUIRED');var result=await backend.ownershipCheck(bioProof.id);if(session===epoch)receiveBio(result);});});
-    node('bioRefresh').addEventListener('click',function(){act(async function(session){var result=await backend.ownershipStatus(productId);if(session===epoch)receiveBio(result);});});
+    node('bioCheck').addEventListener('click',function(){act(async function(session){if(!bioMatches())throw new Error('BIO_VERIFICATION_REQUIRED');node('bioMessage').textContent=t('bio_checking');var result=await backend.ownershipCheck(bioProof.id);if(session===epoch)receiveBio(result);});});
+    node('bioRefresh').addEventListener('click',function(){act(async function(session){if(!bioMatches())throw new Error('BIO_VERIFICATION_REQUIRED');node('bioMessage').textContent=t('bio_checking');var result=await backend.ownershipCheck(bioProof.id);if(session===epoch)receiveBio(result);});});
     node('bioCopy').addEventListener('click',async function(){if(!bioMatches())return;try{await navigator.clipboard.writeText(bioProof.code);status('bio_copied');}catch{status('bio_copy_failed',true);}});
     node('bioDraft').addEventListener('click',function(){if(busy||!form.reportValidity())return;draftIntent=true;form.requestSubmit();});
     form.elements.kind.addEventListener('change',updateKind);node('cancelListing').addEventListener('click',function(){if(!busy){resetForm();status('');}});

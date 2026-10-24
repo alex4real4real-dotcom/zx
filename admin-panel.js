@@ -82,7 +82,7 @@
       var wrap = make('label', 'admin-switch'), check = make('input'); check.type = 'checkbox'; check.checked = filter === 'open'; wrap.append(check, label('only_open')); host.append(wrap);
       check.addEventListener('change', function () { filter = check.checked ? 'open' : ''; target = 50; loadAdminRows(); });
     } else if (tab === 'tickets' || tab === 'verifications' || tab === 'withdrawals' || tab === 'ownership') {
-      var opts = tab === 'tickets' ? [['','all'],['open','open'],['in_progress','in_progress'],['closed','closed']] : [['','all'],['pending','pending'],['approved','approved'],['rejected','rejected']].concat(tab==='verifications'?[['cancelled','cancelled']]:[]);
+      var opts = tab === 'ownership' ? [['','all'],['issued','issued'],['approved','approved']] : tab === 'tickets' ? [['','all'],['open','open'],['in_progress','in_progress'],['closed','closed']] : [['','all'],['pending','pending'],['approved','approved'],['rejected','rejected']].concat(tab==='verifications'?[['cancelled','cancelled']]:[]);
       var control = selectField('status', opts, filter); if (tab === 'tickets') control.select.id = 'ticketFilter'; host.append(control.wrap);
       control.select.addEventListener('change', function () { filter = control.select.value; target = 50; loadAdminRows(); });
     }
@@ -98,7 +98,7 @@
   }
   function chooseTab(tab, nextFilter) {
     if (!['verifications','disputes','accounts','orders','tickets','members','withdrawals','ideas','ownership'].includes(tab)) tab = 'verifications';
-    activeTab = tab; filter = nextFilter !== undefined ? nextFilter : (tab === 'verifications'||tab === 'withdrawals'||tab === 'ownership') ? 'pending' : tab === 'disputes' ? 'open' : ''; target = 50; topupTarget = 50; adminRows = []; topups = [];
+    activeTab = tab; filter = nextFilter !== undefined ? nextFilter : (tab === 'verifications'||tab === 'withdrawals') ? 'pending' : tab === 'disputes' ? 'open' : ''; target = 50; topupTarget = 50; adminRows = []; topups = [];
     document.querySelectorAll('[data-admin-tab]').forEach(function (el) { var selected = el.dataset.adminTab === tab; el.setAttribute('aria-selected',String(selected)); el.tabIndex = selected ? 0 : -1; });
     node('adminSection').setAttribute('aria-labelledby','tab-' + tab); node('sectionTitle').textContent = t(tab); node('sectionCopy').textContent = t(tab + '_copy'); node('sectionForm').replaceChildren();
     node('topupSection').hidden = tab !== 'orders'; node('adminMore').hidden = true; filtersFor(tab); if (tab === 'members') membershipForm();
@@ -196,26 +196,12 @@
   function renderWithdrawals(host){
     adminRows.forEach(function(row){var box=card(row.email),top=make('div','admin-card-top');top.append(make('strong','',money(row.amount)),make('span','admin-badge',t('withdrawal_'+row.status)));box.append(top,make('p','admin-copy',row.bank_name+' · '+row.holder_name),make('p','admin-copy',row.iban_masked),make('p','admin-copy',date(row.created_at)),make('p','admin-copy',t('withdrawal_test')));if(row.note)box.append(make('p','',row.note));if(row.review_note)box.append(make('p','',row.review_note));box.append(make('p','admin-copy',t('payments_inactive')));host.append(box);});
   }
-  function ownershipReview(row,approve){
-    var ui=dialog('ownership_review');ui.el.append(make('p','admin-copy',t('ownership_check_instructions')));
-    if(row.profile_url){var link=make('a','admin-button is-outline',t('ownership_open'));link.href=row.profile_url;link.target='_blank';link.rel='noopener noreferrer';ui.el.append(link);}
-    ui.el.append(make('p','admin-copy',row.platform+' · @'+row.username));
-    var form=make('form','admin-form');
-    if(approve){
-      var observed=field('ownership_observed_code','code','text',true,8),codeInput=observed.querySelector('input');codeInput.minLength=8;codeInput.pattern='[0-9]{8}';codeInput.inputMode='numeric';codeInput.autocomplete='off';form.append(observed);
-      var confirm=make('label','admin-switch'),check=make('input');check.type='checkbox';check.name='confirmed';check.required=true;confirm.append(check,label('ownership_confirmed'));form.append(confirm);
-    }
-    form.append(field('decision_note','note','textarea',false,1000));
-    var submit=mutationButton(approve?'ownership_approve':'ownership_reject');submit.type='submit';form.append(submit,ui.status);ui.el.append(form);
-    form.addEventListener('submit',function(event){event.preventDefault();if(!form.reportValidity())return;run(function(){return backend.adminOwnershipReview(row.id,approve,approve?form.elements.code.value.trim():'',approve&&form.elements.confirmed.checked,form.elements.note.value.trim());},async function(){closeDialog();await refreshAdmin();},ui.status);});
-  }
   function renderOwnership(host){
     adminRows.forEach(function(row){
       var box=card(row.platform+' · @'+row.username,row.status),code=make('p','admin-copy',row.code);code.dir='ltr';
       box.append(make('p','admin-copy',row.seller_name+' · '+row.seller_email),code,make('p','admin-copy',date(row.created_at)),make('p','admin-copy',t('ownership_expires')+' '+date(row.expires_at)));
       if(row.profile_url){var link=make('a','admin-button is-outline',t('ownership_open'));link.href=row.profile_url;link.target='_blank';link.rel='noopener noreferrer';box.append(link);}
       if(row.review_note)box.append(make('p','admin-copy',row.review_note));
-      if(row.status==='pending'){var actions=make('div','admin-actions');actions.append(mutationButton('ownership_approve',function(){ownershipReview(row,true);}),mutationButton('ownership_reject',function(){ownershipReview(row,false);},true));box.append(actions);}
       host.append(box);
     });
   }

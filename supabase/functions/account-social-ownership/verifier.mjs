@@ -42,18 +42,19 @@ export function biography(platform,username,html) {
 }
 export async function verifyPublicBio(proof,send=fetch) {
  if(!NAME.test(proof.username||'')||!CODE.test(proof.code||''))throw new Error('INVALID_REQUEST');
+ const unavailable=proof.platform==='tiktok'?'automatic_unavailable':'profile_unavailable';
  let url;
  if(proof.platform==='telegram')url='https://t.me/'+proof.username;
  else if(proof.platform==='tiktok')url='https://www.tiktok.com/@'+proof.username;
- else return {verified:false,reason:'manual_review'};
+ else return {verified:false,reason:'automatic_unavailable'};
  try {
   const response=await send(url,{redirect:'error',signal:AbortSignal.timeout(8000),headers:{accept:'text/html','cache-control':'no-cache','user-agent':'AccountOwnershipVerifier/1.0'}});
-  if(!(response.headers.get('content-type')||'').includes('text/html'))return {verified:false,reason:'profile_unavailable'};
+  if(!(response.headers.get('content-type')||'').includes('text/html'))return {verified:false,reason:unavailable};
   const bio=biography(proof.platform,proof.username,await boundedText(response));
-  if(bio===null)return {verified:false,reason:'profile_unavailable'};
+  if(bio===null)return {verified:false,reason:unavailable};
   const present=new RegExp('(^|[^\\p{L}\\p{N}])'+proof.code+'($|[^\\p{L}\\p{N}])','u').test(bio);
   return {verified:present,reason:present?'':'code_missing'};
- }catch{return {verified:false,reason:'profile_unavailable'};}
+ }catch{return {verified:false,reason:unavailable};}
 }
 export function createHandler({env,fetch:send=fetch}) {
  const cors={'access-control-allow-origin':'*','access-control-allow-headers':'authorization,apikey,x-client-info,content-type','access-control-allow-methods':'POST,OPTIONS','cache-control':'no-store','content-type':'application/json'};
@@ -78,7 +79,7 @@ export function createHandler({env,fetch:send=fetch}) {
    let body;try{body=JSON.parse(await boundedText(new Response(request.body),4096));}catch{return reply({error:'INVALID_REQUEST'},400);}
    if(!body||body.action!=='check'||!UUID.test(body.id||''))return reply({error:'INVALID_REQUEST'},400);
    const proof=await rpc('claim',user.id,body.id);
-   if(proof.status==='approved')return reply(proof);
+   if(proof.status==='approved'&&['public_bio','official_api'].includes(proof.method))return reply(proof);
    const decision=await verifyPublicBio(proof,send);
    return reply(await rpc('finish',user.id,proof.id,decision));
   }catch(error){

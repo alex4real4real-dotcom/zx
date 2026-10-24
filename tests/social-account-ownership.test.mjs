@@ -25,10 +25,10 @@ test('Telegram requires a matching canonical profile and the biography field',()
  assert.equal(biography('telegram','other',telegram),null);
  assert.equal(biography('telegram','owner','<div>'+code+'</div>'),null);
 });
-test('unsupported platforms and failed responses require review, never approval',async()=>{
+test('unsupported platforms and failed responses remain unverified',async()=>{
  let calls=0;const fetcher=async()=>{calls++;throw Error('network');};
- assert.deepEqual(await verifyPublicBio({...proof,platform:'instagram'},fetcher),{verified:false,reason:'manual_review'});assert.equal(calls,0);
- assert.deepEqual(await verifyPublicBio(proof,fetcher),{verified:false,reason:'profile_unavailable'});assert.equal(calls,1);
+ assert.deepEqual(await verifyPublicBio({...proof,platform:'instagram'},fetcher),{verified:false,reason:'automatic_unavailable'});assert.equal(calls,0);
+ assert.deepEqual(await verifyPublicBio(proof,fetcher),{verified:false,reason:'automatic_unavailable'});assert.equal(calls,1);
  assert.equal((await verifyPublicBio(proof,async()=>new Response('denied',{status:403}))).verified,false);
  assert.equal((await verifyPublicBio(proof,async()=>page('x'.repeat(2_000_001)))).verified,false);
 });
@@ -60,9 +60,9 @@ test('verification uses the authenticated user, stored challenge and observed bi
 test('a client cannot turn a missing biography code into approval',async()=>{
  const handler=createHandler({env,fetch:async(url,options)=>{
   if(url.endsWith('/auth/v1/user'))return json({id:uid});
-  if(url.endsWith('/rpc/account_bio_service')){const body=JSON.parse(options.body);if(body.p_action==='claim')return json(proof);assert.equal(body.p_success,false);return json({...proof,status:'pending'});}
+  if(url.endsWith('/rpc/account_bio_service')){const body=JSON.parse(options.body);if(body.p_action==='claim')return json(proof);assert.equal(body.p_success,false);return json({...proof,status:'issued'});}
   return page(html('owner','No ownership code here'));
  }});
  const response=await handler(new Request('https://example.test',{method:'POST',headers:{authorization:'Bearer token'},body:JSON.stringify({action:'check',id,verified:true})}));
- assert.equal((await response.json()).status,'pending');
+ assert.equal((await response.json()).status,'issued');
 });

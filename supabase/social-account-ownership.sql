@@ -74,7 +74,7 @@ create function account_bio_private.visible(p_record account_bio_private.challen
 language sql stable set search_path='' as $$
  select jsonb_build_object('id',p_record.id,'product_id',p_record.product_id,'platform',p_record.platform,'username',p_record.username,
  'code',p_record.code,'profile_url',p_record.profile_url,'status',p_record.status,'expires_at',p_record.expires_at,
- 'verified_at',p_record.verified_at,'consumed_at',p_record.consumed_at,'review_note',p_record.review_note,
+ 'method',p_record.method,'verified_at',p_record.verified_at,'consumed_at',p_record.consumed_at,'review_note',p_record.review_note,
  'server_now',clock_timestamp(),'check_reason',p_record.check_reason);
 $$;
 create function account_bio_private.start(p_product_id text,p_platform text,p_username text) returns jsonb
@@ -117,7 +117,7 @@ begin
  if not account_bio_private.is_social(p_platform) then return null;end if;
  name:=account_bio_private.username(p_platform,p_username);
  select * into proof from account_bio_private.challenges where user_id=p_owner and product_id=p_product_id and platform=p_platform and username=name
-  and status='approved' and (expires_at>clock_timestamp() or consumed_at is not null) order by verified_at desc limit 1 for update;
+  and status='approved' and method in ('public_bio','official_api') and (expires_at>clock_timestamp() or consumed_at is not null) order by verified_at desc limit 1 for update;
  if not found then raise exception 'BIO_VERIFICATION_REQUIRED';end if;
  if p_consume and proof.consumed_at is null then update account_bio_private.challenges set consumed_at=clock_timestamp() where id=proof.id;end if;
  return proof.id;
@@ -153,24 +153,6 @@ begin
  ) q;
  return jsonb_build_object('rows',case when jsonb_array_length(result)>50 then result-50 else result end,'more',jsonb_array_length(result)>50);
 end;$$;
-create function account_bio_private.review(p_id uuid,p_approve boolean,p_observed_code text,p_confirmed boolean,p_note text) returns jsonb
-language plpgsql security definer set search_path='' as $$
-declare reviewer uuid;proof account_bio_private.challenges;
-begin
- reviewer:=account_admin_private.require_admin(true);
- select * into proof from account_bio_private.challenges where id=p_id for update;
- if not found then raise exception 'RECORD_NOT_FOUND';end if;
- if proof.status<>'pending' then raise exception 'ALREADY_REVIEWED';end if;
- if proof.expires_at<=clock_timestamp() then raise exception 'BIO_CODE_EXPIRED';end if;
- if p_approve is null or char_length(coalesce(p_note,''))>1000 then raise exception 'INVALID_REQUEST';end if;
- if p_approve and (p_confirmed is distinct from true or btrim(coalesce(p_observed_code,''))<>proof.code) then raise exception 'BIO_CODE_MISMATCH';end if;
- if p_approve and not exists(select 1 from public.account_profiles where id=proof.user_id and not banned) then raise exception 'ACCOUNT_BANNED';end if;
- update account_bio_private.challenges set status=case when p_approve then 'approved' else 'rejected' end,
-  verified_at=case when p_approve then clock_timestamp() else null end,reviewer_id=reviewer,review_note=btrim(coalesce(p_note,'')),method='manual',
-  expires_at=case when p_approve then clock_timestamp()+interval '24 hours' else expires_at end where id=p_id returning * into proof;
- return account_bio_private.visible(proof);
-end;$$;
-
 -- This RPC is callable only by the authenticated Edge Function's service role.
 create function account_bio_private.service(p_action text,p_user_id uuid,p_id uuid,p_success boolean default false,p_reason text default '') returns jsonb
 language plpgsql security definer set search_path='' as $$
@@ -179,7 +161,7 @@ begin
  if p_user_id is null or not exists(select 1 from public.account_profiles p join auth.users u on u.id=p.id where p.id=p_user_id and not p.banned and u.email_confirmed_at is not null) then raise exception 'AUTH_REQUIRED';end if;
  select * into proof from account_bio_private.challenges where id=p_id and user_id=p_user_id for update;
  if not found then raise exception 'RECORD_NOT_FOUND';end if;
- if proof.status='approved' then return account_bio_private.visible(proof);end if;
+ if proof.status='approved' and proof.method in ('public_bio','official_api') then return account_bio_private.visible(proof);end if;
  if proof.status='rejected' or proof.expires_at<=clock_timestamp() then raise exception 'BIO_CODE_EXPIRED';end if;
  if p_action='claim' then
   if proof.last_checked_at>clock_timestamp()-interval '20 seconds' then raise exception 'BIO_CHECK_RATE_LIMIT';end if;
@@ -188,24 +170,23 @@ begin
  elsif p_action='finish' then
   if proof.last_checked_at is null or proof.last_checked_at<clock_timestamp()-interval '30 seconds' then raise exception 'INVALID_REQUEST';end if;
   if p_success and proof.platform not in ('telegram','tiktok') then raise exception 'INVALID_REQUEST';end if;
-  update account_bio_private.challenges set status=case when p_success then 'approved' else 'pending' end,
+  update account_bio_private.challenges set status=case when p_success then 'approved' else 'issued' end,
    verified_at=case when p_success then clock_timestamp() else null end,method=case when p_success then 'public_bio' else null end,
-   submitted_at=coalesce(submitted_at,clock_timestamp()),check_reason=case when p_reason in ('code_missing','manual_review','profile_unavailable') then p_reason else '' end
+   submitted_at=coalesce(submitted_at,clock_timestamp()),check_reason=case when p_reason in ('code_missing','automatic_unavailable','profile_unavailable') then p_reason else '' end
    where id=p_id returning * into proof;
  else raise exception 'INVALID_REQUEST';end if;
  return account_bio_private.visible(proof);
 end;$$;
 
 revoke all on all functions in schema account_bio_private from public,anon,authenticated,service_role;
-grant execute on function account_bio_private.start(text,text,text),account_bio_private.latest(text),account_bio_private.admin_list(integer,text),account_bio_private.review(uuid,boolean,text,boolean,text) to authenticated;
+grant execute on function account_bio_private.start(text,text,text),account_bio_private.latest(text),account_bio_private.admin_list(integer,text) to authenticated;
 grant execute on function account_bio_private.service(text,uuid,uuid,boolean,text) to service_role;
 create function public.account_bio_start(p_product_id text,p_platform text,p_username text) returns jsonb language sql security invoker set search_path='' as $$select account_bio_private.start(p_product_id,p_platform,p_username);$$;
 create function public.account_bio_status(p_product_id text) returns jsonb language sql security invoker set search_path='' as $$select account_bio_private.latest(p_product_id);$$;
 create function public.account_bio_admin_list(p_offset integer default 0,p_filter text default 'pending') returns jsonb language sql security invoker set search_path='' as $$select account_bio_private.admin_list(p_offset,p_filter);$$;
-create function public.account_bio_review(p_id uuid,p_approve boolean,p_observed_code text,p_confirmed boolean,p_note text default '') returns jsonb language sql security invoker set search_path='' as $$select account_bio_private.review(p_id,p_approve,p_observed_code,p_confirmed,p_note);$$;
 create function public.account_bio_service(p_action text,p_user_id uuid,p_id uuid,p_success boolean default false,p_reason text default '') returns jsonb language sql security invoker set search_path='' as $$select account_bio_private.service(p_action,p_user_id,p_id,p_success,p_reason);$$;
-revoke all on function public.account_bio_start(text,text,text),public.account_bio_status(text),public.account_bio_admin_list(integer,text),public.account_bio_review(uuid,boolean,text,boolean,text),public.account_bio_service(text,uuid,uuid,boolean,text) from public,anon,authenticated,service_role;
-grant execute on function public.account_bio_start(text,text,text),public.account_bio_status(text),public.account_bio_admin_list(integer,text),public.account_bio_review(uuid,boolean,text,boolean,text) to authenticated;
+revoke all on function public.account_bio_start(text,text,text),public.account_bio_status(text),public.account_bio_admin_list(integer,text),public.account_bio_service(text,uuid,uuid,boolean,text) from public,anon,authenticated,service_role;
+grant execute on function public.account_bio_start(text,text,text),public.account_bio_status(text),public.account_bio_admin_list(integer,text) to authenticated;
 grant execute on function public.account_bio_service(text,uuid,uuid,boolean,text) to service_role;
 notify pgrst,'reload schema';
 CREATE OR REPLACE FUNCTION account_seller_private.save_product(p_id text, p_title text, p_price numeric, p_listing_type text, p_description text, p_credentials jsonb, p_active boolean)
