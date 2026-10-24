@@ -76,12 +76,79 @@
     mark.setAttribute('aria-hidden', 'true'); button.type = 'button'; button.dataset.uid = row.id; button.append(mark, ui('span', 'أضف إلى السلة'));
     footer.append(price, button); card.append(header, description, footer); return card;
   }
+  function filterListings(rows, filters) {
+    var query = String(filters.search || '').trim().toLocaleLowerCase();
+    return rows.filter(function (row) {
+      if (query && ![row.title, row.description].join(' ').toLocaleLowerCase().includes(query)) return false;
+      if (filters.type && row.listing_type !== filters.type) return false;
+      if (filters.category) {
+        if (['service', 'game'].includes(row.listing_type)) return false;
+        var length = Array.from(String(row.title || '').trim().replace(/^@/, '')).length;
+        if (filters.category === 'other' ? length >= 2 && length <= 6 : length !== Number(filters.category)) return false;
+      }
+      if (filters.price === 'above' && !(Number(row.price) > 500)) return false;
+      if (filters.price === 'below' && !(Number(row.price) < 500)) return false;
+      return true;
+    });
+  }
+  function mountCatalog(rows, host, headingTag, emptyText) {
+    var layout = el('div', undefined, 'catalog-layout');
+    var toggle = ui('button', 'الفلاتر', 'catalog-filter-toggle backend-button secondary');
+    var sidebar = el('aside', undefined, 'catalog-filters'), form = el('form');
+    var results = el('div', undefined, 'catalog-results');
+    var fields = {}, prefix = host.id + '-filter-';
+    sidebar.id = prefix + 'panel';
+    sidebar.setAttribute('aria-label', t('خيارات التصفية'));
+    sidebar.setAttribute('data-i18n-aria', 'خيارات التصفية');
+    toggle.type = 'button'; toggle.setAttribute('aria-controls', sidebar.id); toggle.setAttribute('aria-expanded', 'false');
+    toggle.addEventListener('click', function () {
+      toggle.setAttribute('aria-expanded', String(sidebar.classList.toggle('is-open')));
+    });
+    function field(name, label, control) {
+      var group = el('div', undefined, 'catalog-filter-field'), caption = ui('label', label);
+      control.id = prefix + name; control.name = name; caption.htmlFor = control.id;
+      fields[name] = control; group.append(caption, control); form.append(group); return control;
+    }
+    function select(name, label, options) {
+      var control = field(name, label, el('select'));
+      options.forEach(function (option) { var node = ui('option', option[1]); node.value = option[0]; control.append(node); });
+    }
+    var search = field('search', 'كلمة البحث', el('input'));
+    search.type = 'search'; search.placeholder = t('أدخل كلمة البحث'); search.setAttribute('data-i18n-placeholder', 'أدخل كلمة البحث');
+    select('type', 'نوع الحساب', [['', 'الكل'], ['x', 'X'], ['instagram', 'Instagram'], ['snapchat', 'Snapchat'], ['tiktok', 'TikTok'], ['tellonym', 'Tellonym'], ['discord', 'Discord'], ['playstation', 'PlayStation'], ['xbox', 'Xbox'], ['telegram', 'Telegram'], ['facebook', 'Facebook'], ['youtube', 'YouTube'], ['service', 'الخدمات الرقمية'], ['game', 'الألعاب والاشتراكات']]);
+    select('category', 'فئة الحساب', [['', 'الكل'], ['2', 'ثنائي'], ['3', 'ثلاثي'], ['4', 'رباعي'], ['5', 'خماسي'], ['6', 'سداسي'], ['other', 'أخرى']]);
+    var priceGroup = el('fieldset', undefined, 'catalog-filter-field catalog-price-filter');
+    priceGroup.append(ui('legend', 'الفئة السعرية'));
+    [['above', 'أكثر من (500 SAR)'], ['below', 'أقل من (500 SAR)']].forEach(function (option) {
+      var label = el('label'), radio = el('input'); radio.type = 'radio'; radio.name = 'price'; radio.value = option[0];
+      label.append(radio, ui('span', option[1])); priceGroup.append(label);
+    });
+    var reset = ui('button', 'إعادة تعيين', 'catalog-filter-reset'); reset.type = 'reset';
+    form.append(priceGroup, reset); sidebar.append(form);
+    host.parentNode.insertBefore(layout, host);
+    host.classList.remove('backend-grid', 'mt-12'); host.classList.add('catalog-grid');
+    host.setAttribute('aria-live', 'polite');
+    results.append(host); layout.append(toggle, sidebar, results);
+    function render() {
+      var selected = form.querySelector('input[name="price"]:checked');
+      var visible = filterListings(rows, {search: fields.search.value, type: fields.type.value, category: fields.category.value, price: selected ? selected.value : ''});
+      host.replaceChildren();
+      visible.forEach(function (row) { host.append(listingCard(row, headingTag)); });
+      if (!visible.length) host.append(ui('p', rows.length ? 'لا توجد منتجات تطابق خيارات البحث.' : emptyText || 'لا توجد منتجات متاحة حاليًا.', 'backend-muted catalog-empty'));
+    }
+    form.addEventListener('submit', function (event) { event.preventDefault(); });
+    form.addEventListener('input', render); form.addEventListener('change', render);
+    form.addEventListener('reset', function () { window.setTimeout(render, 0); });
+    render();
+  }
   async function shopPage(verifiedOnly) {
     try {
       var rows = await (verifiedOnly ? backend.verifiedSellerProducts() : backend.products()), container = document.getElementById('productList');
-      container.classList.add('catalog-grid'); container.replaceChildren();
-      if (!rows.length) container.append(ui('p', verifiedOnly ? 'لا توجد سلع متاحة من بائعين موثّقين حاليًا.' : 'لا توجد منتجات متاحة حاليًا.'));
-      rows.forEach(function (row) { container.append(listingCard(row)); });
+      if (verifiedOnly) {
+        container.classList.add('catalog-grid'); container.replaceChildren();
+        if (!rows.length) container.append(ui('p', 'لا توجد سلع متاحة من بائعين موثّقين حاليًا.'));
+        rows.forEach(function (row) { container.append(listingCard(row)); });
+      } else mountCatalog(rows, container);
       status('shopStatus', '', false);
     } catch (error) { status('shopStatus', backend.errorMessage(error), true); }
   }
@@ -137,9 +204,7 @@
     try {
       var social = ['x','instagram','snapchat','tiktok','tellonym','discord','playstation','xbox','telegram'];
       var rows = (await backend.products()).filter(function (row) { return social.includes(row.listing_type) && !row.deleted_at && !row.sold_at; });
-      host.replaceChildren();
-      rows.forEach(function (row) { host.append(listingCard(row, 'h3')); });
-      if (!rows.length) host.append(ui('p', 'لا توجد منتجات متاحة حاليًا.', 'backend-muted'));
+      mountCatalog(rows, host, 'h3');
     } catch (error) { host.replaceChildren(ui('p', backend.errorMessage(error), 'backend-status error')); }
   }
   window.addEventListener('account:languagechange', function () {
@@ -156,3 +221,4 @@
     if (!page) await syncHomepageProducts();
   }).catch(function (error) { var node = document.querySelector('.backend-status'); if (node) { if (window.AppI18N) window.AppI18N.bindText(node, backend.errorMessage(error)); else node.textContent = backend.errorMessage(error); node.classList.add('error'); } });
 })();
+
