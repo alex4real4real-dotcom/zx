@@ -115,7 +115,7 @@
     }
     var search = field('search', 'كلمة البحث', el('input'));
     search.type = 'search'; search.placeholder = t('أدخل كلمة البحث'); search.setAttribute('data-i18n-placeholder', 'أدخل كلمة البحث');
-    select('type', 'نوع الحساب', [['', 'الكل'], ['x', 'X'], ['instagram', 'Instagram'], ['snapchat', 'Snapchat'], ['tiktok', 'TikTok'], ['tellonym', 'Tellonym'], ['discord', 'Discord'], ['playstation', 'PlayStation'], ['xbox', 'Xbox'], ['telegram', 'Telegram'], ['facebook', 'Facebook'], ['youtube', 'YouTube'], ['service', 'الخدمات الرقمية'], ['game', 'الألعاب والاشتراكات']]);
+    select('type', 'نوع الحساب', [['', 'الكل'], ['x', 'X'], ['instagram', 'Instagram'], ['snapchat', 'Snapchat'], ['tiktok', 'TikTok'], ['tellonym', 'Tellonym'], ['discord', 'Discord'], ['playstation', 'PlayStation'], ['xbox', 'Xbox'], ['telegram', 'Telegram'], ['service', 'الخدمات الرقمية'], ['game', 'الألعاب والاشتراكات']]);
     select('category', 'فئة الحساب', [['', 'الكل'], ['2', 'ثنائي'], ['3', 'ثلاثي'], ['4', 'رباعي'], ['5', 'خماسي'], ['6', 'سداسي'], ['other', 'أخرى']]);
     var priceGroup = el('fieldset', undefined, 'catalog-filter-field catalog-price-filter');
     priceGroup.append(ui('legend', 'الفئة السعرية'));
