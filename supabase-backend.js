@@ -284,6 +284,11 @@
 
   backend.ownershipStart = async function(id,platform,username){return check(await (await client(true)).rpc('account_bio_start',{p_product_id:id,p_platform:platform,p_username:username}));};
   backend.ownershipStatus = async function(id){return check(await (await client(true)).rpc('account_bio_status',{p_product_id:id}));};
+  backend.ownershipCapabilities = async function(){
+    var response=await (await client(true)).functions.invoke('account-social-ownership',{body:{action:'capabilities'}});
+    if(response.error||!response.data||!response.data.platforms)throw new Error('BIO_UNAVAILABLE');
+    return response.data.platforms;
+  };
   backend.ownershipCheck = async function(id){
     var response=await (await client(true)).functions.invoke('account-social-ownership',{body:{action:'check',id:id}});
     if(response.error){var data={};try{data=await response.error.context.json();}catch{}throw new Error(data.error||'BIO_UNAVAILABLE');}

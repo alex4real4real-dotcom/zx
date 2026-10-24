@@ -18,13 +18,16 @@ $$;
 
 create function account_bio_private.is_social(p_kind text) returns boolean
 language sql immutable set search_path='' as $$
- select coalesce(p_kind in ('x','instagram','snapchat','tiktok','tellonym','discord','telegram'),false);
+ select coalesce(p_kind in ('x','instagram','snapchat','tiktok','tellonym','discord','telegram','playstation','xbox'),false);
 $$;
 create function account_bio_private.username(p_kind text,p_name text) returns text
 language plpgsql immutable set search_path='' as $$
-declare name text:=lower(regexp_replace(btrim(coalesce(p_name,'')),'^@',''));
+declare name text:=lower(case when p_kind='xbox' then btrim(coalesce(p_name,'')) else regexp_replace(btrim(coalesce(p_name,'')),'^@','') end);
 begin
- if not account_bio_private.is_social(p_kind) or name !~ '^[a-z0-9][a-z0-9_.-]{0,63}$' then raise exception 'BIO_INVALID_USERNAME';end if;
+ if not account_bio_private.is_social(p_kind) then raise exception 'BIO_INVALID_USERNAME';end if;
+ if p_kind='xbox' then
+  if char_length(name)>64 or name !~ '^[[:alnum:]][[:alnum:] ,]*(#[0-9]{1,4})?$' then raise exception 'BIO_INVALID_USERNAME';end if;
+ elsif name !~ '^[a-z0-9][a-z0-9_.-]{0,63}$' then raise exception 'BIO_INVALID_USERNAME';end if;
  return name;
 end;$$;
 create function account_bio_private.profile_url(p_kind text,p_name text) returns text
@@ -49,7 +52,7 @@ create table account_bio_private.challenges (
  id uuid primary key default gen_random_uuid(),
  user_id uuid not null references public.account_profiles(id) on delete cascade,
  product_id text not null,
- platform text not null check(platform in ('x','instagram','snapchat','tiktok','tellonym','discord','telegram')),
+ platform text not null check(platform in ('x','instagram','snapchat','tiktok','tellonym','discord','telegram','playstation','xbox')),
  username text not null,
  code text not null unique default account_bio_private.new_code() check(code ~ '^[0-9]{8}$'),
  profile_url text,
@@ -61,7 +64,8 @@ create table account_bio_private.challenges (
  review_note text not null default '', method text,
  attempts integer not null default 0, last_checked_at timestamptz,
  check_reason text not null default '',
- check (username ~ '^[a-z0-9][a-z0-9_.-]{0,63}$'),
+ check ((platform='xbox' and char_length(username)<=64 and username ~ '^[[:alnum:]][[:alnum:] ,]*(#[0-9]{1,4})?$') or
+  (platform<>'xbox' and username ~ '^[a-z0-9][a-z0-9_.-]{0,63}$')),
  check (product_id ~ '^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$'),
  check (status<>'approved' or verified_at is not null)
 );
@@ -169,7 +173,7 @@ begin
   update account_bio_private.challenges set attempts=attempts+1,last_checked_at=clock_timestamp() where id=p_id returning * into proof;
  elsif p_action='finish' then
   if proof.last_checked_at is null or proof.last_checked_at<clock_timestamp()-interval '30 seconds' then raise exception 'INVALID_REQUEST';end if;
-  if p_success and proof.platform not in ('telegram','tiktok') then raise exception 'INVALID_REQUEST';end if;
+  if p_success and proof.platform not in ('telegram','tiktok','tellonym','x','snapchat') then raise exception 'INVALID_REQUEST';end if;
   update account_bio_private.challenges set status=case when p_success then 'approved' else 'issued' end,
    verified_at=case when p_success then clock_timestamp() else null end,method=case when p_success then 'public_bio' else null end,
    submitted_at=coalesce(submitted_at,clock_timestamp()),check_reason=case when p_reason in ('code_missing','automatic_unavailable','profile_unavailable') then p_reason else '' end

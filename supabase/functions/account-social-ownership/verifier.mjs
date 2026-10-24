@@ -1,6 +1,15 @@
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CODE=/^[0-9]{8}$/;
 const NAME=/^[a-z0-9][a-z0-9_.-]{0,63}$/;
+const PLATFORMS=['x','instagram','snapchat','tiktok','tellonym','discord','playstation','xbox','telegram'];
+export function capabilities(env=()=>undefined) {
+ return Object.fromEntries(PLATFORMS.map(platform=>[platform,
+  ['telegram','tellonym','tiktok'].includes(platform)?'public_bio':
+  platform==='x'&&env('X_API_BEARER_TOKEN')||platform==='snapchat'&&env('SNAPCHAT_PROFILE_ACCESS_TOKEN')?'official_api':'connection_required']));
+}
+function validName(platform,name) {
+ return typeof name==='string'&&(platform==='xbox'?/^(?=.{1,64}$)[\p{L}\p{N}][\p{L}\p{N} ,]*(?:#[0-9]{1,4})?$/u.test(name):NAME.test(name));
+}
 export async function boundedText(response,max=2_000_000) {
  if(!response.ok||!response.body)throw new Error('PROFILE_UNAVAILABLE');
  const reader=response.body.getReader(),chunks=[];let length=0;
@@ -40,17 +49,30 @@ export function biography(platform,username,html) {
  }
  return null;
 }
-export async function verifyPublicBio(proof,send=fetch) {
- if(!NAME.test(proof.username||'')||!CODE.test(proof.code||''))throw new Error('INVALID_REQUEST');
- const unavailable=proof.platform==='tiktok'?'automatic_unavailable':'profile_unavailable';
- let url;
+export function apiBiography(platform,username,data) {
+ if(platform==='tellonym')return typeof data?.username==='string'&&data.username.toLowerCase()===username&&typeof data.aboutMe==='string'?data.aboutMe:null;
+ if(platform==='x')return typeof data?.data?.username==='string'&&data.data.username.toLowerCase()===username&&typeof data.data.description==='string'?data.data.description:null;
+ if(platform==='snapchat'&&data?.request_status==='SUCCESS'&&Array.isArray(data.public_profiles)) {
+  const matches=data.public_profiles.filter(item=>item?.sub_request_status==='SUCCESS'&&typeof item.public_profile?.snap_user_name==='string'&&item.public_profile.snap_user_name.toLowerCase()===username);
+  return matches.length===1&&typeof matches[0].public_profile.description==='string'?matches[0].public_profile.description:null;
+ }
+ return null;
+}
+export async function verifyPublicBio(proof,send=fetch,env=()=>undefined) {
+ if(!PLATFORMS.includes(proof.platform)||!validName(proof.platform,proof.username)||!CODE.test(proof.code||''))throw new Error('INVALID_REQUEST');
+ const unavailable=['tiktok','x','snapchat'].includes(proof.platform)?'automatic_unavailable':'profile_unavailable';
+ let url,json=false;const headers={'cache-control':'no-cache','user-agent':'AccountOwnershipVerifier/1.0'};
  if(proof.platform==='telegram')url='https://t.me/'+proof.username;
  else if(proof.platform==='tiktok')url='https://www.tiktok.com/@'+proof.username;
+ else if(proof.platform==='tellonym'){url='https://api.tellonym.me/profiles/name/'+encodeURIComponent(proof.username);json=true;}
+ else if(proof.platform==='x'&&env('X_API_BEARER_TOKEN')){url='https://api.x.com/2/users/by/username/'+encodeURIComponent(proof.username)+'?user.fields=description';headers.authorization='Bearer '+env('X_API_BEARER_TOKEN');json=true;}
+ else if(proof.platform==='snapchat'&&env('SNAPCHAT_PROFILE_ACCESS_TOKEN')){url='https://businessapi.snapchat.com/public/v1/public_profiles/search?query='+encodeURIComponent(proof.username)+'&category=CATEGORY_PERSON&tier=TIER_PUBLIC&includeStandard=true&limit=100';headers.authorization='Bearer '+env('SNAPCHAT_PROFILE_ACCESS_TOKEN');json=true;}
  else return {verified:false,reason:'automatic_unavailable'};
  try {
-  const response=await send(url,{redirect:'error',signal:AbortSignal.timeout(8000),headers:{accept:'text/html','cache-control':'no-cache','user-agent':'AccountOwnershipVerifier/1.0'}});
-  if(!(response.headers.get('content-type')||'').includes('text/html'))return {verified:false,reason:unavailable};
-  const bio=biography(proof.platform,proof.username,await boundedText(response));
+  headers.accept=json?'application/json':'text/html';
+  const response=await send(url,{redirect:'error',signal:AbortSignal.timeout(8000),headers});
+  if(!(response.headers.get('content-type')||'').includes(json?'application/json':'text/html'))return {verified:false,reason:unavailable};
+  const text=await boundedText(response),bio=json?apiBiography(proof.platform,proof.username,JSON.parse(text)):biography(proof.platform,proof.username,text);
   if(bio===null)return {verified:false,reason:unavailable};
   const present=new RegExp('(^|[^\\p{L}\\p{N}])'+proof.code+'($|[^\\p{L}\\p{N}])','u').test(bio);
   return {verified:present,reason:present?'':'code_missing'};
@@ -77,10 +99,11 @@ export function createHandler({env,fetch:send=fetch}) {
    if(!auth.ok)return reply({error:'AUTH_REQUIRED'},401);
    const user=JSON.parse(await boundedText(auth,32000));if(!UUID.test(user.id||''))return reply({error:'AUTH_REQUIRED'},401);
    let body;try{body=JSON.parse(await boundedText(new Response(request.body),4096));}catch{return reply({error:'INVALID_REQUEST'},400);}
+   if(body?.action==='capabilities')return reply({platforms:capabilities(env)});
    if(!body||body.action!=='check'||!UUID.test(body.id||''))return reply({error:'INVALID_REQUEST'},400);
    const proof=await rpc('claim',user.id,body.id);
    if(proof.status==='approved'&&['public_bio','official_api'].includes(proof.method))return reply(proof);
-   const decision=await verifyPublicBio(proof,send);
+   const decision=await verifyPublicBio(proof,send,env);
    return reply(await rpc('finish',user.id,proof.id,decision));
   }catch(error){
    const message=String(error?.message||'');const known=['BIO_CHECK_RATE_LIMIT','BIO_REQUEST_LIMIT','BIO_CODE_EXPIRED','AUTH_REQUIRED','RECORD_NOT_FOUND','INVALID_REQUEST'];

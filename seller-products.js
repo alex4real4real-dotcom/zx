@@ -7,8 +7,9 @@
     bio_checking:["جارٍ فحص البايو آليًا…", "Checking the biography automatically…"],
     bio_connection:["الفحص الآلي لهذه المنصة غير متاح حاليًا ويحتاج ربطها بالموقع. لا يمكن نشر الحساب قبل تفعيل الفحص.", "Automatic verification for this platform is not connected yet. This account cannot be published until verification is available."],
     bio_unavailable:["تعذّرت قراءة البايو آليًا من المنصة. لن يُنشر الحساب دون تحقق آلي ناجح. يمكنك إعادة المحاولة لاحقًا.", "The platform biography could not be read automatically. Publication requires successful automatic verification. You can retry later."],
-    bio_title:["إثبات ملكية حساب التواصل","Prove social account ownership"],
-    bio_hint:["ضع الكود في بايو الحساب المعروض للبيع واجعله ظاهرًا حتى يكتمل التحقق. لا يمكن نشر الحساب قبل إثبات ملكيته.","Place the code in the account bio and keep it visible until verification is complete. Ownership must be verified before publishing."],
+    bio_title:["إثبات ملكية الحساب","Prove account ownership"],
+    bio_loading:["جارٍ التأكد من توفر الفحص الآلي لهذه المنصة…","Checking automatic verification availability for this platform…"],
+    bio_hint:["ضع الكود في بايو الحساب أو قسم «نبذة عني» واجعله ظاهرًا حتى يكتمل الفحص الآلي. لا يمكن نشر الحساب قبل إثبات ملكيته.","Place the code in the account bio or About me section and keep it visible until the automatic check completes. Ownership must be verified before publishing."],
     bio_start:["إصدار كود الملكية","Get ownership code"],
     bio_code:["كود الملكية","Ownership code"],
     bio_copy:["نسخ الكود","Copy code"],
@@ -17,7 +18,7 @@
     bio_profile:["فتح الحساب","Open profile"],
     bio_draft:["حفظ كمسودة","Save as draft"],
     bio_required:["أثبت ملكية الحساب من قسم البايو أولًا. للسلع المحفوظة، افتح «تعديل» لإصدار الكود.","Verify account ownership in the bio section first. For saved listings, open Edit to get the code."],
-    bio_username:["أدخل يوزر الحساب بالأعلى أولًا، دون رابط أو مسافات.","First enter the username above, without a URL or spaces."],
+    bio_username:["أدخل يوزر الحساب كما يظهر في المنصة، دون رابط. إكس بوكس يقبل المسافات ورقم #.","Enter the account username as shown on the platform, without a URL. Xbox supports spaces and a # suffix."],
     bio_mismatch:["يوزر بيانات التسليم يجب أن يطابق يوزر الحساب الذي تم التحقق منه.","The delivery username must match the verified username."],
     bio_issued:["انسخ الكود إلى البايو ثم اضغط التحقق. الكود خاص بهذا الحساب وهذه السلعة وصالح لمدة 24 ساعة.","Copy the code into the bio, then verify. This code is tied to this account and listing and expires in 24 hours."],
     bio_pending:["لم يكتمل الفحص الآلي. اضغط التحقق لإعادة المحاولة؛ لا توجد مراجعة يدوية للملكية.", "Automatic verification is incomplete. Run the check again; ownership is never approved manually."],
@@ -28,7 +29,7 @@
     bio_rate:["انتظر قليلًا قبل إعادة التحقق أو إصدار أكواد إضافية.","Please wait before checking again or requesting more codes."],
     bio_copied:["نُسخ كود الملكية.","Ownership code copied."],
     bio_copy_failed:["انسخ الكود من الخانة يدويًا.","Copy the code from the field manually."],
-    bio_draft_saved:["حُفظت السلعة كمسودة. أكمل إثبات الملكية قبل نشر حساب التواصل.","Draft saved. Verify social account ownership before publishing."],
+    bio_draft_saved:["حُفظت السلعة كمسودة. أكمل إثبات ملكية الحساب قبل نشره.","Draft saved. Verify account ownership before publishing."],
     delete:['حذف السلعة','Delete listing'],restore:['استعادة كمسودة','Restore as draft'],deleted:['محذوفة','Deleted'],deleted_list:['المحذوفات','Deleted listings'],active_list:['العودة إلى سلعي','Back to my listings'],deleted_empty:['لا توجد سلع محذوفة.','No deleted listings.'],deleted_saved:['حُذفت السلعة من العرض. يمكنك استعادتها من المحذوفات.','Listing removed. You can restore it from Deleted listings.'],restored_saved:['استُعيدت السلعة كمسودة.','Listing restored as a draft.'],delete_confirm:['هل تريد حذف هذه السلعة من العرض؟ تبقى الطلبات السابقة محفوظة، ويمكنك استعادتها من المحذوفات.','Remove this listing? Existing orders are preserved. You can restore it from Deleted listings.'],
     title:['إضافة خدمة جديدة','Add a new listing'],intro:['أضف بيانات السلعة لتظهر في متجرك وكتالوج السوق.','Add your listing to your store and the marketplace.'],
     name:['اسم الخدمة *','Listing name *'],user:['يوزر الحساب *','Account username *'],price:['السعر (SAR) *','Price (SAR) *'],kind:['نوع العرض *','Listing type *'],
@@ -44,19 +45,20 @@
     placeholder:['مثال: لعبة فيفا 27','For example: FIFA 27'],user_placeholder:['مثال: xx7a','For example: xx7a'],description_placeholder:['اكتب وصفًا مختصرًا للخدمة…','Write a short description…']
   };
   var form, user, profile, canPublish = false, busy = false, epoch = 0, listEpoch = 0, rows = [], more = false, editing = false, productId = null, viewDeleted = false;
-  var BIO=['x','instagram','snapchat','tiktok','tellonym','discord','telegram'],bioProof=null,bioOffset=0,draftIntent=false;
-  function normalizedUsername(value){return String(value||'').trim().replace(/^@/,'').toLowerCase();}
+  var BIO=SOCIAL.slice(),bioProof=null,bioOffset=0,draftIntent=false,bioCapabilities=null,bioCapabilityFailed=false;
+  function normalizedUsername(value){var name=String(value||'').trim();return (form.elements.kind.value==='xbox'?name:name.replace(/^@/,'')).toLowerCase();}
+  function validUsername(value){return form.elements.kind.value==='xbox'?/^(?=.{1,64}$)[\p{L}\p{N}][\p{L}\p{N} ,]*(?:#[0-9]{1,4})?$/u.test(value):/^[a-z0-9][a-z0-9_.-]{0,63}$/.test(value);}
   function bioRequired(){return form&&BIO.includes(form.elements.kind.value);}
   function bioMatches(){return !!(bioProof&&bioProof.product_id===productId&&bioProof.platform===form.elements.kind.value&&bioProof.username===normalizedUsername(form.elements.title.value));}
   function bioValid(){return bioMatches()&&bioProof.status==='approved'&&['public_bio','official_api'].includes(bioProof.method)&&(bioProof.consumed_at||Date.parse(bioProof.expires_at)>Date.now()+bioOffset);}
   function receiveBio(value){bioProof=value;bioOffset=value&&value.server_now?Date.parse(value.server_now)-Date.now():0;renderBio();}
   function renderBio(){
-    if(!node('bioOwnership')||!form)return;var required=bioRequired(),matches=bioMatches(),expired=matches&&!bioProof.consumed_at&&Date.parse(bioProof.expires_at)<=Date.now()+bioOffset;
-    node('bioOwnership').hidden=!required;node('bioCodePanel').hidden=!matches;node('bioStart').hidden=matches&&!expired&&bioProof.status!=='rejected';
-    node('bioCheck').disabled=busy||!matches||expired||bioValid()||bioProof.status==='rejected';node('bioRefresh').disabled=busy||!productId;
-    if(matches){node('bioCode').value=bioProof.code;node('bioAccount').textContent=t(bioProof.platform)+' · @'+bioProof.username;node('bioProfile').hidden=!bioProof.profile_url;if(bioProof.profile_url)node('bioProfile').href=bioProof.profile_url;}
-    var key=!matches?'bio_hint':expired?'bio_expired':bioValid()?'bio_approved':bioProof.status==='rejected'?'bio_rejected':bioProof.check_reason==='code_missing'?'bio_missing':bioProof.check_reason==='automatic_unavailable'?'bio_connection':bioProof.check_reason==='profile_unavailable'?'bio_unavailable':bioProof.status==='pending'?'bio_pending':'bio_issued';
-    node('bioMessage').textContent=t(key);node('bioReviewNote').textContent=matches?bioProof.review_note||'':'';
+    if(!node('bioOwnership')||!form)return;var required=bioRequired(),matches=bioMatches(),expired=matches&&!bioProof.consumed_at&&Date.parse(bioProof.expires_at)<=Date.now()+bioOffset,connected=!!(bioCapabilities&&['public_bio','official_api'].includes(bioCapabilities[form.elements.kind.value]));
+    node('bioOwnership').hidden=!required;node('bioCodePanel').hidden=!matches;node('bioStart').hidden=!connected||(matches&&!expired&&bioProof.status!=='rejected');
+    node('bioCheck').disabled=busy||!connected||!matches||expired||bioValid()||bioProof.status==='rejected';node('bioRefresh').disabled=node('bioCheck').disabled;
+    if(matches){node('bioCode').value=bioProof.code;node('bioAccount').textContent=t(bioProof.platform)+' · '+(['xbox','playstation'].includes(bioProof.platform)?'':'@')+bioProof.username;node('bioProfile').hidden=!bioProof.profile_url;if(bioProof.profile_url)node('bioProfile').href=bioProof.profile_url;}
+    var key=bioValid()?'bio_approved':bioCapabilityFailed?'bio_unavailable':!bioCapabilities?'bio_loading':!connected?'bio_connection':!matches?'bio_hint':expired?'bio_expired':bioProof.status==='rejected'?'bio_rejected':bioProof.check_reason==='code_missing'?'bio_missing':bioProof.check_reason==='automatic_unavailable'?'bio_connection':bioProof.check_reason==='profile_unavailable'?'bio_unavailable':bioProof.status==='pending'?'bio_pending':'bio_issued';
+    node('bioMessage').textContent=t(form.elements.kind.value)+' — '+t(key);node('bioReviewNote').textContent=matches?bioProof.review_note||'':'';
     var publishing=canPublish&&(!editing||form.dataset.wasActive==='true');
     node('listingPublish').disabled=busy||(required&&publishing&&!bioValid());node('bioDraft').hidden=!canPublish;node('bioDraft').disabled=busy;
   }
@@ -125,7 +127,7 @@
     var deletedToggle=make('button','seller-button secondary',t('deleted_list'));deletedToggle.id='sellerDeletedToggle';deletedToggle.type='button';node('sellerRefresh').parentElement.append(deletedToggle);deletedToggle.addEventListener('click',function(){act(async function(){viewDeleted=!viewDeleted;localize();await loadProducts(false);});});
     localize();
     form.elements.title.addEventListener('input',renderBio);
-    node('bioStart').addEventListener('click',function(){act(async function(session){var name=normalizedUsername(form.elements.title.value);if(!/^[a-z0-9][a-z0-9_.-]{0,63}$/.test(name))throw new Error('BIO_INVALID_USERNAME');if(!productId)productId=uuid();var result=await backend.ownershipStart(productId,form.elements.kind.value,name);if(session===epoch)receiveBio(result);});});
+    node('bioStart').addEventListener('click',function(){act(async function(session){var name=normalizedUsername(form.elements.title.value);if(!validUsername(name))throw new Error('BIO_INVALID_USERNAME');if(!productId)productId=uuid();var result=await backend.ownershipStart(productId,form.elements.kind.value,name);if(session===epoch)receiveBio(result);});});
     node('bioCheck').addEventListener('click',function(){act(async function(session){if(!bioMatches())throw new Error('BIO_VERIFICATION_REQUIRED');node('bioMessage').textContent=t('bio_checking');var result=await backend.ownershipCheck(bioProof.id);if(session===epoch)receiveBio(result);});});
     node('bioRefresh').addEventListener('click',function(){act(async function(session){if(!bioMatches())throw new Error('BIO_VERIFICATION_REQUIRED');node('bioMessage').textContent=t('bio_checking');var result=await backend.ownershipCheck(bioProof.id);if(session===epoch)receiveBio(result);});});
     node('bioCopy').addEventListener('click',async function(){if(!bioMatches())return;try{await navigator.clipboard.writeText(bioProof.code);status('bio_copied');}catch{status('bio_copy_failed',true);}});
@@ -144,10 +146,10 @@
     });
     var session=epoch;await backend.ready;if(session!==epoch)return;user=backend.currentUser();
     if(!user){node('sellerGuest').hidden=false;setBusy(false);return;}
-    try{profile=await backend.profile();if(session!==epoch)return;canPublish=!!(profile&&(profile.is_verified||profile.role==='admin'));node('sellerVerification').hidden=canPublish;node('sellerProducts').hidden=false;setBusy(false);localize();await loadProducts(false);}catch(error){status(errorKey(error),true);}
+    try{profile=await backend.profile();if(session!==epoch)return;canPublish=!!(profile&&(profile.is_verified||profile.role==='admin'));node('sellerVerification').hidden=canPublish;node('sellerProducts').hidden=false;setBusy(false);localize();try{var available=await backend.ownershipCapabilities();if(session!==epoch)return;bioCapabilities=available;}catch{if(session!==epoch)return;bioCapabilityFailed=true;}renderBio();await loadProducts(false);}catch(error){status(errorKey(error),true);}
   }
   window.addEventListener('account:languagechange',function(){if(form)localize();});
-  window.addEventListener('account:signed-out',function(){epoch++;listEpoch++;user=null;profile=null;rows=[];more=false;viewDeleted=false;if(form)resetForm();node('sellerRows').replaceChildren();node('sellerProducts').hidden=true;node('sellerVerification').hidden=true;node('sellerGuest').hidden=false;status('');setBusy(false);});
+  window.addEventListener('account:signed-out',function(){epoch++;listEpoch++;user=null;profile=null;rows=[];more=false;viewDeleted=false;bioCapabilities=null;bioCapabilityFailed=false;if(form)resetForm();node('sellerRows').replaceChildren();node('sellerProducts').hidden=true;node('sellerVerification').hidden=true;node('sellerGuest').hidden=false;status('');setBusy(false);});
   window.addEventListener('pagehide',function(){if(form){['account_email','email_password','account_username','account_password'].forEach(function(key){form.elements[key].value='';});}});
   var ready=document.readyState==='loading'?new Promise(function(resolve){document.addEventListener('DOMContentLoaded',resolve,{once:true});}):Promise.resolve();
   ready.then(initialize).catch(function(error){status(errorKey(error),true);});

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {verifyPublicBio,biography,createHandler} from '../supabase/functions/account-social-ownership/verifier.mjs';
+import {verifyPublicBio,biography,apiBiography,capabilities,createHandler} from '../supabase/functions/account-social-ownership/verifier.mjs';
 const code='01234567',uid='11111111-1111-4111-8111-111111111111',id='22222222-2222-4222-8222-222222222222';
 const proof={id,platform:'tiktok',username:'owner',code,status:'issued'};
 const json=value=>new Response(JSON.stringify(value),{headers:{'content-type':'application/json'}});
@@ -65,4 +65,47 @@ test('a client cannot turn a missing biography code into approval',async()=>{
  }});
  const response=await handler(new Request('https://example.test',{method:'POST',headers:{authorization:'Bearer token'},body:JSON.stringify({action:'check',id,verified:true})}));
  assert.equal((await response.json()).status,'issued');
+});
+test('Tellonym checks only the exact account aboutMe, never answers or display names',async()=>{
+ const tellonym={...proof,platform:'tellonym'};
+ assert.deepEqual(await verifyPublicBio(tellonym,async(url,options)=>{
+  assert.equal(url,'https://api.tellonym.me/profiles/name/owner');assert.equal(options.redirect,'error');assert.equal(options.headers.authorization,undefined);
+  return json({id:1,username:'Owner',aboutMe:'About me: '+code});
+ }),{verified:true,reason:''});
+ for(const data of [{username:'other',aboutMe:code},{username:'owner',aboutMe:'no code',answers:[{answer:code}]},{displayName:'owner',aboutMe:code},{username:'owner',aboutMe:code+'0'}])assert.equal((await verifyPublicBio(tellonym,async()=>json(data))).verified,false);
+ assert.equal((await verifyPublicBio(tellonym,async()=>json({username:'owner',aboutMe:'Hello'}))).reason,'code_missing');
+});
+test('X official API requires a server token and a matching username',async()=>{
+ const x={...proof,platform:'x'},tokens=name=>name==='X_API_BEARER_TOKEN'?'x-server-token':undefined;
+ assert.equal((await verifyPublicBio(x,async()=>{throw Error('must not fetch');})).reason,'automatic_unavailable');
+ assert.equal((await verifyPublicBio(x,async(url,options)=>{
+  assert.equal(url,'https://api.x.com/2/users/by/username/owner?user.fields=description');assert.equal(options.headers.authorization,'Bearer x-server-token');assert.equal(options.headers.apikey,undefined);
+  return json({data:{id:'123',username:'Owner',description:code}});
+ },tokens)).verified,true);
+ assert.equal((await verifyPublicBio(x,async()=>json({data:{username:'other',description:code}}),tokens)).verified,false);
+ assert.equal((await verifyPublicBio(x,async()=>new Response('denied',{status:401}),tokens)).reason,'automatic_unavailable');
+});
+test('Snapchat official API matches one exact successful public profile',async()=>{
+ const snap={...proof,platform:'snapchat'},tokens=name=>name==='SNAPCHAT_PROFILE_ACCESS_TOKEN'?'snap-server-token':undefined;
+ const profile=(name,bio)=>({sub_request_status:'SUCCESS',public_profile:{snap_user_name:name,description:bio}});
+ const data={request_status:'SUCCESS',public_profiles:[profile('someone_else',code),profile('Owner',code)]};
+ assert.equal((await verifyPublicBio(snap,async(url,options)=>{
+  const parsed=new URL(url);assert.equal(parsed.origin,'https://businessapi.snapchat.com');assert.equal(parsed.pathname,'/public/v1/public_profiles/search');assert.equal(parsed.searchParams.get('query'),'owner');assert.equal(parsed.searchParams.get('includeStandard'),'true');assert.equal(options.headers.authorization,'Bearer snap-server-token');return json(data);
+ },tokens)).verified,true);
+ assert.equal(apiBiography('snapchat','owner',{...data,public_profiles:[profile('other',code)]}),null);
+ assert.equal(apiBiography('snapchat','owner',{...data,public_profiles:[profile('owner',code),profile('owner',code)]}),null);
+ assert.equal((await verifyPublicBio(snap,async()=>json({...data,public_profiles:[profile('owner','empty')]}),tokens)).reason,'code_missing');
+});
+test('all account types report capabilities without exposing credentials',async()=>{
+ const publicCapabilities=capabilities();
+ assert.deepEqual(Object.keys(publicCapabilities).sort(),['x','instagram','snapchat','tiktok','tellonym','discord','playstation','xbox','telegram'].sort());
+ assert.equal(publicCapabilities.tellonym,'public_bio');assert.equal(publicCapabilities.x,'connection_required');
+ assert.equal(capabilities(()=> 'secret').x,'official_api');assert.equal(capabilities(()=> 'secret').snapchat,'official_api');
+ const handler=createHandler({env:name=>env(name)||(name==='X_API_BEARER_TOKEN'?'do-not-return-me':undefined),fetch:async(url)=>{assert.equal(url,'https://project.supabase.co/auth/v1/user');return json({id:uid});}});
+ const response=await handler(new Request('https://example.test',{method:'POST',headers:{authorization:'Bearer token'},body:JSON.stringify({action:'capabilities'})}));
+ const body=await response.text();assert.equal(response.status,200);assert.equal(body.includes('do-not-return-me'),false);assert.equal(JSON.parse(body).platforms.x,'official_api');
+});
+test('gaming and unconnected account types never pass verification or cause external requests',async()=>{
+ for(const platform of ['playstation','xbox','instagram','discord'])assert.deepEqual(await verifyPublicBio({...proof,platform,username:platform==='xbox'?'صقر Player#1234':'owner'},async()=>{throw Error('must not fetch');}),{verified:false,reason:'automatic_unavailable'});
+ await assert.rejects(verifyPublicBio({...proof,platform:'xbox',username:'name/../../secret'},async()=>{}),/INVALID_REQUEST/);
 });
