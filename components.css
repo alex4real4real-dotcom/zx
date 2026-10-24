@@ -61,8 +61,8 @@
     justify-content: center;
     overflow: hidden;
     border-radius: 1rem;
-    background: var(--surface-color);
-    box-shadow: var(--shadow-button);
+    background: transparent;
+    box-shadow: none;
 }
 
 .verified-badge {
