@@ -2,6 +2,9 @@ begin;
 select set_config('account_test.owner',(select p.id::text from public.account_profiles p join auth.users u on u.id=p.id where p.role='admin' and not p.banned and u.email_confirmed_at is not null limit 1),true),
        set_config('account_test.buyer',(select p.id::text from public.account_profiles p join auth.users u on u.id=p.id where p.role='buyer' and not p.banned and not p.is_verified and u.email_confirmed_at is not null limit 1),true),
        set_config('account_test.product',gen_random_uuid()::text,true);
+-- Ownership is pre-approved here; the full proof flow is tested separately.
+insert into account_bio_private.challenges(user_id,product_id,platform,username,status,verified_at)
+ values(current_setting('account_test.owner')::uuid,current_setting('account_test.product'),'x','qa_fixture','approved',clock_timestamp());
 set local role authenticated;
 do $tests$
 declare owner_id uuid:=current_setting('account_test.owner')::uuid; buyer_id uuid:=current_setting('account_test.buyer')::uuid;
@@ -9,8 +12,8 @@ declare owner_id uuid:=current_setting('account_test.owner')::uuid; buyer_id uui
 begin
   if owner_id is null or buyer_id is null then raise exception 'TWO_TEST_ROLES_REQUIRED'; end if;
   perform set_config('request.jwt.claim.sub',owner_id::text,true);
-  record:=public.account_seller_save_product(product_id,'QA social listing',25.50,'x','QA transaction, rolled back',
-    '{"account_email":"fixture@example.test","email_password":"fictional-mail-password","account_username":"fixture","account_password":"fictional-account-password"}'::jsonb,true);
+  record:=public.account_seller_save_product(product_id,'qa_fixture',25.50,'x','QA transaction, rolled back',
+    '{"account_email":"fixture@example.test","email_password":"fictional-mail-password","account_username":"qa_fixture","account_password":"fictional-account-password"}'::jsonb,true);
   if record->>'seller_id'<>owner_id::text or record->>'active'<>'true' then raise exception 'PUBLISH_FAILED'; end if;
   if record ? 'credentials' or record ? 'account_password' then raise exception 'PUBLIC_RESPONSE_LEAK'; end if;
   record:=public.account_seller_read_product(product_id);
