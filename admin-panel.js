@@ -21,7 +21,7 @@
   function notice(el, key, error) { if (typeof el === 'string') el = node(el); if (!el) return; el.hidden = !key; el.dataset.adminNotice = key || ''; el.textContent = key ? t(key) : ''; el.classList.toggle('is-error', !!error); }
   function errorKey(error) {
     var s = String(error && error.code || '') + ' ' + String(error && error.message || error || '');
-    var keys = [['BIO_CODE_MISMATCH','ownership_mismatch'],['BIO_CODE_EXPIRED','ownership_expired'],['DISPUTE_WINDOW_EXPIRED','window_expired'],['DISPUTE_WINNER_REQUIRED','winner_required'],['SETTLEMENT_FINAL','settlement_final'],['SETTLEMENT_SELLER_REQUIRED','seller_required'],['ADMIN_REQUIRED','admin_required'],['AUTH_REQUIRED','guest_heading'],['OWNER_PROTECTED','owner_protected'],['SELF_PROTECTED','self_protected'],['ACCOUNT_NOT_FOUND','account_not_found'],['ACCOUNT_BANNED','account_banned'],['ALREADY_REVIEWED','already_reviewed'],['REASON_REQUIRED','reason_required'],['RECORD_NOT_FOUND','not_found'],['REQUEST_LIMIT','request_limit'],['VERIFICATION_PENDING|REQUEST_PENDING','verification_pending'],['ALREADY_VERIFIED','already_verified'],['DOCUMENT_REQUIRED','document_required'],['INVALID_DOCUMENT','invalid_document'],['DISPUTE_EXISTS','dispute_exists'],['DISPUTE_CLOSED','dispute_closed'],['INVALID_|23514','invalid_request'],['PGRST202|PGRST205|schema cache|does not exist|PROFILE_NOT_READY','not_ready']];
+    var keys = [['DISPUTE_WINDOW_EXPIRED','window_expired'],['DISPUTE_WINNER_REQUIRED','winner_required'],['SETTLEMENT_FINAL','settlement_final'],['SETTLEMENT_SELLER_REQUIRED','seller_required'],['ADMIN_REQUIRED','admin_required'],['AUTH_REQUIRED','guest_heading'],['OWNER_PROTECTED','owner_protected'],['SELF_PROTECTED','self_protected'],['ACCOUNT_NOT_FOUND','account_not_found'],['ACCOUNT_BANNED','account_banned'],['ALREADY_REVIEWED','already_reviewed'],['REASON_REQUIRED','reason_required'],['RECORD_NOT_FOUND','not_found'],['REQUEST_LIMIT','request_limit'],['VERIFICATION_PENDING|REQUEST_PENDING','verification_pending'],['ALREADY_VERIFIED','already_verified'],['DOCUMENT_REQUIRED','document_required'],['INVALID_DOCUMENT','invalid_document'],['DISPUTE_EXISTS','dispute_exists'],['DISPUTE_CLOSED','dispute_closed'],['INVALID_|23514','invalid_request'],['PGRST202|PGRST205|schema cache|does not exist|PROFILE_NOT_READY','not_ready']];
     for (var i = 0; i < keys.length; i++) if (new RegExp(keys[i][0], 'i').test(s)) return keys[i][1];
     return 'request_failed';
   }
@@ -81,8 +81,8 @@
     } else if (tab === 'disputes') {
       var wrap = make('label', 'admin-switch'), check = make('input'); check.type = 'checkbox'; check.checked = filter === 'open'; wrap.append(check, label('only_open')); host.append(wrap);
       check.addEventListener('change', function () { filter = check.checked ? 'open' : ''; target = 50; loadAdminRows(); });
-    } else if (tab === 'tickets' || tab === 'verifications' || tab === 'withdrawals' || tab === 'ownership') {
-      var opts = tab === 'ownership' ? [['','all'],['issued','issued'],['approved','approved']] : tab === 'tickets' ? [['','all'],['open','open'],['in_progress','in_progress'],['closed','closed']] : [['','all'],['pending','pending'],['approved','approved'],['rejected','rejected']].concat(tab==='verifications'?[['cancelled','cancelled']]:[]);
+    } else if (tab === 'tickets' || tab === 'verifications' || tab === 'withdrawals') {
+      var opts = tab === 'tickets' ? [['','all'],['open','open'],['in_progress','in_progress'],['closed','closed']] : [['','all'],['pending','pending'],['approved','approved'],['rejected','rejected']].concat(tab==='verifications'?[['cancelled','cancelled']]:[]);
       var control = selectField('status', opts, filter); if (tab === 'tickets') control.select.id = 'ticketFilter'; host.append(control.wrap);
       control.select.addEventListener('change', function () { filter = control.select.value; target = 50; loadAdminRows(); });
     }
@@ -97,7 +97,7 @@
     }); node('sectionForm').append(form);
   }
   function chooseTab(tab, nextFilter) {
-    if (!['verifications','disputes','accounts','orders','tickets','members','withdrawals','ideas','ownership'].includes(tab)) tab = 'verifications';
+    if (!['verifications','disputes','accounts','orders','tickets','members','withdrawals','ideas'].includes(tab)) tab = 'verifications';
     activeTab = tab; filter = nextFilter !== undefined ? nextFilter : (tab === 'verifications'||tab === 'withdrawals') ? 'pending' : tab === 'disputes' ? 'open' : ''; target = 50; topupTarget = 50; adminRows = []; topups = [];
     document.querySelectorAll('[data-admin-tab]').forEach(function (el) { var selected = el.dataset.adminTab === tab; el.setAttribute('aria-selected',String(selected)); el.tabIndex = selected ? 0 : -1; });
     node('adminSection').setAttribute('aria-labelledby','tab-' + tab); node('sectionTitle').textContent = t(tab); node('sectionCopy').textContent = t(tab + '_copy'); node('sectionForm').replaceChildren();
@@ -196,19 +196,9 @@
   function renderWithdrawals(host){
     adminRows.forEach(function(row){var box=card(row.email),top=make('div','admin-card-top');top.append(make('strong','',money(row.amount)),make('span','admin-badge',t('withdrawal_'+row.status)));box.append(top,make('p','admin-copy',row.bank_name+' · '+row.holder_name),make('p','admin-copy',row.iban_masked),make('p','admin-copy',date(row.created_at)),make('p','admin-copy',t('withdrawal_test')));if(row.note)box.append(make('p','',row.note));if(row.review_note)box.append(make('p','',row.review_note));box.append(make('p','admin-copy',t('payments_inactive')));host.append(box);});
   }
-  function renderOwnership(host){
-    adminRows.forEach(function(row){
-      var box=card(row.platform+' · @'+row.username,row.status),code=make('p','admin-copy',row.code);code.dir='ltr';
-      box.append(make('p','admin-copy',row.seller_name+' · '+row.seller_email),code,make('p','admin-copy',date(row.created_at)),make('p','admin-copy',t('ownership_expires')+' '+date(row.expires_at)));
-      if(row.profile_url){var link=make('a','admin-button is-outline',t('ownership_open'));link.href=row.profile_url;link.target='_blank';link.rel='noopener noreferrer';box.append(link);}
-      if(row.review_note)box.append(make('p','admin-copy',row.review_note));
-      host.append(box);
-    });
-  }
   function renderAdminRows() {
     if(!activeTab||!node('myTicketsList')||!user)return;var host=node('myTicketsList');host.replaceChildren();host.className=['orders','disputes'].includes(activeTab)?'':'admin-grid';
     if(!adminRows.length)empty(host);
-    else if(activeTab==='ownership')renderOwnership(host);
     else if(activeTab==='ideas')adminRows.forEach(function(row){var box=card(row.idea);box.append(make('p','admin-copy',row.submitter_name+' · '+row.submitter_email),make('p','admin-copy',date(row.created_at)));var description=make('p','',row.description);description.style.whiteSpace='pre-wrap';description.style.overflowWrap='anywhere';box.append(description);host.append(box);});else if(activeTab==='members')renderMembers(host);else if(activeTab==='accounts')renderAccounts(host);else if(activeTab==='tickets')renderTickets(host);
     else if(activeTab==='verifications')adminRows.forEach(function(row){host.append(verificationCard(row,true));});else if(activeTab==='disputes')renderDisputeTable(host);
     if(activeTab==='orders')renderOrders(host);if(activeTab==='withdrawals')renderWithdrawals(host);node('adminMore').hidden=!listMore;

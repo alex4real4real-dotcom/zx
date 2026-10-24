@@ -1,11 +1,7 @@
 begin;
-update account_bio_private.settings set enabled=true where singleton;
 select set_config('account_test.owner',(select p.id::text from public.account_profiles p join auth.users u on u.id=p.id where p.role='admin' and not p.banned and u.email_confirmed_at is not null limit 1),true),
        set_config('account_test.buyer',(select p.id::text from public.account_profiles p join auth.users u on u.id=p.id where p.role='buyer' and not p.banned and not p.is_verified and u.email_confirmed_at is not null limit 1),true),
        set_config('account_test.product',gen_random_uuid()::text,true);
--- Ownership is pre-approved here; the full proof flow is tested separately.
-insert into account_bio_private.challenges(user_id,product_id,platform,username,status,verified_at,method)
- values(current_setting('account_test.owner')::uuid,current_setting('account_test.product'),'x','qa_fixture','approved',clock_timestamp(),'public_bio');
 set local role authenticated;
 do $tests$
 declare owner_id uuid:=current_setting('account_test.owner')::uuid; buyer_id uuid:=current_setting('account_test.buyer')::uuid;

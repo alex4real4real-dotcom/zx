@@ -1,10 +1,5 @@
 window.AccountManagementText = {
 "issued":["غير موثّق آليًا", "Not automatically verified"],
-"ownership":["ملكية الحسابات","Account ownership"],
-"ownership_copy":["نتائج الفحص الآلي للبايو. لا يمكن اعتماد ملكية الحسابات يدويًا.", "Automatic biography verification results. Account ownership cannot be approved manually."],
-"ownership_open":["فتح الحساب الأصلي","Open original profile"],
-"ownership_expired":["انتهت صلاحية كود الملكية. يحتاج البائع إلى كود جديد.","The ownership code expired. The seller needs a new code."],
-"ownership_expires":["ينتهي الكود في:","Code expires:"],
 "ideas":["فكرة","Ideas"],"ideas_copy":["أفكار المستخدمين واقتراحاتهم لتطوير المنصة.","User ideas and suggestions to improve the platform."],
 "payments_inactive":["خدمات الدفع والسحب غير مفعّلة حاليًا؛ هذه سجلات سابقة.","Payments and withdrawals are currently inactive; these are historical records."],
   "withdrawals":["طلبات السحب", "Withdrawals"],
