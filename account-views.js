@@ -39,7 +39,12 @@
   function writeStored(key, value) { if (value) sessionStorage.setItem(key, JSON.stringify(value)); else sessionStorage.removeItem(key); }
   function checkedPassword(form) {
     var password = form.elements.password.value;
-    if (password.length < 8 || password.length > 128 || !/\p{L}/u.test(password) || !/\p{N}/u.test(password)) throw new Error('كلمة المرور يجب أن تكون 8 خانات على الأقل وتجمع بين الحروف والأرقام.');
+    if (/[^\x20-\x7E]/.test(password)) {
+      throw new Error('استخدم حروفًا إنجليزية وأرقامًا ورموزًا من لوحة المفاتيح الإنجليزية.');
+    }
+    if (password.length < 8 || password.length > 128 || !/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      throw new Error('كلمة المرور لا تقل عن 8 خانات وتجمع بين الحروف الإنجليزية والأرقام.');
+    }
     if (password !== form.elements.confirm.value) throw new Error('كلمتا المرور غير متطابقتين.');
     return password;
   }
