@@ -154,7 +154,20 @@
   }
   async function profilePage() {
     if (!backend.currentUser()) { node('profileGuest').hidden = false; return; }
-    var profile, changedAvatar = null;
+    var profile, changedAvatar = null, pendingPhone = null;
+    var editor = node('profileForm');
+    var phoneInput = editor.elements.phone;
+    var codeInput = editor.elements.phoneCode;
+    var phoneVerification = node('profilePhoneVerification');
+    var saveButton = editor.querySelector('[type=submit]');
+    function setPhoneChallenge(phone) {
+      pendingPhone = phone;
+      phoneVerification.hidden = !phone;
+      phoneVerification.disabled = !phone;
+      phoneInput.readOnly = Boolean(phone);
+      codeInput.value = '';
+      bindText(node('profileSaveText'), phone ? 'تأكيد الرقم وحفظ التعديلات' : 'حفظ التعديلات');
+    }
     async function render() {
       profile = await backend.profile();
       node('profileHeadingName').textContent = profile.display_name;
@@ -168,15 +181,55 @@
       catch (error) { node('profileSales').textContent = '—'; notify('profileStatus', userError(error), true); }
     }
     node('editProfile').addEventListener('click', function () {
+      setPhoneChallenge(null);
       var form = node('profileForm'); form.elements.fullname.value = profile.display_name; form.elements.email.value = backend.currentUser().email; form.elements.phone.value = profile.phone;
       node('editAvatarPreview').src = backend.avatarUrl(profile) || './assets/account-logo-soft.png';
       node('editAvatar').value = ''; changedAvatar = null; node('profileCard').hidden = true; node('profileEditor').hidden = false; notify('profileStatus', '', false);
     });
-    node('cancelProfileEdit').addEventListener('click', function () { node('profileEditor').hidden = true; node('profileCard').hidden = false; notify('profileStatus', '', false); });
+    node('cancelProfileEdit').addEventListener('click', function () {
+      if (saveButton.disabled) return;
+      setPhoneChallenge(null);
+      node('profileEditor').hidden = true;
+      node('profileCard').hidden = false;
+      notify('profileStatus', '', false);
+    });
+    node('changeProfilePhone').addEventListener('click', function () {
+      if (saveButton.disabled) return;
+      setPhoneChallenge(null);
+      notify('profileStatus', '', false);
+      phoneInput.focus();
+    });
+    node('resendProfilePhoneCode').addEventListener('click', function () {
+      if (!pendingPhone) return;
+      run(saveButton, 'profileStatus', async function () {
+        await backend.resendProfilePhoneCode(pendingPhone);
+        codeInput.value = '';
+        codeInput.focus();
+        notify('profileStatus', 'أُرسل رمز التحقق إلى رقم الجوال الجديد.', false);
+      });
+    });
     node('editAvatar').addEventListener('change', function () { readAvatar(this, node('editAvatarPreview')).then(function (data) { changedAvatar = data; }).catch(function (error) { this.value = ''; changedAvatar = null; notify('profileStatus', userError(error), true); }.bind(this)); });
     bindForm('profileForm', 'profileStatus', async function (form) {
       var name = form.elements.fullname.value.trim(), phone = backend.normalizePhone(form.elements.phone.value);
       if (name.length < 2 || name.length > 120) throw new Error('INVALID_NAME');
+      if (phone !== profile.phone && pendingPhone !== phone) {
+        phoneInput.readOnly = true;
+        try {
+          await backend.requestProfilePhoneCode(phone);
+          phoneInput.value = phone;
+          setPhoneChallenge(phone);
+          codeInput.focus();
+          notify('profileStatus', 'أُرسل رمز التحقق إلى رقم الجوال الجديد.', false);
+        } finally {
+          phoneInput.readOnly = Boolean(pendingPhone);
+        }
+        return;
+      }
+      if (pendingPhone === phone) {
+        await backend.verifyProfilePhoneCode(phone, codeInput.value);
+        profile.phone = phone;
+        setPhoneChallenge(null);
+      }
       var avatar = changedAvatar ? await backend.uploadAvatar(changedAvatar) : undefined;
       await backend.updateProfile(name, phone, avatar);
       node('profileEditor').hidden = true; await render(); notify('profileStatus', 'حُفظت بيانات الملف الشخصي.', false);
