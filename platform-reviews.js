@@ -11,6 +11,7 @@
       title: 'آراء العملاء',
       loading: 'جارٍ تحميل آراء العملاء…',
       empty: 'تظهر آراء العملاء بعد أول تقييم.',
+      samples: 'تقييمات تجريبية',
       loadError: 'تعذّر تحميل آراء العملاء.',
       buyer: 'مشتري موثّق',
       previous: 'السابق',
@@ -35,6 +36,7 @@
       title: 'Customer Reviews',
       loading: 'Loading customer reviews…',
       empty: 'Customer reviews will appear after the first rating.',
+      samples: 'Sample reviews',
       loadError: 'Could not load customer reviews.',
       buyer: 'Verified buyer',
       previous: 'Previous',
@@ -56,6 +58,51 @@
       sendError: 'Could not save your review. Try again.',
     },
   };
+
+  const sampleReviews = [
+    {
+      rating: 5,
+      copy: {
+        ar: { author: 'سعد م.', comment: 'خطوات الشراء كانت واضحة، ووصلتني تفاصيل الطلب بعد الدفع مباشرة.' },
+        en: { author: 'Saad M.', comment: 'The checkout steps were clear, and I received my order details right after paying.' },
+      },
+    },
+    {
+      rating: 4,
+      copy: {
+        ar: { author: 'نورة ع.', comment: 'الشراء سهل، بس تمنّيت تفاصيل المنتج تكون أوضح قبل الدفع.' },
+        en: { author: 'Noura A.', comment: 'Buying was easy, but I wish the product details had been clearer before checkout.' },
+      },
+    },
+    {
+      rating: 5,
+      copy: {
+        ar: { author: 'عبدالرحمن س.', comment: 'لقيت الحساب اللي أبحث عنه بسرعة، وقدرت أتابع الطلب من حسابي.' },
+        en: { author: 'Abdulrahman S.', comment: 'I found the account I was looking for quickly and could track the order from my account.' },
+      },
+    },
+    {
+      rating: 3,
+      copy: {
+        ar: { author: 'ريم خ.', comment: 'الطلب تم، لكن تحديث حالته تأخر شوي وخلاني أراجع الصفحة أكثر من مرة.' },
+        en: { author: 'Reem K.', comment: 'My order went through, but the status took a while to update, so I checked the page a few times.' },
+      },
+    },
+    {
+      rating: 4,
+      copy: {
+        ar: { author: 'خالد أ.', comment: 'التصفح بالجوال مريح، وكنت أتمنى خيارات أكثر في الفئة اللي أبحث عنها.' },
+        en: { author: 'Khalid A.', comment: 'Browsing on my phone was easy. I would have liked more options in the category I was looking at.' },
+      },
+    },
+    {
+      rating: 5,
+      copy: {
+        ar: { author: 'هيا ف.', comment: 'كان عندي سؤال عن الطلب، ورد الدعم وضّح لي الخطوة اللي بعدها.' },
+        en: { author: 'Haya F.', comment: 'I had a question about my order, and support explained what to do next.' },
+      },
+    },
+  ];
 
   function language() {
     return window.AppI18N?.getLang() === 'en' ? 'en' : 'ar';
@@ -128,28 +175,36 @@
       more.textContent = text(statusKey === 'loadError' ? 'retry' : 'more');
       more.hidden = !hasMore || (loading && !cards.length);
       more.disabled = loading;
-      cards.forEach(({ stars, rating }) => stars.setAttribute('aria-label', ratingLabel(rating)));
+      const locale = language();
+      cards.forEach(({ stars, rating, sampleCopy, quote, buyer }) => {
+        stars.setAttribute('aria-label', ratingLabel(rating));
+        if (sampleCopy) {
+          quote.textContent = '«' + sampleCopy[locale].comment + '»';
+          buyer.textContent = sampleCopy[locale].author;
+        }
+      });
       updateRotation();
     }
 
-    function appendReview(review) {
+    function appendReview(review, sampleCopy) {
       const rating = Number(review.rating);
-      if (!Number.isInteger(rating) || rating < 1 || rating > 5 || typeof review.comment !== 'string') return;
+      if (!Number.isInteger(rating) || rating < 1 || rating > 5) return;
+      if (!sampleCopy && typeof review.comment !== 'string') return;
       const card = element('article', 'platform-review-card glass-panel');
       const stars = element('span', 'platform-review-stars', '★'.repeat(rating) + '☆'.repeat(5 - rating));
       stars.dir = 'ltr';
       stars.setAttribute('role', 'img');
-      const quote = element('blockquote', 'platform-review-quote', '«' + review.comment + '»');
+      const quote = element('blockquote', 'platform-review-quote', sampleCopy ? '' : '«' + review.comment + '»');
       quote.dir = 'auto';
       const author = element('div', 'platform-review-author');
       const icon = element('i', 'fa-solid fa-user');
       icon.setAttribute('aria-hidden', 'true');
-      const buyer = element('span', '', text('buyer'));
-      buyer.dataset.reviewLabel = 'buyer';
+      const buyer = element('span', '');
+      if (!sampleCopy) buyer.dataset.reviewLabel = 'buyer';
       author.append(icon, buyer);
       card.append(stars, quote, author);
       grid.append(card);
-      cards.push({ node: card, stars, rating });
+      cards.push({ node: card, stars, rating, sampleCopy, quote, buyer });
     }
 
     async function loadReviews() {
@@ -160,10 +215,15 @@
       try {
         const page = await backend.platformReviews(offset, pageSize + 1);
         const rows = page.slice(0, pageSize);
-        rows.forEach(appendReview);
+        if (offset === 0 && rows.length === 0) {
+          sampleReviews.forEach(review => appendReview(review, review.copy));
+          statusKey = 'samples';
+        } else {
+          rows.forEach(review => appendReview(review));
+          statusKey = cards.length ? '' : 'empty';
+        }
         offset += rows.length;
         hasMore = page.length > pageSize;
-        statusKey = cards.length ? '' : 'empty';
         show(active, false);
       } catch {
         statusKey = 'loadError';
