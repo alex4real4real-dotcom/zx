@@ -1,0 +1,238 @@
+#availabilityAlerts {
+  --account-ink: #f3f2f8;
+  --account-secondary: #b4b6c8;
+  --account-line: #353950;
+  --account-accent: #8793e5;
+  font-family: var(--font-body);
+}
+
+#availabilityAlerts *,
+#availabilityAlerts *::before,
+#availabilityAlerts *::after { box-sizing: border-box; }
+#availabilityAlerts [hidden] { display: none !important; }
+
+#availabilityAlerts .alert-section {
+  border: 1px solid var(--account-line);
+  border-radius: 1.35rem;
+  background: radial-gradient(ellipse at 8% 0%, #22263d, transparent 67%), #121216;
+  color: var(--account-ink);
+  color-scheme: dark;
+}
+
+#availabilityAlerts .alert-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.35rem;
+  padding: clamp(16px, 3.6vw, 26px);
+}
+
+#availabilityAlerts .alert-copy {
+  display: flex;
+  align-items: center;
+  flex: 1 1 18rem;
+  min-inline-size: 0;
+  gap: .85rem;
+}
+
+#availabilityAlerts .alert-bell {
+  display: grid;
+  flex: 0 0 45px;
+  block-size: 45px;
+  place-items: center;
+  border-radius: .85rem;
+  background: #262940;
+  color: #aeb8ff;
+}
+
+#availabilityAlerts .alert-bell i {
+  font-size: 1.3rem;
+}
+
+#availabilityAlerts h2,
+#availabilityAlerts h3 {
+  margin: 0;
+  color: var(--account-ink);
+  font-family: var(--font-heading);
+  font-weight: 800;
+}
+
+#availabilityAlerts h2 {
+  font-size: clamp(1.6rem, 3.8vw, 2.15rem);
+  line-height: 1.16;
+}
+
+#availabilityAlerts h3 {
+  font-size: 1.3rem;
+  line-height: 1.25;
+}
+
+#availabilityAlerts .alert-copy p {
+  margin: .35rem 0 0;
+  color: var(--account-secondary);
+  font-size: .86rem;
+  line-height: 1.7;
+}
+
+#availabilityAlerts .alert-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+
+#availabilityAlerts button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  min-block-size: 44px;
+  padding: .45rem .8rem;
+  border: 1px solid var(--account-line);
+  border-radius: .7rem;
+  background: #1b1d28;
+  color: var(--account-ink);
+  font: 700 .85rem/1.4 var(--font-body);
+  text-align: center;
+  cursor: pointer;
+}
+
+#availabilityAlerts button:hover,
+#availabilityAlerts button[aria-expanded="true"] {
+  border-color: var(--account-accent);
+}
+
+#availabilityAlerts button[data-alert-kind="username"],
+#availabilityAlerts button[type="submit"] {
+  border-color: var(--account-accent);
+  background: var(--account-accent);
+  color: #111428;
+}
+
+#availabilityAlerts button[data-alert-kind="username"]:hover,
+#availabilityAlerts button[type="submit"]:hover {
+  background: #9ba6f1;
+}
+
+#availabilityAlerts button i,
+#availabilityAlerts .alert-destination i {
+  flex: 0 0 16px;
+  inline-size: 16px;
+  text-align: center;
+}
+
+#availabilityAlerts .alert-request {
+  padding: clamp(16px, 3.6vw, 26px);
+  border-block-start: 1px solid var(--account-line);
+  border-radius: 0 0 1.35rem 1.35rem;
+  background: #16161c;
+}
+
+#availabilityAlerts .alert-request-header,
+#availabilityAlerts .alert-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: .65rem;
+}
+
+#availabilityAlerts button[data-close-alert] {
+  inline-size: 44px;
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+  color: var(--account-secondary);
+}
+
+#availabilityAlerts button[data-close-alert]:hover {
+  border-color: var(--account-line);
+  background: #20212b;
+}
+
+#availabilityAlerts .alert-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr);
+  min-inline-size: 0;
+  gap: .7rem;
+  margin: .45rem 0 1rem;
+  padding: 0;
+  border: 0;
+}
+
+#availabilityAlerts .alert-fields label { min-inline-size: 0; }
+
+#availabilityAlerts .alert-fields label > span {
+  display: block;
+  margin-block-end: .35rem;
+  color: var(--account-secondary);
+  font-size: .8rem;
+  font-weight: 700;
+}
+
+#availabilityAlerts .alert-fields :is(input, select) {
+  inline-size: 100%;
+  min-block-size: 46px;
+  padding: .5rem .7rem;
+  border: 1px solid var(--account-line);
+  border-radius: .7rem;
+  background: #101015;
+  color: var(--account-ink);
+  font: 600 1rem/1.4 var(--font-body);
+}
+
+#availabilityAlerts input[name="username"]::placeholder {
+  color: var(--account-secondary);
+  opacity: 1;
+}
+
+#availabilityAlerts .alert-destination {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  color: var(--account-secondary);
+  font-size: .81rem;
+}
+
+#availabilityAlerts .alert-destination i { color: #aeb8ff; }
+
+#availabilityAlerts .alert-feedback p {
+  margin: 0;
+  color: var(--account-secondary);
+  font-size: .88rem;
+  line-height: 1.65;
+}
+
+#availabilityAlerts .alert-feedback p:not(:empty) { margin-block-start: .85rem; }
+
+#availabilityAlerts .alert-feedback a {
+  display: inline-block;
+  margin-block-start: .4rem;
+  color: var(--account-accent);
+  text-decoration: underline;
+}
+
+#availabilityAlerts button:disabled { opacity: .65; cursor: wait; }
+
+@media (max-width: 540px) {
+  #availabilityAlerts .alert-choices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    inline-size: 100%;
+  }
+}
+
+@media (max-width: 410px) {
+  #availabilityAlerts .alert-copy {
+    flex-basis: 100%;
+    align-items: start;
+  }
+
+  #availabilityAlerts .alert-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  #availabilityAlerts .alert-form-actions button {
+    inline-size: 100%;
+  }
+}

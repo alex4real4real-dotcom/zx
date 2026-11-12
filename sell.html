@@ -1448,6 +1448,16 @@
           <label class="seller-field" for="listingKind"><span data-seller-text="kind">نوع العرض *</span><select id="listingKind" name="kind" required>
             <option value="x" data-seller-type="x">X</option><option value="instagram" data-seller-type="instagram">إنستغرام</option><option value="snapchat" data-seller-type="snapchat">سناب شات</option><option value="tiktok" data-seller-type="tiktok">تيك توك</option><option value="tellonym" data-seller-type="tellonym">تيلونيم</option><option value="discord" data-seller-type="discord">ديسكورد</option><option value="playstation" data-seller-type="playstation">سوني (PlayStation)</option><option value="xbox" data-seller-type="xbox">إكس بوكس</option><option value="telegram" data-seller-type="telegram">تلقرام</option><option value="service" data-seller-type="service">خدمة رقمية</option><option value="game" data-seller-type="game">لعبة أو اشتراك</option>
           </select><span class="seller-hint" data-seller-text="hint">كل منصة تواصل تظهر برمزها تلقائيًا، أما الخدمات والألعاب فتظهر بأيقونة دون صورة.</span></label>
+          <label id="listingServiceType" class="seller-field" hidden>
+            <span data-seller-text="service_type">نوع الخدمة</span>
+            <select name="serviceType" disabled>
+              <option value="" data-seller-text="service_unspecified">غير محدد</option>
+              <option value="programming" data-seller-text="service_programming">برمجة</option>
+              <option value="design" data-seller-text="service_design">تصميم</option>
+              <option value="video" data-seller-text="service_video">مونتاج</option>
+              <option value="other" data-seller-text="service_other">أخرى</option>
+            </select>
+          </label>
           <fieldset id="listingCredentials" class="seller-secrets">
             <legend data-seller-text="private">بيانات الحساب المعروض للبيع</legend>
             <div class="seller-secrets-grid">
@@ -1540,6 +1550,6 @@
 <script src="./supabase-config.js"></script>
 <script src="./listing-platforms.js?v=9965258b19f5"></script>
 <script src="./currency.js?v=1089cfad761d"></script>
-<script src="./supabase-backend.js?v=580837f1aa8b"></script>
+<script src="./supabase-backend.js?v=3a9a5c4204ca"></script>
 <script src="./app.js?v=cbc60fb83666"></script>
-<script src="./backend-pages.js?v=04f5eb92e70f"></script><script src="./seller-products.js?v=fc5954f44a11"></script></body></html>
+<script src="./backend-pages.js?v=04f5eb92e70f"></script><script src="./seller-products.js?v=5037076183da"></script></body></html>

@@ -217,7 +217,14 @@
   backend.sellerArchiveProduct = async function (id, restore) { return check(await (await client(true)).rpc('account_seller_archive_product', {p_id:id,p_restore:!!restore})); };
   backend.sellerProduct = async function (id) { return check(await (await client(true)).rpc('account_seller_read_product', { p_id: id })); };
   backend.sellerSaveProduct = async function (product) {
-    return check(await (await client(true)).rpc('account_seller_save_product', {
+    var api = await client(true);
+    if (product.kind === 'service' && typeof product.serviceType === 'string') {
+      return check(await api.rpc('account_seller_save_service', {
+        p_id: product.id, p_title: product.title, p_price: product.price,
+        p_description: product.description, p_active: product.active, p_service_type: product.serviceType || null
+      }));
+    }
+    return check(await api.rpc('account_seller_save_product', {
       p_id: product.id, p_title: product.title, p_price: product.price, p_listing_type: product.kind,
       p_description: product.description, p_credentials: product.credentials, p_active: product.active
     }));
@@ -251,6 +258,11 @@
   backend.platformReviews = async function (offset, limit) {
     return check(await (await client()).rpc('account_platform_reviews', {
       p_offset: offset, p_limit: limit
+    }));
+  };
+  backend.saveAvailabilityAlert = async function (kind, qualifier, target, locale) {
+    return check(await (await client(true)).rpc('account_save_availability_alert', {
+      p_kind: kind, p_qualifier: qualifier, p_target: target, p_locale: locale
     }));
   };
   backend.pendingPlatformReview = async function () {

@@ -7,6 +7,7 @@
     delete:['حذف السلعة','Delete listing'],restore:['استعادة كمسودة','Restore as draft'],deleted:['محذوفة','Deleted'],deleted_list:['المحذوفات','Deleted listings'],active_list:['العودة إلى سلعي','Back to my listings'],deleted_empty:['لا توجد سلع محذوفة.','No deleted listings.'],deleted_saved:['حُذفت السلعة من العرض. يمكنك استعادتها من المحذوفات.','Listing removed. You can restore it from Deleted listings.'],restored_saved:['استُعيدت السلعة كمسودة.','Listing restored as a draft.'],delete_confirm:['هل تريد حذف هذه السلعة من العرض؟ تبقى الطلبات السابقة محفوظة، ويمكنك استعادتها من المحذوفات.','Remove this listing? Existing orders are preserved. You can restore it from Deleted listings.'],
     title:['إضافة خدمة جديدة','Add a new listing'],intro:['أضف بيانات السلعة لتظهر في متجرك وكتالوج السوق.','Add your listing to your store and the marketplace.'],
     name:['اسم الخدمة *','Listing name *'],user:['يوزر الحساب *','Account username *'],price:['السعر (SAR) *','Price (SAR) *'],kind:['نوع العرض *','Listing type *'],
+    service_type:['نوع الخدمة','Service type'],service_unspecified:['غير محدد','Unspecified'],service_programming:['برمجة','Programming'],service_design:['تصميم','Design'],service_video:['مونتاج','Video editing'],service_other:['أخرى','Other'],
     hint:['كل منصة تواصل تظهر برمزها تلقائيًا، أما الخدمات والألعاب فتظهر بأيقونة دون صورة.','Social accounts use their platform icon. Services and games use an icon.'],
     private:['بيانات الحساب المعروض للبيع','Account details for this listing'],email:['البريد الإلكتروني للحساب *','Account email *'],email_password:['باسورد البريد *','Email password *'],username:['يوزر الحساب *','Account username *'],password:['باسورد الحساب *','Account password *'],
     privacy:['بيانات الحساب خاصة ولا تظهر في صفحة المنتج العامة.','Account details are private and hidden from the public listing.'],
@@ -29,6 +30,9 @@
   function setBusy(value) { busy=value; node('listingFields').disabled=value||!user; node('cancelListing').disabled=value; node('sellerRefresh').disabled=value;if(node('sellerDeletedToggle'))node('sellerDeletedToggle').disabled=value; document.querySelectorAll('[data-seller-action]').forEach(function(el){el.disabled=value;});node('listingPublish').disabled=busy; }
   function updateKind() {
     var social=SOCIAL.includes(form.elements.kind.value);node('listingCredentials').hidden=!social;node('listingCredentials').disabled=!social;
+    var service=form.elements.kind.value==='service';
+    node('listingServiceType').hidden=!service;
+    form.elements.serviceType.disabled=!service;
     node('listingNameLabel').textContent=t(social?'user':'name');form.elements.title.placeholder=t(social?'user_placeholder':'placeholder');
     form.elements.title.autocomplete='off';node('listingPublish').disabled=busy;
   }
@@ -68,6 +72,7 @@
   function editProduct(id) {
     act(async function(session){var result=await backend.sellerProduct(id);if(session!==epoch)return;var row=result.product,secrets=result.credentials||{};
       productId=row.id;editing=true;form.elements.title.value=row.title;form.elements.price.value=row.price;form.elements.kind.value=row.listing_type||'service';form.elements.description.value=row.description;form.dataset.wasActive=String(row.active);
+      form.elements.serviceType.value=row.service_type||'';
       ['account_email','email_password','account_username','account_password'].forEach(function(key){form.elements[key].value=secrets[key]||'';});updateKind();node('cancelListing').hidden=false;node('listingSubmitText').textContent=t('update');node('listingCard').scrollIntoView({behavior:'smooth',block:'start'});form.elements.title.focus();
     });
   }
@@ -90,7 +95,7 @@
         var social=SOCIAL.includes(form.elements.kind.value),credentials={};if(social)['account_email','email_password','account_username','account_password'].forEach(function(key){credentials[key]=form.elements[key].value;});if(social)credentials.test_delivery=false;
         if(!productId)productId=uuid();
         var desiredActive=canPublish&&(!editing||form.dataset.wasActive==='true');
-        var record=await backend.sellerSaveProduct({id:productId,title:form.elements.title.value.trim(),price:Number(form.elements.price.value),kind:form.elements.kind.value,description:form.elements.description.value.trim(),credentials:credentials,active:desiredActive});
+        var record=await backend.sellerSaveProduct({id:productId,title:form.elements.title.value.trim(),price:Number(form.elements.price.value),kind:form.elements.kind.value,serviceType:form.elements.serviceType.value,description:form.elements.description.value.trim(),credentials:credentials,active:desiredActive});
         if(session!==epoch)return;resetForm();node('sellerVerification').hidden=canPublish;await refreshedAfterSave(record.active?'saved':canPublish?'hidden_updated':'draft_saved',session);
       });
     });
