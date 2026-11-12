@@ -1,17 +1,96 @@
 (function () {
   'use strict';
 
-  const section = document.getElementById('availabilityAlerts');
-  if (!section) return;
+  const gamesLinks = document.querySelectorAll('nav details a[href="./shop.html?category=games"], #navOverlay a[href="./shop.html?category=games"]');
+  if (!gamesLinks.length) return;
+
+  const section = document.createElement('dialog');
+  section.id = 'availabilityAlerts';
+  section.setAttribute('aria-labelledby', 'account-alert-strip-title');
+  section.innerHTML = `
+  <div class="alert-section">
+    <button type="button" data-close-alert aria-label="إغلاق نافذة التنبيه" data-alert-aria="close">
+      <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+    </button>
+    <div class="alert-entry">
+      <div class="alert-copy">
+        <span class="alert-bell" aria-hidden="true"><i class="fa-solid fa-bell"></i></span>
+        <div>
+          <h2 id="account-alert-strip-title" data-alert-text="title">ما لقيت اللي تبيه؟</h2>
+          <p data-alert-text="intro">يوصلك تنبيه بالبريد عند توفر اليوزر أو الخدمة.</p>
+        </div>
+      </div>
+      <div class="alert-choices" role="group" aria-label="نوع التنبيه" data-alert-aria="modes">
+        <button type="button" data-alert-kind="username" aria-controls="account-alert-strip-request" aria-expanded="false">
+          <i class="fa-solid fa-at" aria-hidden="true"></i><span data-alert-text="usernameMode">تنبيه ليوزر</span>
+        </button>
+        <button type="button" data-alert-kind="service" aria-controls="account-alert-strip-request" aria-expanded="false">
+          <i class="fa-solid fa-code" aria-hidden="true"></i><span data-alert-text="serviceMode">تنبيه لخدمة</span>
+        </button>
+      </div>
+    </div>
+    <section id="account-alert-strip-request" class="alert-request" aria-labelledby="account-alert-strip-form-title" hidden>
+      <header class="alert-request-header">
+        <h3 id="account-alert-strip-form-title"></h3>
+      </header>
+      <form autocomplete="off">
+        <fieldset class="alert-fields" data-alert-fields="username" hidden disabled>
+          <label>
+            <span data-alert-text="platform">التطبيق</span>
+            <select name="platform">
+              <option value="instagram" data-alert-text="instagram">إنستغرام</option>
+              <option value="tiktok" data-alert-text="tiktok">تيك توك</option>
+              <option value="telegram" data-alert-text="telegram">تيليجرام</option>
+              <option value="x" data-alert-text="x">إكس</option>
+              <option value="discord" data-alert-text="discord">ديسكورد</option>
+              <option value="tellonym" data-alert-text="tellonym">تيلونيم</option>
+              <option value="playstation" data-alert-text="playstation">بلايستيشن</option>
+              <option value="xbox" data-alert-text="xbox">إكس بوكس</option>
+            </select>
+          </label>
+          <label>
+            <span data-alert-text="username">اليوزر المطلوب</span>
+            <input name="username" dir="ltr" placeholder="@username" autocapitalize="none" spellcheck="false" maxlength="65" required>
+          </label>
+        </fieldset>
+        <fieldset class="alert-fields" data-alert-fields="service" hidden disabled>
+          <label>
+            <span data-alert-text="serviceType">نوع الخدمة</span>
+            <select name="service-type">
+              <option value="programming" data-alert-text="programming">برمجة</option>
+              <option value="design" data-alert-text="design">تصميم</option>
+              <option value="video" data-alert-text="video">مونتاج</option>
+              <option value="other" data-alert-text="other">أخرى</option>
+            </select>
+          </label>
+          <label>
+            <span data-alert-service-label>نوع البرمجة</span>
+            <input name="service-details" dir="auto" maxlength="100" required>
+          </label>
+        </fieldset>
+        <div class="alert-form-actions">
+          <span class="alert-destination"><i class="fa-regular fa-envelope" aria-hidden="true"></i><span data-alert-text="email">على بريد حسابك المسجّل</span></span>
+          <button type="submit">نبّهني عند التوفر</button>
+        </div>
+        <div class="alert-feedback" aria-live="polite">
+          <p data-alert-status></p>
+          <a href="./account.html" data-alert-sign-in data-alert-text="signInLink" hidden>تسجيل الدخول</a>
+        </div>
+      </form>
+    </section>
+  </div>
+  `;
+  document.body.append(section);
 
   const labels = {
     ar: {
+      menu: 'ما لقيت اللي تبيه',
       title: 'ما لقيت اللي تبيه؟',
       intro: 'يوصلك تنبيه بالبريد عند توفر اليوزر أو الخدمة.',
       modes: 'نوع التنبيه',
       usernameMode: 'تنبيه ليوزر',
       serviceMode: 'تنبيه لخدمة',
-      close: 'إغلاق نموذج التنبيه',
+      close: 'إغلاق نافذة التنبيه',
       platform: 'التطبيق',
       username: 'اليوزر المطلوب',
       instagram: 'إنستغرام',
@@ -45,12 +124,13 @@
       failed: 'تعذّر حفظ التنبيه. حاول مرة ثانية.',
     },
     en: {
+      menu: 'Can’t find what you need?',
       title: 'Can’t find what you need?',
       intro: 'Get an email when the username or service you want becomes available.',
       modes: 'Alert type',
       usernameMode: 'Username alert',
       serviceMode: 'Service alert',
-      close: 'Close the alert form',
+      close: 'Close the alert dialog',
       platform: 'Platform',
       username: 'Requested username',
       instagram: 'Instagram',
@@ -103,6 +183,7 @@
   let statusKey;
   let saving = false;
   let revision = 0;
+  let returnFocus;
 
   function language() {
     return window.AppI18N?.getLang() === 'en' ? 'en' : 'ar';
@@ -111,6 +192,41 @@
   function text(key) {
     return labels[language()][key];
   }
+
+  function openDialog(button) {
+    if (section.open) return;
+    returnFocus = button;
+    const categories = button?.closest('details');
+    if (categories) {
+      returnFocus = categories.querySelector('summary');
+      categories.open = false;
+    }
+    if (button?.closest('#navOverlay')) {
+      returnFocus = document.getElementById('navOpenButton');
+      document.getElementById('navCloseButton')?.click();
+    }
+    section.showModal();
+  }
+
+  const menuLabels = Array.from(gamesLinks, gamesLink => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = gamesLink.className;
+    button.classList.remove('nav-close-link');
+    button.classList.add('availability-menu-choice');
+    button.style.fontFamily = gamesLink.style.fontFamily;
+    button.setAttribute('aria-haspopup', 'dialog');
+    button.setAttribute('aria-controls', section.id);
+    button.append(...Array.from(gamesLink.children, node => node.cloneNode(true)));
+    const icon = button.querySelector('i');
+    icon.classList.replace('fa-gamepad', 'fa-bell');
+    icon.setAttribute('aria-hidden', 'true');
+    const label = button.querySelector('[data-i18n="cat_games_name"]');
+    label.removeAttribute('data-i18n');
+    button.addEventListener('click', () => openDialog(button));
+    gamesLink.after(button);
+    return label;
+  });
 
   function updateServiceCopy() {
     serviceLabel.textContent = text(serviceType.value === 'programming' ? 'programmingDetail' : 'serviceDetail');
@@ -123,6 +239,7 @@
   }
 
   function translate() {
+    menuLabels.forEach(label => { label.textContent = text('menu'); });
     section.querySelectorAll('[data-alert-text]').forEach(node => {
       node.textContent = text(node.dataset.alertText);
     });
@@ -158,10 +275,17 @@
   buttons.forEach(button => {
     button.addEventListener('click', () => showRequest(selected === button ? null : button));
   });
-  request.querySelector('[data-close-alert]').addEventListener('click', () => {
-    const opener = selected;
+  section.querySelector('[data-close-alert]').addEventListener('click', () => section.close());
+  section.addEventListener('click', event => {
+    if (event.target === section) section.close();
+  });
+  section.addEventListener('close', () => {
     showRequest(null);
-    opener?.focus();
+    if (window.location.hash === '#availabilityAlerts') {
+      window.history.replaceState(window.history.state, '', window.location.pathname + window.location.search);
+    }
+    returnFocus?.focus();
+    returnFocus = null;
   });
   form.addEventListener('input', event => {
     if (event.target === username || event.target === serviceDetails) event.target.setCustomValidity('');
@@ -216,4 +340,5 @@
   window.addEventListener('account:languagechange', translate);
   window.addEventListener('account:signed-out', clearStatus);
   translate();
+  if (window.location.hash === '#availabilityAlerts') openDialog();
 })();

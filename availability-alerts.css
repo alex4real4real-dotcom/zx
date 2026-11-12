@@ -3,7 +3,28 @@
   --account-secondary: #b4b6c8;
   --account-line: #353950;
   --account-accent: #8793e5;
+  inline-size: min(46rem, calc(100% - 1.5rem));
+  max-block-size: calc(100dvh - 1.5rem);
+  padding: 0;
+  border: 0;
+  border-radius: 1.35rem;
+  background: transparent;
+  color: var(--account-ink);
+  overscroll-behavior: contain;
   font-family: var(--font-body);
+}
+
+#availabilityAlerts::backdrop {
+  background: rgb(5 5 9 / .72);
+  backdrop-filter: blur(3px);
+}
+
+body:has(#availabilityAlerts[open]) { overflow: hidden; }
+
+.availability-menu-choice {
+  inline-size: 100%;
+  text-align: start;
+  cursor: pointer;
 }
 
 #availabilityAlerts *,
@@ -26,6 +47,7 @@
   justify-content: space-between;
   gap: 1rem 1.35rem;
   padding: clamp(16px, 3.6vw, 26px);
+  padding-inline-end: 4rem;
 }
 
 #availabilityAlerts .alert-copy {
@@ -128,7 +150,8 @@
   background: #16161c;
 }
 
-#availabilityAlerts .alert-request-header,
+#availabilityAlerts .alert-request-header { margin-block-end: .65rem; }
+
 #availabilityAlerts .alert-form-actions {
   display: flex;
   flex-wrap: wrap;
@@ -138,6 +161,9 @@
 }
 
 #availabilityAlerts button[data-close-alert] {
+  position: absolute;
+  inset-block-start: .5rem;
+  inset-inline-end: .5rem;
   inline-size: 44px;
   padding: 0;
   border-color: transparent;
@@ -215,6 +241,10 @@
 #availabilityAlerts button:disabled { opacity: .65; cursor: wait; }
 
 @media (max-width: 540px) {
+  #availabilityAlerts .alert-entry { padding-inline-end: 16px; }
+
+  #availabilityAlerts .alert-copy { padding-inline-end: 2.4rem; }
+
   #availabilityAlerts .alert-choices {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -1254,7 +1254,7 @@
 <style id="app-builder-recap-style">.grecaptcha-badge { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; transition: opacity 0.2s ease; }.grecaptcha-badge.app-builder-recap-show { visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; }</style><link rel="stylesheet" href="./backend-pages.css?v=272eddd6c755">
 <link rel="stylesheet" href="./listing-platforms.css?v=2b448bfa113b">
 <link rel="stylesheet" href="./platform-reviews.css?v=6d45131eedb0">
-<link rel="stylesheet" href="./availability-alerts.css?v=02e04884d1d1">
+<link rel="stylesheet" href="./availability-alerts.css?v=4915afde6bb5">
 </head>
 <body class="min-h-screen bg-[var(--background-color)] text-[var(--text-color)]" style="font-family: var(--font-body);">
     <!-- twig-include:global/header.html --><!-- Explain: Main site header with navigation, cart, and account widget. -->
@@ -1554,79 +1554,7 @@
         </div>
     </div>
 </section>
-<section id="availabilityAlerts" class="section-pad px-5 sm:px-8" aria-labelledby="account-alert-strip-title">
-  <div class="alert-section mx-auto max-w-7xl">
-    <div class="alert-entry">
-      <div class="alert-copy">
-        <span class="alert-bell" aria-hidden="true"><i class="fa-solid fa-bell"></i></span>
-        <div>
-          <h2 id="account-alert-strip-title" data-alert-text="title">ما لقيت اللي تبيه؟</h2>
-          <p data-alert-text="intro">يوصلك تنبيه بالبريد عند توفر اليوزر أو الخدمة.</p>
-        </div>
-      </div>
-      <div class="alert-choices" role="group" aria-label="نوع التنبيه" data-alert-aria="modes">
-        <button type="button" data-alert-kind="username" aria-controls="account-alert-strip-request" aria-expanded="false">
-          <i class="fa-solid fa-at" aria-hidden="true"></i><span data-alert-text="usernameMode">تنبيه ليوزر</span>
-        </button>
-        <button type="button" data-alert-kind="service" aria-controls="account-alert-strip-request" aria-expanded="false">
-          <i class="fa-solid fa-code" aria-hidden="true"></i><span data-alert-text="serviceMode">تنبيه لخدمة</span>
-        </button>
-      </div>
-    </div>
-    <section id="account-alert-strip-request" class="alert-request" aria-labelledby="account-alert-strip-form-title" hidden>
-      <header class="alert-request-header">
-        <h3 id="account-alert-strip-form-title"></h3>
-        <button type="button" data-close-alert aria-label="إغلاق نموذج التنبيه" data-alert-aria="close">
-          <i class="fa-solid fa-xmark" aria-hidden="true"></i>
-        </button>
-      </header>
-      <form autocomplete="off">
-        <fieldset class="alert-fields" data-alert-fields="username" hidden disabled>
-          <label>
-            <span data-alert-text="platform">التطبيق</span>
-            <select name="platform">
-              <option value="instagram" data-alert-text="instagram">إنستغرام</option>
-              <option value="tiktok" data-alert-text="tiktok">تيك توك</option>
-              <option value="telegram" data-alert-text="telegram">تيليجرام</option>
-              <option value="x" data-alert-text="x">إكس</option>
-              <option value="discord" data-alert-text="discord">ديسكورد</option>
-              <option value="tellonym" data-alert-text="tellonym">تيلونيم</option>
-              <option value="playstation" data-alert-text="playstation">بلايستيشن</option>
-              <option value="xbox" data-alert-text="xbox">إكس بوكس</option>
-            </select>
-          </label>
-          <label>
-            <span data-alert-text="username">اليوزر المطلوب</span>
-            <input name="username" dir="ltr" placeholder="@username" autocapitalize="none" spellcheck="false" maxlength="65" required>
-          </label>
-        </fieldset>
-        <fieldset class="alert-fields" data-alert-fields="service" hidden disabled>
-          <label>
-            <span data-alert-text="serviceType">نوع الخدمة</span>
-            <select name="service-type">
-              <option value="programming" data-alert-text="programming">برمجة</option>
-              <option value="design" data-alert-text="design">تصميم</option>
-              <option value="video" data-alert-text="video">مونتاج</option>
-              <option value="other" data-alert-text="other">أخرى</option>
-            </select>
-          </label>
-          <label>
-            <span data-alert-service-label>نوع البرمجة</span>
-            <input name="service-details" dir="auto" maxlength="100" required>
-          </label>
-        </fieldset>
-        <div class="alert-form-actions">
-          <span class="alert-destination"><i class="fa-regular fa-envelope" aria-hidden="true"></i><span data-alert-text="email">على بريد حسابك المسجّل</span></span>
-          <button type="submit">نبّهني عند التوفر</button>
-        </div>
-        <div class="alert-feedback" aria-live="polite">
-          <p data-alert-status></p>
-          <a href="./account.html" data-alert-sign-in data-alert-text="signInLink" hidden>تسجيل الدخول</a>
-        </div>
-      </form>
-    </section>
-  </div>
-</section><!-- /twig-include:sections/index.categories.html -->
+<!-- /twig-include:sections/index.categories.html -->
         <!-- twig-include:sections/index.newsletter.html --><!-- Explain: Newsletter signup form section for user engagement. -->
 <section id="newsletter" class="section-pad contact-section px-5 sm:px-8" data-twig-section="sections/index.newsletter.html">
     <div class="mx-auto max-w-4xl text-center" data-twig-section="sections/index.newsletter.html">
@@ -1714,8 +1642,8 @@
 <script src="./currency.js?v=1089cfad761d"></script>
 <script src="./supabase-backend.js?v=3a9a5c4204ca"></script>
 <script src="./app.js?v=cbc60fb83666"></script>
+<script src="./availability-alerts.js?v=85fdfd754fe0"></script>
 <script src="./backend-pages.js?v=04f5eb92e70f"></script>
 
 <script src="./platform-reviews.js?v=866d6cbcf744"></script>
-<script src="./availability-alerts.js?v=3c1da65d8040"></script>
 </body></html>
