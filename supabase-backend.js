@@ -248,6 +248,19 @@
     return check(await c.from('account_orders').select('*,items:account_order_items(*)')
       .eq('user_id', state.user.id).order('created_at', { ascending: false }));
   };
+  backend.platformReviews = async function (offset, limit) {
+    return check(await (await client()).rpc('account_platform_reviews', {
+      p_offset: offset, p_limit: limit
+    }));
+  };
+  backend.pendingPlatformReview = async function () {
+    return check(await (await client(true)).rpc('account_pending_platform_review'));
+  };
+  backend.submitPlatformReview = async function (orderId, rating, comment) {
+    return check(await (await client(true)).rpc('account_submit_platform_review', {
+      p_order_id: orderId, p_rating: rating, p_comment: comment
+    }));
+  };
   backend.submitMessage = async function (email, kind, fields) {
     return check(await (await client()).rpc('account_submit_message', { p_email: email, p_kind: kind, p_fields: fields }));
   };

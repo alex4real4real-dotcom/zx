@@ -1253,6 +1253,7 @@
 <link rel="stylesheet" href="./layout.css?v=30b70e46e673"><!-- /twig-include:global/head.html -->
 <style id="app-builder-recap-style">.grecaptcha-badge { visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; transition: opacity 0.2s ease; }.grecaptcha-badge.app-builder-recap-show { visibility: visible !important; opacity: 1 !important; pointer-events: auto !important; }</style><link rel="stylesheet" href="./backend-pages.css?v=272eddd6c755">
 <link rel="stylesheet" href="./listing-platforms.css?v=2b448bfa113b">
+<link rel="stylesheet" href="./platform-reviews.css?v=6d45131eedb0">
 </head>
 <body class="min-h-screen bg-[var(--background-color)] text-[var(--text-color)]" style="font-family: var(--font-body);">
     <!-- twig-include:global/header.html --><!-- Explain: Main site header with navigation, cart, and account widget. -->
@@ -1537,40 +1538,21 @@
         <div id="featuredProducts" class="mt-12 catalog-grid" aria-live="polite"><p class="backend-muted" data-i18n="featured_loading">جارٍ تحميل المنتجات…</p></div>
     </div>
 </section><!-- /twig-include:sections/index.featured.html -->
-        <!-- twig-include:sections/index.sellers.html --><!-- Explain: Homepage section displaying featured verified sellers. -->
-<section class="section-pad px-5 sm:px-8" data-twig-section="sections/index.sellers.html">
-    <div class="mx-auto max-w-7xl" data-twig-section="sections/index.sellers.html">
-        <div class="flex flex-col gap-5 md:flex-row md:items-end md:justify-between" data-twig-section="sections/index.sellers.html">
-            <div class="max-w-2xl" data-twig-section="sections/index.sellers.html">
-                <p class="section-kicker" data-twig-section="sections/index.sellers.html" data-i18n="sellers_kicker">بائعون موثّقون</p>
-                <h2 class="mt-4 text-3xl font-bold leading-tight tracking-[-0.02em] sm:text-4xl" style="font-family: var(--font-heading);" data-twig-section="sections/index.sellers.html" data-i18n="sellers_title">تسوّق من متاجر تم التحقق من أصحابها</h2>
+        <section id="platformReviews" class="section-pad px-5 sm:px-8" aria-labelledby="platformReviewsHeading">
+    <div class="mx-auto max-w-7xl">
+        <h2 id="platformReviewsHeading" class="text-3xl font-bold leading-tight sm:text-4xl" style="font-family: var(--font-heading);" data-review-label="title">آراء العملاء</h2>
+        <p class="platform-review-status" role="status">جارٍ تحميل آراء العملاء…</p>
+        <div class="platform-review-grid" aria-live="off"></div>
+        <div class="platform-review-actions">
+            <div class="platform-review-mobile" role="group" aria-labelledby="platformReviewsHeading" hidden>
+                <button type="button" data-review-previous data-review-label="previous">السابق</button>
+                <button type="button" data-review-toggle>إيقاف التبديل</button>
+                <button type="button" data-review-next data-review-label="next">التالي</button>
             </div>
-            <a href="./sellers.html" class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-[var(--accent-color)] transition-colors duration-300 hover:text-[var(--text-color)]" data-twig-section="sections/index.sellers.html" data-i18n-text="sellers_all">
-                كل البائعين
-                <i class="fa-solid fa-arrow-left"></i>
-            </a>
+            <button type="button" data-review-more hidden>عرض المزيد</button>
         </div>
-
-        <div class="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3" data-twig-section="sections/index.sellers.html">
-            <a href="./account.html" class="seller-card glass-panel group flex flex-col items-center justify-center p-6 text-center" data-twig-section="sections/index.sellers.html">
-                <span class="feature-icon h-[4.75rem] w-[4.75rem] rounded-full text-3xl" data-twig-section="sections/index.sellers.html">
-                    <i class="fa-solid fa-user"></i>
-                </span>
-                <h3 class="mt-4 text-lg font-bold text-[var(--text-color)]" style="font-family: var(--font-heading);" data-twig-section="sections/index.sellers.html" data-i18n="sellers_account">زيارة الحساب</h3>
-                <p class="mt-3 flex-1 text-sm leading-6 text-[var(--text-muted)]" data-twig-section="sections/index.sellers.html" data-i18n="sellers_account_desc">انتقل إلى حسابك لمتابعة طلباتك ومبيعاتك ورصيدك وإدارة بياناتك الشخصية.</p>
-                <span class="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[var(--accent-color)]" data-twig-section="sections/index.sellers.html" data-i18n-text="sellers_account">
-                    زيارة الحساب
-                    <i class="fa-solid fa-arrow-left transition-transform duration-300 group-hover:-translate-x-1"></i>
-                </span>
-            </a>
-
-                                    
-                                    
-                                    
-                                    
-                                            </div>
     </div>
-</section><!-- /twig-include:sections/index.sellers.html -->
+</section>
         <!-- twig-include:sections/index.categories.html --><!-- Explain: Section displaying product categories on the homepage. -->
 <section id="categories" class="section-pad px-5 sm:px-8" data-twig-section="sections/index.categories.html">
     <div class="mx-auto max-w-7xl" data-twig-section="sections/index.categories.html">
@@ -1710,8 +1692,9 @@
 <script src="./supabase-config.js"></script>
 <script src="./listing-platforms.js?v=9965258b19f5"></script>
 <script src="./currency.js?v=1089cfad761d"></script>
-<script src="./supabase-backend.js?v=580837f1aa8b"></script>
+<script src="./supabase-backend.js?v=72704ce2a166"></script>
 <script src="./app.js?v=cbc60fb83666"></script>
 <script src="./backend-pages.js?v=04f5eb92e70f"></script>
 
+<script src="./platform-reviews.js?v=1965bbd31d2c"></script>
 </body></html>
