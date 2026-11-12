@@ -7,10 +7,6 @@
   function message(error) {
     var text = String(error && (error.message || error.error_description || error) || '');
     var code = String(error && error.code || '');
-    if (/PHONE_SMS_NOT_READY|phone_provider_disabled|sms_provider_disabled|sms provider.*not configured/i.test(code + ' ' + text)) return 'إرسال رمز الجوال بانتظار تفعيل خدمة الرسائل النصية.';
-    if (/sms_send_failed|error sending confirmation sms/i.test(code + ' ' + text)) return 'تعذّر إرسال رمز التحقق إلى الجوال. حاول مرة ثانية.';
-    if (/PHONE_VERIFICATION_REQUIRED/.test(text)) return 'أكد رقم الجوال الجديد برمز التحقق أولًا.';
-    if (/INVALID_PHONE_OTP/.test(text)) return 'أدخل رمز التحقق بالأرقام.';
     if (/PAYMENTS_NOT_ENABLED/.test(text)) return 'الدفع والسحب غير متاحين حاليًا.';
     if (/AUTH_REQUIRED/.test(text)) return 'سجّل الدخول أولًا.';
     if (/ACCOUNT_BANNED/.test(text)) return 'هذا الحساب موقوف.';
@@ -203,32 +199,6 @@
     await loadProfile();
     storeSession(state.session, state.user);
     return state.profile;
-  };
-  backend.requestProfilePhoneCode = async function (phone) {
-    var c = await client(true);
-    var target = backend.normalizePhone(phone);
-    var response = await fetch(config.url + '/auth/v1/settings', { headers: { apikey: config.publishableKey } });
-    if (!response.ok) throw new Error('PHONE_SMS_NOT_READY');
-    var settings = await response.json();
-    if (!settings.external || !settings.external.phone || settings.sms_autoconfirm) throw new Error('PHONE_SMS_NOT_READY');
-    check(await c.rpc('account_check_profile_phone', { p_phone: target }));
-    check(await c.auth.updateUser({ phone: target }));
-  };
-  backend.resendProfilePhoneCode = async function (phone) {
-    var c = await client(true);
-    check(await c.auth.resend({ phone: backend.normalizePhone(phone), type: 'phone_change' }));
-  };
-  backend.verifyProfilePhoneCode = async function (phone, code) {
-    var c = await client(true);
-    var userId = state.user.id;
-    var token = asciiDigits(code).replace(/\s/g, '');
-    if (!/^[0-9]{4,10}$/.test(token)) throw new Error('INVALID_PHONE_OTP');
-    var data = check(await c.auth.verifyOtp({ phone: backend.normalizePhone(phone), token: token, type: 'phone_change' }));
-    if (!data.user || data.user.id !== userId) {
-      await c.auth.signOut({ scope: 'local' });
-      throw new Error('AUTH_REQUIRED');
-    }
-    storeSession(data.session || state.session, data.user);
   };
   backend.withdrawalDashboard = async function (offset) { return check(await (await client(true)).rpc('account_payout_dashboard',{p_offset:offset||0})); };
   backend.payoutBalance = async function () { return check(await (await client(true)).rpc('account_payout_wallet')); };
